@@ -1,0 +1,59 @@
+{
+  "events": [
+    {
+      "id": "TEST-MAP-EVENT-1",
+      "title": "Test Event with Full Location Data",
+      "description": "This event has both address and coordinates provided.",
+      "date": "2024-12-25",
+      "location": "1600 Pennsylvania Avenue NW, Washington, DC",
+      "coordinates": "38.8977,-77.0365",
+      "category": "Test, Government",
+      "cost": "Free",
+      "name": "Test User"
+    },
+    {
+      "id": "TEST-MAP-EVENT-2", 
+      "title": "Concert at The Anthem",
+      "description": "Live music event at one of DC's premier venues.",
+      "date": "2024-12-26",
+      "location": "901 Wharf St SW, Washington, DC 20024",
+      "latitude": 38.8765,
+      "longitude": -77.0047,
+      "category": "Music, Entertainment",
+      "cost": "$45",
+      "name": "Event Organizer"
+    },
+    {
+      "id": "TEST-MAP-EVENT-3",
+      "title": "Outdoor Festival at National Mall",
+      "description": "Annual outdoor festival with food, music, and activities.",
+      "date": "2024-12-27", 
+      "location": "National Mall, Washington, DC",
+      "latitude": 38.8895,
+      "longitude": -77.0353,
+      "category": "Festival, Outdoor, Free",
+      "cost": "Free",
+      "name": "DC Events"
+    },
+    {
+      "id": "TEST-MAP-EVENT-4",
+      "title": "9:30 Club Concert",
+      "description": "Indie rock concert at the famous 9:30 Club.",
+      "date": "2024-12-28",
+      "location": "815 V St NW, Washington, DC 20001",
+      "category": "Music, Rock",
+      "cost": "$35",
+      "name": "9:30 Club"
+    },
+    {
+      "id": "TEST-MAP-EVENT-5",
+      "title": "Kennedy Center Performance",
+      "description": "Classical music performance at the Kennedy Center.",
+      "date": "2024-12-29",
+      "location": "2700 F St NW, Washington, DC 20566",
+      "category": "Music, Classical, Arts",
+      "cost": "$75",
+      "name": "Kennedy Center"
+    }
+  ]
+} 

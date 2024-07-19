@@ -1,0 +1,96 @@
+import Link from "next/link";
+
+interface Category {
+  category: string;
+}
+
+interface CategoriesProps {
+  categories?: Category[];
+  selectedCategories?: string[];
+  onCategoryChange?: (category: string) => void;
+  displayMode?: 'selection' | 'display';
+  eventCategories?: string | string[];
+}
+
+export default function Categories({ 
+  categories, 
+  selectedCategories = [], 
+  onCategoryChange,
+  displayMode = 'selection',
+  eventCategories
+}: CategoriesProps) {
+  
+  // Display mode for showing event categories
+  if (displayMode === 'display' && eventCategories) {
+    return (
+      <div className="my-4">
+        <h2 className="text-lg font-semibold mb-2">Categories</h2>
+        <div className="flex flex-wrap gap-2">
+          {Array.isArray(eventCategories) ? (
+            eventCategories.map((cat: string, index: number) => (
+              <Link 
+                key={index}
+                href={`/events/category/${encodeURIComponent(cat)}`}
+                className="inline-block"
+              >
+                <span 
+                  className="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer"
+                >
+                  {cat}
+                </span>
+              </Link>
+            ))
+          ) : (
+            eventCategories.split(',').map((cat: string, index: number) => (
+              <Link 
+                key={index}
+                href={`/events/category/${encodeURIComponent(cat.trim())}`}
+                className="inline-block"
+              >
+                <span 
+                  className="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer"
+                >
+                  {cat.trim()}
+                </span>
+              </Link>
+            ))
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Selection mode for category selection (original functionality)
+  return (
+    <section className="max-w-7xl mx-auto px-4 py-16">
+      <h2 className="text-4xl font-bold mb-8 text-white">Browse by Category</h2>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {categories?.map((category: any) => (
+          <div key={category.category}>
+            {onCategoryChange ? (
+              // Interactive selection mode
+              <button
+                onClick={() => onCategoryChange(category.category)}
+                style={{
+                  backgroundColor: selectedCategories.includes(category.category) ? '#10b981' : 'white',
+                  borderColor: selectedCategories.includes(category.category) ? '#10b981' : '#d1d5db',
+                  color: selectedCategories.includes(category.category) ? 'white' : '#374151'
+                }}
+                className="w-full bg-white rounded-lg shadow-md p-6 text-center cursor-pointer hover:shadow-lg transition-shadow transform hover:scale-105 duration-300 slow-transition"
+              >
+                <h3 className="text-lg font-semibold">{category.category}</h3>
+              </button>
+            ) : (
+              // Navigation mode (original functionality)
+              <Link href={`/events/category/${encodeURIComponent(category.category)}`} className="hover:text-blue-500">
+                <div className="bg-white rounded-lg shadow-md p-6 text-center cursor-pointer hover:shadow-lg transition-shadow transform hover:scale-105 duration-300 slow-transition">
+                  <h3 className="text-lg font-semibold text-gray-800 hover:text-blue-500">{category.category}</h3>
+                </div>
+              </Link>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+} 

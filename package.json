@@ -1,0 +1,29 @@
+{
+  "name": "monorepo-template",
+  "version": "0.0.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "sst dev",
+    "build": "sst build",
+    "deploy": "sst deploy",
+    "remove": "sst remove",
+    "console": "sst console",
+    "diff": "sst diff",
+    "test": "sst test",
+    "script:seed": "sst run packages/scripts/src/seed-data.ts"
+  },
+  "devDependencies": {
+    "@tsconfig/node22": "^22",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.830.0",
+    "@aws-sdk/client-s3": "^3.839.0",
+    "@aws-sdk/util-dynamodb": "^3.835.0",
+    "aws-cdk-lib": "^2.204.0",
+    "sst": "^3"
+  }
+}

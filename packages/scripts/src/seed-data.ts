@@ -1,0 +1,220 @@
+import { Resource } from "sst";
+import { DynamoDBClient, DeleteItemCommand, BatchWriteItemCommand, ScanCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
+import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
+import fs from 'fs';
+import path from 'path';
+import { cwd } from "process";
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config();
+
+// Type definitions for Google Maps API response
+interface GeocodingResult {
+  geometry: {
+    location: {
+      lat: number;
+      lng: number;
+    };
+  };
+  formatted_address: string;
+}
+
+interface GeocodingResponse {
+  status: string;
+  results?: GeocodingResult[];
+  error_message?: string;
+}
+
+// Geocoding function (copied from frontend to avoid import issues)
+async function geocodeAddress(address: string): Promise<{ latitude: number; longitude: number; formattedAddress: string } | null> {
+  try {
+    if (!address) {
+      console.log('No address provided for geocoding');
+      return null;
+    }
+    
+    // Get API key from environment variables
+    const apiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+      console.log('No Google Maps API key found in environment variables');
+      console.log('Please set the GOOGLE_MAPS_API_KEY environment variable or add it to your .env file');
+      return null;
+    }
+    
+    console.log(`Using API key: ${apiKey.substring(0, 10)}...`);
+
+    const encodedAddress = encodeURIComponent(address);
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&key=${apiKey}`;
+    
+    const response = await fetch(url);
+    const data = await response.json() as GeocodingResponse;
+
+    console.log(`Geocoding response for "${address}":`, JSON.stringify(data, null, 2));
+
+    if (data.status === 'OK' && data.results && data.results.length > 0) {
+      const result = data.results[0];
+      const location = result.geometry.location;
+      
+      return {
+        latitude: location.lat,
+        longitude: location.lng,
+        formattedAddress: result.formatted_address
+      };
+    } else {
+      console.log(`Geocoding failed for "${address}" with status: ${data.status}`);
+      if (data.error_message) {
+        console.log(`Error message: ${data.error_message}`);
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Geocoding error:', error);
+    return null;
+  }
+}
+
+export async function main() {
+  console.log("Seeding sample data...");
+  
+  const client = new DynamoDBClient({
+    region: process.env.AWS_REGION || 'us-east-1',
+  });
+
+  // Load the test-map-event.json file for map testing
+  const eventsPath = path.join(process.cwd(), 'events.json');
+  const eventsData = JSON.parse(fs.readFileSync(eventsPath, 'utf8'));
+  const sampleEvents = eventsData.events || eventsData;
+
+  console.log(`Found ${sampleEvents.length} events to seed`);
+
+
+  console.log("🗑️  Deleting all events from the database...");
+  
+  // First, scan the table to get all items
+  const scanCommand: any = {
+    TableName: Resource.Db.name,
+  };
+  
+  let allItems: any[] = [];
+  let lastEvaluatedKey = undefined;
+  
+  do {
+    const scanParams: any = {
+      ...scanCommand,
+      ...(lastEvaluatedKey && { ExclusiveStartKey: lastEvaluatedKey })
+    };
+    
+    const scanResult = await client.send(new ScanCommand(scanParams));
+    if (scanResult.Items) {
+      allItems = allItems.concat(scanResult.Items);
+    }
+    lastEvaluatedKey = scanResult.LastEvaluatedKey;
+  } while (lastEvaluatedKey);
+  
+  console.log(`📋 Found ${allItems.length} items to delete`);
+  
+  // Delete all items in batches
+  const batchSize = 25; // DynamoDB batch delete limit
+  for (let i = 0; i < allItems.length; i += batchSize) {
+    const batch = allItems.slice(i, i + batchSize);
+    
+    const deleteRequests = batch.map(item => ({
+      DeleteRequest: {
+        Key: {
+          pk: item.pk,
+          sk: item.sk
+        }
+      }
+    }));
+    
+    const batchDeleteCommand = {
+      RequestItems: {
+        [Resource.Db.name]: deleteRequests
+      }
+    };
+    
+    try {
+      await client.send(new BatchWriteItemCommand(batchDeleteCommand));
+      console.log(`🗑️  Deleted batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(allItems.length / batchSize)}`);
+    } catch (error) {
+      console.error(`❌ Error deleting batch ${Math.floor(i / batchSize) + 1}:`, error);
+    }
+  }
+  
+  console.log("✅ All events deleted successfully!");
+  
+
+  for (const eventData of sampleEvents) {
+    try {
+      // Use a consistent eventId based on the event data
+      const eventId = eventData.id || `EVENT#${eventData.title?.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`;
+      const timestamp = Date.now();
+
+      // Handle category field - ensure it's a string
+      let category = eventData.category;
+      if (Array.isArray(category)) {
+        category = category.join(', ');
+      } else if (typeof category !== 'string') {
+        category = 'Uncategorized';
+      }
+
+      // Create the item with proper DynamoDB formatting
+      const item = {
+        pk: eventId,
+        sk: eventId,
+        ...eventData,
+        category, // Override with the processed category
+        updatedAt: timestamp,
+        createdAt: timestamp,
+      };
+
+      // Handle location data specifically (simulate the createEvent logic)
+      const location = eventData.location;
+      const latitude = eventData.latitude;
+      const longitude = eventData.longitude;
+      
+      if (location) {
+        item.location = location;
+      }
+      
+      // If coordinates are provided, use them; otherwise try to geocode the address
+      if (latitude && longitude) {
+        item.coordinates = `${latitude},${longitude}`;
+        console.log(`📍 Event "${eventData.title}" using provided coordinates: ${latitude},${longitude}`);
+      } else if (location && !latitude && !longitude) {
+        // Try to geocode the address to get coordinates
+        try {
+          console.log(`📍 Geocoding address for "${eventData.title}": ${location}`);
+          const geocoded = await geocodeAddress(location);
+          if (geocoded) {
+            item.coordinates = `${geocoded.latitude},${geocoded.longitude}`;
+            // Update location with formatted address if geocoding was successful
+            item.location = geocoded.formattedAddress;
+            console.log(`✅ Geocoded "${eventData.title}" to: ${geocoded.latitude},${geocoded.longitude}`);
+          } else {
+            console.log(`❌ Failed to geocode address for "${eventData.title}": ${location}`);
+          }
+        } catch (error) {
+          console.error(`❌ Geocoding error for "${eventData.title}":`, error);
+          // Continue without coordinates if geocoding fails
+        }
+      }
+
+      const command = new PutItemCommand({
+        TableName: Resource.Db.name,
+        Item: marshall(item),
+      });
+
+      await client.send(command);
+      console.log(`✅ Created event: ${eventData.title || eventData.id || 'Unknown'}`);
+    } catch (error) {
+      console.error(`❌ Failed to create event: ${eventData.title || eventData.id || 'Unknown'}`, error);
+    }
+  }
+
+  console.log("Seeding complete!");
+}
+
+main().catch(console.error); 

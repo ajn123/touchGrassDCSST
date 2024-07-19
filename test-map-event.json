@@ -1,0 +1,37 @@
+{
+  "events": [
+    {
+      "id": "TEST-MAP-EVENT",
+      "title": "Test Event with Map",
+      "description": "This is a test event to verify the Google Maps functionality is working correctly.",
+      "date": "2024-12-25",
+      "location": "1600 Pennsylvania Avenue NW, Washington, DC 20500",
+      "coordinates": "38.8977,-77.0365",
+      "category": "Test",
+      "cost": "Free",
+      "name": "Test User"
+    },
+    {
+      "id": "TEST-MAP-EVENT-2", 
+      "title": "Concert at The Anthem",
+      "description": "Live music event at one of DC's premier venues.",
+      "date": "2024-12-26",
+      "location": "901 Wharf St SW, Washington, DC 20024",
+      "coordinates": "38.8765,-77.0047",
+      "category": "Music, Entertainment",
+      "cost": "$45",
+      "name": "Event Organizer"
+    },
+    {
+      "id": "TEST-MAP-EVENT-3",
+      "title": "Outdoor Festival at National Mall",
+      "description": "Annual outdoor festival with food, music, and activities.",
+      "date": "2024-12-27", 
+      "location": "National Mall, Washington, DC",
+      "coordinates": "38.8895,-77.0353",
+      "category": "Festival, Outdoor, Free",
+      "cost": "Free",
+      "name": "DC Events"
+    }
+  ]
+} 

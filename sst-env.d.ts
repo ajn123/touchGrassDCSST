@@ -9,6 +9,10 @@ declare module "sst" {
       "type": "sst.aws.ApiGatewayV2"
       "url": string
     }
+    "Auth": {
+      "type": "sst.aws.Auth"
+      "url": string
+    }
     "Db": {
       "name": string
       "type": "sst.aws.Dynamo"

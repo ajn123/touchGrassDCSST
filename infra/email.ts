@@ -19,4 +19,4 @@ const sendEmail = new sst.aws.Function("SendEmail", {
   },
 });
 
-export { sendEmail as email };
+export { sendEmail as email, email as EmailConfig };

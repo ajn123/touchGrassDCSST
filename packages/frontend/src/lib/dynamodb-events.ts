@@ -155,6 +155,9 @@ export async function getEvent(id: string) {
 
 export async function getEventByTitle(title: string) {
   try {
+    console.log('Searching for event with title:', title);
+    console.log('Using table:', Resource.Db.name);
+    
     const command = new ScanCommand({
       TableName: Resource.Db.name,
       FilterExpression: '#title = :title',
@@ -166,13 +169,36 @@ export async function getEventByTitle(title: string) {
       }
     });
 
+    console.log('Scan command created, executing...');
     const result = await client.send(command);
-    const events = result.Items?.map((item) => unmarshall(item)) || [];
+    console.log('Scan result received:', result);
+    
+    if (!result.Items) {
+      console.log('No items found in scan result');
+      return null;
+    }
+    
+    const events = result.Items.map((item) => {
+      try {
+        return unmarshall(item);
+      } catch (unmarshallError) {
+        console.error('Error unmarshalling item:', unmarshallError);
+        return null;
+      }
+    }).filter(Boolean);
+    
+    console.log('Found events:', events.length);
     
     // Return the first matching event (titles should be unique)
     return events.length > 0 ? events[0] : null;
   } catch (error) {
     console.error('Error fetching event by title:', error);
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      title,
+      tableName: Resource.Db.name
+    });
     return null;
   }
 }
@@ -230,13 +256,30 @@ export async function createEvent(event: any) {
         item.createdAt = { N: existingEvent.createdAt.toString() };
       }
   
+      // Collect socials fields
+      const socials: { [key: string]: string } = {};
+      
       // Add all other properties from body as strings
       for (const [key, value] of event.entries()) {
         if (key !== 'eventId') { // Skip eventId as it's already handled
+          const stringValue = String(value);
+          
+          // Skip empty values to avoid DynamoDB index issues
+          if (!stringValue.trim()) {
+            continue;
+          }
+          
+          // Handle socials fields (socials.website, socials.instagram, etc.)
+          if (key.startsWith('socials.')) {
+            const socialKey = key.replace('socials.', '');
+            socials[socialKey] = stringValue;
+            continue; // Skip adding to main item, will handle socials separately
+          }
+          
           if (key === 'cost') {
             // Handle cost as a JSON object
             try {
-              const costObj = JSON.parse(String(value));
+              const costObj = JSON.parse(stringValue);
               item[key] = { M: {
                 type: { S: costObj.type },
                 currency: { S: costObj.currency },
@@ -244,14 +287,23 @@ export async function createEvent(event: any) {
               }};
             } catch (error) {
               console.error('Error parsing cost JSON:', error);
-              item[key] = { S: String(value) };
+              item[key] = { S: stringValue };
             }
           } else if (key === 'title') {
-            item[key] = { S: String(value) };
+            item[key] = { S: stringValue };
           } else {
-            item[key] = { S: String(value) };
+            item[key] = { S: stringValue };
           }
         }
+      }
+      
+      // Add socials as a map if there are any social media links
+      if (Object.keys(socials).length > 0) {
+        const socialsMap: { [key: string]: any } = {};
+        Object.entries(socials).forEach(([key, value]) => {
+          socialsMap[key] = { S: value };
+        });
+        item.socials = { M: socialsMap };
       }
 
       // Handle location data specifically (same as seed-data.ts)
@@ -387,6 +439,39 @@ View the event at: https://touchgrassdc.com/items/${encodeURIComponent(title)}
     console.log('Submitted by:', event.get('email'));
     console.log('===============================');
     throw error;
+  }
+}
+
+export async function deleteEventByTitle(title: string) {
+  console.log('Deleting event by title:', title);
+  try {
+    const event = await getEventByTitle(title);
+    if (!event) {
+      console.log('Event not found with title:', title);
+      return {
+        statusCode: 404,
+        body: JSON.stringify({ error: 'Event not found' }),
+      };
+    }
+
+    console.log('Found event to delete:', event);
+    const deleteResult = await deleteEvent(event.pk);
+    console.log('Delete result:', deleteResult);
+
+    revalidatePath('/');
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: 'Event deleted successfully' }),
+    };
+  } catch (error) {
+    console.error('Error deleting event by title:', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: 'Failed to delete event by title',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }),
+    };
   }
 }
 

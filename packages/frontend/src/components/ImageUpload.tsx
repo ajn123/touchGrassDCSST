@@ -65,7 +65,9 @@ export function ImageUpload({
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Upload failed');
+        console.error('Upload failed with status:', response.status);
+        console.error('Error data:', errorData);
+        throw new Error(errorData.error || errorData.details || 'Upload failed');
       }
 
       const result: UploadResult = await response.json();

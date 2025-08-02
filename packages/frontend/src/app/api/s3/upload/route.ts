@@ -12,12 +12,23 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('S3 upload API called');
+    
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const folder = formData.get('folder') as string || 'uploads';
 
+    console.log('Form data received:', {
+      hasFile: !!file,
+      fileName: file?.name,
+      fileSize: file?.size,
+      fileType: file?.type,
+      folder
+    });
+
     // Validate file exists
     if (!file) {
+      console.log('No file provided');
       return NextResponse.json(
         { error: 'No file provided' },
         { status: 400 }
@@ -26,6 +37,7 @@ export async function POST(request: NextRequest) {
 
     // Validate file type
     if (!ALLOWED_TYPES.includes(file.type)) {
+      console.log('Invalid file type:', file.type);
       return NextResponse.json(
         { error: 'Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.' },
         { status: 400 }
@@ -34,6 +46,7 @@ export async function POST(request: NextRequest) {
 
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
+      console.log('File too large:', file.size);
       return NextResponse.json(
         { error: 'File too large. Maximum size is 5MB.' },
         { status: 400 }
@@ -45,8 +58,11 @@ export async function POST(request: NextRequest) {
     const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     const key = `${folder}/${timestamp}-${sanitizedFilename}`;
 
+    console.log('Generated key:', key);
+
     // Convert file to buffer
     const buffer = Buffer.from(await file.arrayBuffer());
+    console.log('File converted to buffer, size:', buffer.length);
 
     // Get bucket name from SST Resource
     const bucketName = Resource.MediaBucket.name;
@@ -61,13 +77,11 @@ export async function POST(request: NextRequest) {
       Key: key,
       Body: buffer,
       ContentType: file.type,
-      Metadata: {
-        originalName: file.name,
-        uploadedAt: new Date().toISOString(),
-      },
     });
 
+    console.log('S3 command created, sending...');
     await s3Client.send(command);
+    console.log('S3 upload successful');
 
     return NextResponse.json({
       success: true,
@@ -84,6 +98,7 @@ export async function POST(request: NextRequest) {
     if (error instanceof Error) {
       console.error('Error message:', error.message);
       console.error('Error stack:', error.stack);
+      console.error('Error name:', error.name);
     }
     
     return NextResponse.json(

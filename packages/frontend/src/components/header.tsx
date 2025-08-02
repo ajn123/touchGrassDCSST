@@ -1,10 +1,13 @@
 'use client';
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { auth } from "../app/actions";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -14,14 +17,43 @@ export default function Header() {
     setIsMenuOpen(false);
   };
 
+  useEffect(() => {
+    const checkAuth = () => {
+      auth()
+        .then((userData) => {
+          setUser(userData);
+        })
+        .catch((error) => {
+          console.error("Auth check failed:", error);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+
+    };
+
+    checkAuth();
+
+  }, []);
+
   return (
     <nav className="sticky top-0 z-50 bg-white rounded-b-lg shadow-lg">
       <div className="flex flex-row items-center justify-between px-4 py-2">
         {/* Logo/Brand */}
-        <div className="flex items-center">
+        <div className="flex items-center space-x-2">
           <Link href="/" className="text-xl font-bold text-gray-900">
             DC Events
           </Link>
+          {user && (
+            <div className="flex items-center">
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Admin
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Desktop Navigation */}
@@ -31,6 +63,9 @@ export default function Header() {
           <Link href="/signup-emails" className="header-link">Sign up For Emails</Link>
           <Link href="/about" className="header-link">About</Link>
           <Link href="/contact" className="header-link">Contact</Link>
+          {user && (
+            <Link href="/admin" className="header-link text-red-600 font-semibold">Admin</Link>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -90,6 +125,15 @@ export default function Header() {
             >
               Contact
             </Link>
+            {user && (
+              <Link 
+                href="/admin" 
+                className="block px-3 py-2 text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md font-semibold"
+                onClick={closeMenu}
+              >
+                Admin
+              </Link>
+            )}
           </div>
         </div>
       )}

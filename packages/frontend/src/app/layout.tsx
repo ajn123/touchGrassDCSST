@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Header from "@/components/header";
+import Header from "@/components/Header";
+import { UserProvider } from "@/contexts/UserContext";
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -37,10 +39,12 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-      <html lang="en">
+    <html lang="en">
       <body>
-        <Header />
-        {children}
+        <UserProvider>
+          <Header />
+          {children}
+        </UserProvider>
       </body>
     </html>
   )

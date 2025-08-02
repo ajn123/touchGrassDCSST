@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createEvent, getCategories } from '@/lib/dynamodb-events';
 import { ImageUploadWithState } from './ImageUploadWithState';
+import { Resource } from 'sst';
 
 interface EventFormData {
   email: string;
@@ -10,6 +11,9 @@ interface EventFormData {
   description: string;
   eventDate: string;
   location: string;
+  website?: string;
+  instagram?: string;
+  facebook?: string;
   cost?: string;
   selectedCategories: string[];
   image_url?: string;
@@ -19,8 +23,10 @@ interface FormErrors {
   email?: string;
   title?: string;
   description?: string;
-  eventDate?: string;
   location?: string;
+  website?: string;
+  instagram?: string;
+  facebook?: string;
 }
 
 interface UploadResult {
@@ -37,6 +43,9 @@ export function AddEventForm() {
     description: '',
     eventDate: '',
     location: '',
+    website: '',
+    instagram: '',
+    facebook: '',
     cost: '',
     selectedCategories: [],
     image_url: ''
@@ -68,9 +77,6 @@ export function AddEventForm() {
       newErrors.description = 'Event description must be at least 10 characters long';
     }
 
-    if (!formData.eventDate) {
-      newErrors.eventDate = 'Event date is required';
-    }
 
     if (!formData.location.trim()) {
       newErrors.location = 'Event location is required';
@@ -170,6 +176,25 @@ export function AddEventForm() {
       formDataObj.append('description', formData.description);
       formDataObj.append('eventDate', formData.eventDate);
       formDataObj.append('location', formData.location);
+      // Create socials object if any social media fields are filled
+      const socials: { [key: string]: string } = {};
+      if (formData.website) {
+        socials.website = formData.website;
+      }
+      if (formData.instagram) {
+        socials.instagram = formData.instagram;
+      }
+      if (formData.facebook) {
+        socials.facebook = formData.facebook;
+      }
+      
+      // Only add socials if there are any social media links
+      if (Object.keys(socials).length > 0) {
+        // Store each social media field separately instead of as a JSON string
+        Object.entries(socials).forEach(([key, value]) => {
+          formDataObj.append(`socials.${key}`, value);
+        });
+      }
       if (formData.cost && (formData.cost.trim().toLowerCase() === 'free' || formData.cost.trim().toLowerCase() === '0' || formData.cost.trim().toLowerCase() === '0.00')) {
         formDataObj.append('cost', JSON.stringify({
           type: 'free',
@@ -200,6 +225,9 @@ export function AddEventForm() {
           description: '',
           eventDate: '',
           location: '',
+          website: '',
+          instagram: '',
+          facebook: '',
           cost: '',
           selectedCategories: [],
           image_url: ''
@@ -269,6 +297,68 @@ export function AddEventForm() {
           </div>
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-2">
+              Website
+            </label>
+            <input
+              type="url"
+              id="website"
+              name="website"
+              value={formData.website}
+              onChange={handleInputChange}
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.website ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="https://example.com"
+            />
+            {errors.website && (
+              <p className="mt-1 text-sm text-red-600">{errors.website}</p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="instagram" className="block text-sm font-medium text-gray-700 mb-2">
+              Instagram
+            </label>
+            <input
+              type="text"
+              id="instagram"
+              name="instagram"
+              value={formData.instagram}
+              onChange={handleInputChange}
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.instagram ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="@username or URL"
+            />
+            {errors.instagram && (
+              <p className="mt-1 text-sm text-red-600">{errors.instagram}</p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="facebook" className="block text-sm font-medium text-gray-700 mb-2">
+              Facebook
+            </label>
+            <input
+              type="text"
+              id="facebook"
+              name="facebook"
+              value={formData.facebook}
+              onChange={handleInputChange}
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.facebook ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="Page name or URL"
+            />
+            {errors.facebook && (
+              <p className="mt-1 text-sm text-red-600">{errors.facebook}</p>
+            )}
+          </div>
+        </div>  
+
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
             Event Description *
@@ -291,7 +381,7 @@ export function AddEventForm() {
 
         <div>
           <label htmlFor="eventDate" className="block text-sm font-medium text-gray-700 mb-2">
-            Event Date *
+            Event Date (Optional)
           </label>
           <input
             type="date"
@@ -299,13 +389,8 @@ export function AddEventForm() {
             name="eventDate"
             value={formData.eventDate}
             onChange={handleInputChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-              errors.eventDate ? 'border-red-500' : 'border-gray-300'
-            }`}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
-          {errors.eventDate && (
-            <p className="mt-1 text-sm text-red-600">{errors.eventDate}</p>
-          )}
         </div>
 
         <div>

@@ -1,0 +1,57 @@
+# Corrected Email List
+
+## Primary Emails (cleaned and deduplicated):
+Letuttle@gmail.com
+JKu888@gmail.com
+Colin.Raunig@gmail.com
+Amyjkirkpatrick@gmail.com
+lwhite@vt.edu
+sarag17@prodigy.net
+kvweingartner@gmail.com
+dhruvsharma@gwmail.gwu.edu
+jas111779@gmail.com
+celialarsen@gmail.com
+greta1arnold@gmail.com
+mcatania6@gmail.com
+jhuckabone@gmail.com
+Zach.williams0@gmail.com
+chrisegnolan@gmail.com
+Melissa.Sullivan.A@gmail.com
+Justin.Celmer@gmail.com
+barnesrossen@gmail.com
+dan.cardy@gmail.com
+Ayana.stukes@gmail.com
+Habarney@gmail.com
+ealonpyle.realtor@gmail.com
+kponcio@gmail.com
+john.clists@gmail.com
+Annieryualive@gmail.com
+tkserino@gmail.com
+anthornburgh@gmail.com
+dchi400@gmail.com
+Tifaneemichele@gmail.com
+Courtney.douglass@gmail.com
+Garypowell719@gmail.com
+dpdosberg@gmail.com
+silverstein.shelli@gmail.com
+Lbopst@gmail.com
+Mai.Huynh11@gmail.com
+Pezzulo.sara@gmail.com
+Sarah.arlene.coleman@gmail.com
+Lukegrodsky@gmail.com
+Rushshah85@hotmail.com
+imnotarunner@gmail.com
+katie.siemon@gmail.com
+Greytak.1@gmail.com
+rushshah85@gmail.com
+Lisbeth.urich@gmail.com
+ajaypom@gmail.com
+sburstyn@gmail.com
+solomon.sara@gmail.com
+
+## Notes:
+- Removed duplicates (e.g., jku888@gmail.com appeared multiple times)
+- Fixed typo: "ealonpe.realtor@gmail.coom" → "ealonpyle.realtor@gmail.com"
+- Removed incomplete entries like "Hi" and "n"
+- Standardized formatting
+- Total unique emails: 45 

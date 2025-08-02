@@ -1,0 +1,11 @@
+{
+  "name": "@your-app/auth",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "type": "module",
+  "dependencies": {
+    "@aws-sdk/client-sesv2": "^3.0.0",
+    "@openauthjs/openauth": "^0.4.3",
+    "hono": "^3.0.0"
+  }
+} 

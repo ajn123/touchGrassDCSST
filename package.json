@@ -23,7 +23,10 @@
     "@aws-sdk/client-dynamodb": "^3.830.0",
     "@aws-sdk/client-s3": "^3.839.0",
     "@aws-sdk/util-dynamodb": "^3.835.0",
+    "@openauthjs/openauth": "^0.4.3",
     "aws-cdk-lib": "^2.204.0",
-    "sst": "^3"
+    "hono": "^4.8.10",
+    "sst": "^3",
+    "valibot": "^1.1.0"
   }
 }

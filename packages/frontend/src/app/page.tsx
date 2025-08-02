@@ -67,7 +67,6 @@ export default async function Home() {
 
     <Categories categories={categories as Category[]} />
 
-
     {/* <RecurringEvent /> */}
   </main>
   );

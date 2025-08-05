@@ -9,7 +9,10 @@ interface DeleteButtonProps {
 export function DeleteButton({ eventId,}: DeleteButtonProps) {
 
     const handleDelete = async () => {
-      await deleteEvent(eventId);
+      if (confirm('Are you sure you want to delete this event?')) {
+        await deleteEvent(eventId);
+        
+      }
   };
 
   return (

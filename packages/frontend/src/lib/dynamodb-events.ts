@@ -679,4 +679,81 @@ export async function updateEvent(eventId: string, eventData: any) {
     };
   }
 }
+
+export async function updateEventJson(eventId: string, eventData: any) {
+  try {
+    // Check if item exists
+    const existingEvent = await getEvent(eventId);
+    
+    if (!existingEvent) {
+      return {
+        statusCode: 404,
+        body: JSON.stringify({ error: 'Event not found' }),
+      };
+    }
+
+    const timestamp = Date.now();
+    
+    // Build Item object for update
+    const item: any = {
+      pk: { S: eventId },
+      sk: { S: eventId },
+      createdAt: { N: existingEvent.createdAt.toString() }, // Keep original createdAt
+      updatedAt: { N: timestamp.toString() },
+    };
+
+    // Handle JSON data properly - preserve data types
+    for (const [key, value] of Object.entries(eventData)) {
+      if (key !== 'eventId' && key !== 'pk' && key !== 'sk') { // Skip system fields
+        if (value === null || value === undefined) {
+          continue; // Skip null/undefined values
+        } else if (typeof value === 'string') {
+          item[key] = { S: value };
+        } else if (typeof value === 'number') {
+          item[key] = { N: value.toString() };
+        } else if (typeof value === 'boolean') {
+          item[key] = { BOOL: value };
+        } else if (Array.isArray(value)) {
+          item[key] = { L: value.map(v => {
+            if (typeof v === 'string') return { S: v };
+            if (typeof v === 'number') return { N: v.toString() };
+            if (typeof v === 'boolean') return { BOOL: v };
+            return { S: JSON.stringify(v) };
+          })};
+        } else if (typeof value === 'object') {
+          // For objects, store as JSON string
+          item[key] = { S: JSON.stringify(value) };
+        } else {
+          // Fallback to string
+          item[key] = { S: String(value) };
+        }
+      }
+    }
+
+    const command = new PutItemCommand({
+      TableName: Resource.Db.name,
+      Item: item
+    });
+
+    const result = await client.send(command);
+    revalidatePath('/');
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        message: 'Event updated successfully',
+        eventId: eventId
+      }),
+    };
+
+  } catch (error) {
+    console.error('Error updating event JSON:', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: 'Failed to update event',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }),
+    };
+  }
+}
   

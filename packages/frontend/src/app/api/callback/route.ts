@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { client, setTokens } from "../../../../auth";
+import { client } from "../../../../auth";
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
@@ -9,7 +9,11 @@ export async function GET(req: NextRequest) {
 
   if (exchanged.err) return NextResponse.json(exchanged.err, { status: 400 });
 
-  await setTokens(exchanged.tokens.access, exchanged.tokens.refresh);
+  // Redirect to main website with tokens as URL parameters
+  const mainWebsiteUrl = process.env.NEXT_PUBLIC_WEBSITE_URL || "http://localhost:3000";
+  const redirectUrl = new URL("/", mainWebsiteUrl);
+  redirectUrl.searchParams.set("access_token", exchanged.tokens.access);
+  redirectUrl.searchParams.set("refresh_token", exchanged.tokens.refresh);
 
-  return NextResponse.redirect(`${url.origin}/admin`);
+  return NextResponse.redirect(redirectUrl.toString());
 }

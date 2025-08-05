@@ -1,13 +1,12 @@
 'use client';
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
-import { auth } from "../app/actions";
+import { useState } from "react";
+import { useUser } from "../contexts/UserContext";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading } = useUser();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -16,25 +15,6 @@ export default function Header() {
   const closeMenu = () => {
     setIsMenuOpen(false);
   };
-
-  useEffect(() => {
-    const checkAuth = () => {
-      auth()
-        .then((userData) => {
-          setUser(userData);
-        })
-        .catch((error) => {
-          console.error("Auth check failed:", error);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-
-    };
-
-    checkAuth();
-
-  }, []);
 
   return (
     <nav className="sticky top-0 z-50 bg-white rounded-b-lg shadow-lg">
@@ -63,9 +43,7 @@ export default function Header() {
           <Link href="/signup-emails" className="header-link">Sign up For Emails</Link>
           <Link href="/about" className="header-link">About</Link>
           <Link href="/contact" className="header-link">Contact</Link>
-          {user && (
             <Link href="/admin" className="header-link text-red-600 font-semibold">Admin</Link>
-          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -125,7 +103,6 @@ export default function Header() {
             >
               Contact
             </Link>
-            {user && (
               <Link 
                 href="/admin" 
                 className="block px-3 py-2 text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md font-semibold"
@@ -133,7 +110,6 @@ export default function Header() {
               >
                 Admin
               </Link>
-            )}
           </div>
         </div>
       )}

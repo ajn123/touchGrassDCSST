@@ -11,6 +11,7 @@ import EventMap from "@/components/EventMap";
 import Categories from "@/components/Categories";
 import { resolveImageUrl } from "@/lib/image-utils";
 import { DeleteButton } from "@/components/delete-button";
+import { JsonEditor } from "@/components/JsonEditor";
 import { auth } from "@/app/actions";
 
 export default async function ItemPage({ 
@@ -74,45 +75,14 @@ export default async function ItemPage({
             </div>
           </div>
 
-          <div className="mt-4">
-            <h3 className="font-semibold text-gray-700 mb-2">Description</h3>
-            <div className="text-sm bg-white p-3 rounded border">
-              {item.description || 'No description provided'}
-            </div>
-          </div>
 
-          {item.cost && (
-            <div className="mt-4">
-              <h3 className="font-semibold text-gray-700 mb-2">Cost Information</h3>
-              <div className="text-sm bg-white p-3 rounded border">
-                <pre>{JSON.stringify(item.cost, null, 2)}</pre>
-              </div>
-            </div>
-          )}
 
-          {item.socials && (
-            <div className="mt-4">
-              <h3 className="font-semibold text-gray-700 mb-2">Social Media</h3>
-              <div className="text-sm bg-white p-3 rounded border">
-                <pre>{JSON.stringify(item.socials, null, 2)}</pre>
-              </div>
-            </div>
-          )}
-
-          {item.schedules && (
-            <div className="mt-4">
-              <h3 className="font-semibold text-gray-700 mb-2">Schedules</h3>
-              <div className="text-sm bg-white p-3 rounded border">
-                <pre>{JSON.stringify(item.schedules, null, 2)}</pre>
-              </div>
-            </div>
-          )}
-
-          <div className="mt-4">
-            <h3 className="font-semibold text-gray-700 mb-2">All Event Data (Raw)</h3>
-            <div className="text-xs bg-gray-900 text-green-400 p-3 rounded border overflow-auto max-h-96">
-              <pre>{JSON.stringify(item, null, 2)}</pre>
-            </div>
+          {/* JSON Editor for Admins */}
+          <div className="mt-6">
+            <JsonEditor 
+              eventId={item.pk} 
+              initialData={item}
+            />
           </div>
         </div>
       )}

@@ -16,9 +16,21 @@ export default function AdminPage() {
   const checkAuth = async () => {
     try {
       const userData = await auth();
-      setUser(userData);
+      // Convert false to null for setUser
+      if (userData === false) {
+        setUser(null);
+      } else if (userData && typeof userData === 'object' && 'properties' in userData) {
+        // Transform the subject object to match User interface
+        setUser({
+          id: userData.properties.id,
+          email: userData.properties.id // Use id as email since that's what we store
+        });
+      } else {
+        setUser(null);
+      }
     } catch (error) {
       console.error("Auth check failed:", error);
+      setUser(null);
     } finally {
       setLocalLoading(false);
     }

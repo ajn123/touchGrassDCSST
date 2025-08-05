@@ -76,7 +76,7 @@ const app = issuer({
   },
 });
 
-export const handler = handle(app);
+export const handler = handle(app as any);
 
 // Export for SST
 export { handler as default };

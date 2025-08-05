@@ -13,5 +13,6 @@ export const web = new sst.aws.Nextjs("Web", {
     DB_NAME: db.name,
     API_URL: api.url,
     NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: googleMapsApiKey.value,
+    NEXT_PUBLIC_WEBSITE_URL: "https://touchgrassdc.com",
   },
 });

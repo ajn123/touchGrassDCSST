@@ -25,10 +25,21 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const checkAuth = () => {
       auth()
         .then((userData) => {
-          setUser(userData);
+          if (userData === false) {
+            setUser(null);
+          } else if (userData && typeof userData === 'object' && 'properties' in userData) {
+            // Transform the subject object to match User interface
+            setUser({
+              id: userData.properties.id,
+              email: userData.properties.id // Use id as email since that's what we store
+            });
+          } else {
+            setUser(null);
+          }
         })
         .catch((error) => {
           console.error("Auth check failed:", error);
+          setUser(null);
         })
         .finally(() => {
           setLoading(false);

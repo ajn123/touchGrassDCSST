@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { updateEvent, getEvent, getEventByTitle } from '@/lib/dynamodb-events';
+import { updateEvent, updateEventJson, getEvent, getEventByTitle } from '@/lib/dynamodb-events';
 
 export async function DELETE(
   request: NextRequest,
@@ -68,6 +68,31 @@ export async function PUT(
     return NextResponse.json(JSON.parse(result.body), { status: result.statusCode });
   } catch (error) {
     console.error('Error updating event:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+} 
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const body = await request.json();
+    
+    // Validate that we have valid JSON data
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json(
+        { error: 'Invalid JSON data provided' },
+        { status: 400 }
+      );
+    }
+
+    // Use the new updateEventJson function that handles JSON data properly
+    const result = await updateEventJson(id, body);
+    return NextResponse.json(JSON.parse(result.body), { status: result.statusCode });
+  } catch (error) {
+    console.error('Error updating event JSON:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 } 

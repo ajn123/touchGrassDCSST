@@ -416,10 +416,10 @@ View the event at: https://touchgrassdc.com/items/${encodeURIComponent(title)}
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        to: 'hello@touchgrassdc.com',
+        to: 'hi@touchgrassdc.com',
         subject: `New Event Submitted: ${title}`,
         body: emailBody,
-        from: 'hello@touchgrassdc.com',
+        from: 'hi@touchgrassdc.com',
         replyTo: email
       }),
     });

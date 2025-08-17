@@ -9,6 +9,12 @@ const googleMapsApiKey = new sst.Secret("GOOGLE_MAPS_API_KEY");
 export const web = new sst.aws.Nextjs("Web", {
   path: "packages/frontend",
   link: [db, api, bucket, email, googleMapsApiKey, auth],
+
+  domain: {
+    name: "touchgrassdc.com",
+    redirects: ["www.touchgrassdc.com"],
+  },
+
   environment: {
     DB_NAME: db.name,
     API_URL: api.url,

@@ -11,7 +11,7 @@ export interface EmailData {
 export async function sendContactFormEmail(data: EmailData): Promise<void> {
   // Email functionality disabled - just log the data
   console.log('=== CONTACT FORM EMAIL (DISABLED) ===');
-  console.log('To: hello@touchgrassdc.com');
+  console.log('To: hi@touchgrassdc.com');
   console.log('Subject: New Contact Form Submission: ' + data.subject);
   console.log('Name: ' + data.name);
   console.log('Email: ' + data.email);

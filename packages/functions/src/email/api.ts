@@ -54,11 +54,11 @@ export const handler = async (event: any) => {
     // Use verified email or fallback to sandbox
     const fromEmail = isSandboxMode ? 
       (process.env.SES_VERIFIED_EMAIL || "noreply@example.com") : 
-      Resource.Email.sender;
+      Resource.hi.sender;
     
     const toEmail = isSandboxMode ? 
       (process.env.SES_VERIFIED_EMAIL || "noreply@example.com") : 
-      "hello@touchgrassdc.com";
+      "hi@touchgrassdc.com";
     
     const command = new SendEmailCommand({
       Source: fromEmail,

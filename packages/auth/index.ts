@@ -10,7 +10,7 @@ async function getUser(email: string) {
   // List of allowed admin emails
   const allowedEmails = [
     'admin@example.com', // Replace with your actual admin email
-    'hello@touchgrassdc.com',
+    'hi@touchgrassdc.com',
     // Add more admin emails as needed
   ];
   
@@ -38,7 +38,7 @@ const app = issuer({
           // Send email using SESv2
           const client = new SESv2Client();
           const command = new SendEmailCommand({
-            FromEmailAddress: Resource.Email.sender,
+            FromEmailAddress: Resource.hi.sender,
             Destination: {
               ToAddresses: [emailString]
             },

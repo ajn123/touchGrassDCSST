@@ -122,7 +122,7 @@ async function handleDirectEmail(data: { to: string; subject: string; body: stri
       to: data.to,
       subject: data.subject,
       body: data.body,
-      from: data.from || 'hello@touchgrassdc.com',
+      from: data.from || 'hi@touchgrassdc.com',
       replyTo: data.replyTo
     });
 

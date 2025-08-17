@@ -70,10 +70,10 @@ This person will now receive email updates about events in their selected catego
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          to: 'hello@touchgrassdc.com',
+          to: 'hi@touchgrassdc.com',
           subject: `New Email Signup: ${name}`,
           body: emailBody,
-          from: 'hello@touchgrassdc.com',
+          from: 'hi@touchgrassdc.com',
           replyTo: email
         }),
       });

@@ -12,12 +12,12 @@ const auth = new sst.aws.Auth("Auth", {
                     "ses:SendRawEmail"
                 ],
                 resources: [
-                    "arn:aws:ses:*:*:identity/hello@touchgrassdc.com"
+                    "arn:aws:ses:*:*:identity/hi@touchgrassdc.com"
                 ]
             }
         ]
     }
-},
+    },
 );
 
 export { auth };

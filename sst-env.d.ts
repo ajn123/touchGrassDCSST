@@ -17,11 +17,6 @@ declare module "sst" {
       "name": string
       "type": "sst.aws.Dynamo"
     }
-    "Email": {
-      "configSet": string
-      "sender": string
-      "type": "sst.aws.Email"
-    }
     "GOOGLE_MAPS_API_KEY": {
       "type": "sst.sst.Secret"
       "value": string
@@ -38,6 +33,11 @@ declare module "sst" {
     "Web": {
       "type": "sst.aws.Nextjs"
       "url": string
+    }
+    "hi": {
+      "configSet": string
+      "sender": string
+      "type": "sst.aws.Email"
     }
   }
 }

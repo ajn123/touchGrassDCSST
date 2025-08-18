@@ -1,5 +1,6 @@
 // Email functionality disabled - just logging to console
 // import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
+const PRIMARY_EMAIL = 'hi@touchgrassdc.com';
 
 export interface EmailData {
   name: string;
@@ -11,7 +12,7 @@ export interface EmailData {
 export async function sendContactFormEmail(data: EmailData): Promise<void> {
   // Email functionality disabled - just log the data
   console.log('=== CONTACT FORM EMAIL (DISABLED) ===');
-  console.log('To: hi@touchgrassdc.com');
+  console.log('To: ' + PRIMARY_EMAIL);
   console.log('Subject: New Contact Form Submission: ' + data.subject);
   console.log('Name: ' + data.name);
   console.log('Email: ' + data.email);

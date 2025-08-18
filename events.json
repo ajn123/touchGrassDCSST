@@ -483,7 +483,7 @@
             "website": "https://timeleft.com//"
         },
         
-        "description": "The National Portrait Gallery is an art museum in Washington, D.C., United States. Founded in 1962 and opened in 1968, it is part of the Smithsonian Institution.`",
+        "description": "Time Left is a way to meet new people in DC.  Book your seat now and meet 5 strangers over dinner, all matched by our personality algorithm.",
         "category": ["Social"],
         "cost": {
             "type": "variable",

@@ -1,3 +1,5 @@
+import { faTags } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 
 interface Category {
@@ -8,55 +10,49 @@ interface CategoriesProps {
   categories?: Category[];
   selectedCategories?: string[];
   onCategoryChange?: (category: string) => void;
-  displayMode?: 'selection' | 'display';
+  displayMode?: "selection" | "display";
   eventCategories?: string | string[];
 }
 
-export default function Categories({ 
-  categories, 
-  selectedCategories = [], 
+export default function Categories({
+  categories,
+  selectedCategories = [],
   onCategoryChange,
-  displayMode = 'selection',
-  eventCategories
+  displayMode = "selection",
+  eventCategories,
 }: CategoriesProps) {
-  
   // Display mode for showing event categories
-  if (displayMode === 'display' && eventCategories) {
+  if (displayMode === "display" && eventCategories) {
     return (
-      <div className="my-4">
-        <h2 className="text-lg font-semibold mb-2">Categories</h2>
-        <div className="flex flex-wrap gap-2">
-          {Array.isArray(eventCategories) ? (
-            eventCategories.map((cat: string, index: number) => (
-              <Link 
-                key={index}
-                href={`/events/category/${encodeURIComponent(cat)}`}
-                className="inline-block"
-              >
-                <span 
-                  className="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer"
+      <>
+        <div className="inline-flex items-center gap-2 py-2">
+          <FontAwesomeIcon
+            icon={faTags}
+            className="inline-flex w-10 h-10 items-center gap-2 px-3 py-2 "
+          />
+          {Array.isArray(eventCategories)
+            ? eventCategories.map((cat: string, index: number) => (
+                <Link
+                  key={index}
+                  href={`/events/category/${encodeURIComponent(cat)}`}
                 >
-                  {cat}
-                </span>
-              </Link>
-            ))
-          ) : (
-            eventCategories.split(',').map((cat: string, index: number) => (
-              <Link 
-                key={index}
-                href={`/events/category/${encodeURIComponent(cat.trim())}`}
-                className="inline-block"
-              >
-                <span 
-                  className="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer"
+                  <span className="px-3 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer">
+                    {cat}
+                  </span>
+                </Link>
+              ))
+            : eventCategories.split(",").map((cat: string, index: number) => (
+                <Link
+                  key={index}
+                  href={`/events/category/${encodeURIComponent(cat.trim())}`}
                 >
-                  {cat.trim()}
-                </span>
-              </Link>
-            ))
-          )}
+                  <span className="px-3 py-2 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer">
+                    {cat.trim()}
+                  </span>
+                </Link>
+              ))}
         </div>
-      </div>
+      </>
     );
   }
 
@@ -72,9 +68,17 @@ export default function Categories({
               <button
                 onClick={() => onCategoryChange(category.category)}
                 style={{
-                  backgroundColor: selectedCategories.includes(category.category) ? '#10b981' : 'white',
-                  borderColor: selectedCategories.includes(category.category) ? '#10b981' : '#d1d5db',
-                  color: selectedCategories.includes(category.category) ? 'white' : '#374151'
+                  backgroundColor: selectedCategories.includes(
+                    category.category
+                  )
+                    ? "#10b981"
+                    : "white",
+                  borderColor: selectedCategories.includes(category.category)
+                    ? "#10b981"
+                    : "#d1d5db",
+                  color: selectedCategories.includes(category.category)
+                    ? "white"
+                    : "#374151",
                 }}
                 className="w-full bg-white rounded-lg shadow-md p-6 text-center cursor-pointer hover:shadow-lg transition-shadow transform hover:scale-105 duration-300 slow-transition"
               >
@@ -82,9 +86,16 @@ export default function Categories({
               </button>
             ) : (
               // Navigation mode (original functionality)
-              <Link href={`/events/category/${encodeURIComponent(category.category)}`} className="hover:text-blue-500">
+              <Link
+                href={`/events/category/${encodeURIComponent(
+                  category.category
+                )}`}
+                className="hover:text-blue-500"
+              >
                 <div className="bg-white rounded-lg shadow-md p-6 text-center cursor-pointer hover:shadow-lg transition-shadow transform hover:scale-105 duration-300 slow-transition">
-                  <h3 className="text-lg font-semibold text-gray-800 hover:text-blue-500">{category.category}</h3>
+                  <h3 className="text-lg font-semibold text-gray-800 hover:text-blue-500">
+                    {category.category}
+                  </h3>
                 </div>
               </Link>
             )}
@@ -93,4 +104,4 @@ export default function Categories({
       </div>
     </section>
   );
-} 
+}

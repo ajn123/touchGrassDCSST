@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendContactFormEmail, sendConfirmationEmail, EmailData } from '@/lib/email';
+const PRIMARY_EMAIL = 'hi@touchgrassdc.com';
 
 interface EmailRequest {
   to: string;
@@ -122,7 +123,7 @@ async function handleDirectEmail(data: { to: string; subject: string; body: stri
       to: data.to,
       subject: data.subject,
       body: data.body,
-      from: data.from || 'hi@touchgrassdc.com',
+      from: data.from || PRIMARY_EMAIL,
       replyTo: data.replyTo
     });
 

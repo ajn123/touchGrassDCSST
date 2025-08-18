@@ -7,10 +7,12 @@ import { Resource } from "sst";
 import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
 
 async function getUser(email: string) {
+const PRIMARY_EMAIL = 'hi@touchgrassdc.com';
+
   // List of allowed admin emails
   const allowedEmails = [
     'admin@example.com', // Replace with your actual admin email
-    'hi@touchgrassdc.com',
+    PRIMARY_EMAIL,
     // Add more admin emails as needed
   ];
   

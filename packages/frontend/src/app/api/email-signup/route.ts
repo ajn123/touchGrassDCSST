@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { Resource } from 'sst';
+const PRIMARY_EMAIL = 'hi@touchgrassdc.com';
 
 const client = new DynamoDBClient({
   region: process.env.AWS_REGION || 'us-east-1',
@@ -70,10 +71,10 @@ This person will now receive email updates about events in their selected catego
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          to: 'hi@touchgrassdc.com',
+          to: PRIMARY_EMAIL,
           subject: `New Email Signup: ${name}`,
           body: emailBody,
-          from: 'hi@touchgrassdc.com',
+          from: PRIMARY_EMAIL,
           replyTo: email
         }),
       });

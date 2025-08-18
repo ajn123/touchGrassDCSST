@@ -33,7 +33,7 @@ export function Socials({ socials, className = '' }: SocialsProps) {
   }
 
   const socialIcons = {
-    website: faGlobe,
+    website: faLink,
     instagram: faInstagram,
     facebook: faFacebook,
     twitter: faTwitter,
@@ -65,8 +65,14 @@ export function Socials({ socials, className = '' }: SocialsProps) {
 
   return (
     <div className={`space-y-2 py-4 ${className}`}>
-      <h3 className="text-sm font-semibold text-gray-700 mb-2">Socials:</h3>
       <div className="flex flex-wrap gap-2">
+
+        <FontAwesomeIcon
+          icon={faGlobe}
+          className="inline-flex w-10 h-10 items-center gap-2 px-3 py-2 "
+        
+        />
+
         {validSocials.map(([key, url]) => (
           <a
             key={key}

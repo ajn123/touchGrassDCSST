@@ -20,9 +20,9 @@ The contact form is currently set up with simulated email sending. To enable rea
    export async function sendContactFormEmail(data: EmailData): Promise<void> {
      try {
        const command = new SendEmailCommand({
-         Source: 'hi@touchgrassdc.com',
+         Source: 'your-email@yourdomain.com', // Configure this
          Destination: {
-           ToAddresses: ['hi@touchgrassdc.com'],
+           ToAddresses: ['your-email@yourdomain.com'], // Configure this
          },
          Message: {
            Subject: {
@@ -70,8 +70,8 @@ The contact form is currently set up with simulated email sending. To enable rea
    export async function sendContactFormEmail(data: EmailData): Promise<void> {
      try {
        await resend.emails.send({
-         from: 'hi@touchgrassdc.com',
-         to: 'hi@touchgrassdc.com',
+         from: 'your-email@yourdomain.com', // Configure this
+         to: 'your-email@yourdomain.com', // Configure this
          subject: `New Contact Form Submission: ${data.subject}`,
          text: `
    New contact form submission received:
@@ -109,8 +109,8 @@ The contact form is currently set up with simulated email sending. To enable rea
    export async function sendContactFormEmail(data: EmailData): Promise<void> {
      try {
        await sgMail.send({
-         to: 'hi@touchgrassdc.com',
-         from: 'hi@touchgrassdc.com',
+         to: 'your-email@yourdomain.com', // Configure this
+         from: 'your-email@yourdomain.com', // Configure this
          subject: `New Contact Form Submission: ${data.subject}`,
          text: `
    New contact form submission received:

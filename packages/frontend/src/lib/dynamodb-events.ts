@@ -3,6 +3,7 @@ import { GetItemCommand, DynamoDBClient, ScanCommand, PutItemCommand, DeleteItem
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { Resource } from "sst";
 import { revalidatePath } from "next/cache";
+const PRIMARY_EMAIL = 'hi@touchgrassdc.com';
 
 // Geocoding function (copied from seed-data.ts to avoid import issues)
 async function geocodeAddress(address: string): Promise<{ latitude: number; longitude: number; formattedAddress: string } | null> {
@@ -104,6 +105,13 @@ export async function getEventsByCategory(category: string) {
   try {
     const command = new ScanCommand({
       TableName: Resource.Db.name,
+      FilterExpression: 'begins_with(#pk, :eventPrefix)',
+      ExpressionAttributeNames: {
+        '#pk': 'pk'
+      },
+      ExpressionAttributeValues: {
+        ':eventPrefix': { S: 'EVENT' }
+      }
     });
 
     const result = await client.send(command);
@@ -160,13 +168,16 @@ export async function getEventByTitle(title: string) {
     
     const command = new ScanCommand({
       TableName: Resource.Db.name,
-      FilterExpression: '#title = :title',
+      FilterExpression: '#title = :title AND begins_with(#pk, :eventPrefix)',
       ExpressionAttributeNames: {
+        '#pk': 'pk', 
         '#title': 'title'
       },
       ExpressionAttributeValues: {
+        ':eventPrefix': { S: 'EVENT' },
         ':title': { S: title }
       }
+
     });
 
     console.log('Scan command created, executing...');
@@ -207,6 +218,13 @@ export async function getEvents() {
     try {
       const command = new ScanCommand({
         TableName: Resource.Db.name,
+        FilterExpression: 'begins_with(#pk, :eventPrefix)',
+        ExpressionAttributeNames: {
+          '#pk': 'pk'
+        },
+        ExpressionAttributeValues: {
+          ':eventPrefix': { S: 'EVENT' }
+        }
       });
       const result = await client.send(command);
   
@@ -416,10 +434,10 @@ View the event at: https://touchgrassdc.com/items/${encodeURIComponent(title)}
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        to: 'hi@touchgrassdc.com',
+        to: PRIMARY_EMAIL,
         subject: `New Event Submitted: ${title}`,
         body: emailBody,
-        from: 'hi@touchgrassdc.com',
+        from: PRIMARY_EMAIL,
         replyTo: email
       }),
     });
@@ -642,13 +660,57 @@ export async function updateEvent(eventId: string, eventData: any) {
       updatedAt: { N: timestamp.toString() },
     };
 
-    // Add all other properties from eventData
+    // Add all other properties from eventData, preserving data types
     for (const [key, value] of eventData.entries()) {
       if (key !== 'eventId') { // Skip eventId as it's already handled
-        if (key === 'title') {
-          item[key] = { S: String(value) };
+        const stringValue = String(value);
+        
+        // Skip empty values to avoid DynamoDB index issues
+        if (!stringValue.trim()) {
+          continue;
+        }
+        
+        // Handle special fields that should maintain their structure
+        if (key === 'cost') {
+          // Handle cost as a JSON object
+          try {
+            const costObj = JSON.parse(stringValue);
+            item[key] = { M: {
+              type: { S: costObj.type },
+              currency: { S: costObj.currency },
+              amount: { N: costObj.amount.toString() }
+            }};
+          } catch (error) {
+            console.error('Error parsing cost JSON:', error);
+            item[key] = { S: stringValue };
+          }
+        } else if (key === 'category') {
+          // Handle category as an array if it's comma-separated
+          if (stringValue.includes(',')) {
+            const categories = stringValue.split(',').map((cat: string) => cat.trim()).filter(Boolean);
+            item[key] = { L: categories.map(cat => ({ S: cat })) };
+          } else {
+            item[key] = { S: stringValue };
+          }
+        } else if (key === 'coordinates') {
+          // Handle coordinates as a string (latitude,longitude format)
+          item[key] = { S: stringValue };
+        } else if (key.startsWith('socials.')) {
+          // Handle socials fields - collect them and add as a map
+          const socialKey = key.replace('socials.', '');
+          if (!item.socials) {
+            item.socials = { M: {} };
+          }
+          item.socials.M[socialKey] = { S: stringValue };
         } else {
-          item[key] = { S: String(value) };
+          // For other fields, try to detect if it's a number or boolean
+          if (stringValue === 'true' || stringValue === 'false') {
+            item[key] = { BOOL: stringValue === 'true' };
+          } else if (!isNaN(Number(stringValue)) && stringValue.trim() !== '') {
+            item[key] = { N: stringValue };
+          } else {
+            item[key] = { S: stringValue };
+          }
         }
       }
     }
@@ -702,30 +764,40 @@ export async function updateEventJson(eventId: string, eventData: any) {
       updatedAt: { N: timestamp.toString() },
     };
 
+    // Helper function to convert values to DynamoDB format recursively
+    const convertToDynamoDBFormat = (value: any): any => {
+      if (value === null || value === undefined) {
+        return undefined; // Skip null/undefined values
+      } else if (typeof value === 'string') {
+        return { S: value };
+      } else if (typeof value === 'number') {
+        return { N: value.toString() };
+      } else if (typeof value === 'boolean') {
+        return { BOOL: value };
+      } else if (Array.isArray(value)) {
+        return { L: value.map(v => convertToDynamoDBFormat(v)).filter(v => v !== undefined) };
+      } else if (typeof value === 'object') {
+        // Convert object to DynamoDB map
+        const map: { [key: string]: any } = {};
+        for (const [objKey, objValue] of Object.entries(value)) {
+          const convertedValue = convertToDynamoDBFormat(objValue);
+          if (convertedValue !== undefined) {
+            map[objKey] = convertedValue;
+          }
+        }
+        return { M: map };
+      } else {
+        // Fallback to string
+        return { S: String(value) };
+      }
+    };
+
     // Handle JSON data properly - preserve data types
     for (const [key, value] of Object.entries(eventData)) {
       if (key !== 'eventId' && key !== 'pk' && key !== 'sk') { // Skip system fields
-        if (value === null || value === undefined) {
-          continue; // Skip null/undefined values
-        } else if (typeof value === 'string') {
-          item[key] = { S: value };
-        } else if (typeof value === 'number') {
-          item[key] = { N: value.toString() };
-        } else if (typeof value === 'boolean') {
-          item[key] = { BOOL: value };
-        } else if (Array.isArray(value)) {
-          item[key] = { L: value.map(v => {
-            if (typeof v === 'string') return { S: v };
-            if (typeof v === 'number') return { N: v.toString() };
-            if (typeof v === 'boolean') return { BOOL: v };
-            return { S: JSON.stringify(v) };
-          })};
-        } else if (typeof value === 'object') {
-          // For objects, store as JSON string
-          item[key] = { S: JSON.stringify(value) };
-        } else {
-          // Fallback to string
-          item[key] = { S: String(value) };
+        const convertedValue = convertToDynamoDBFormat(value);
+        if (convertedValue !== undefined) {
+          item[key] = convertedValue;
         }
       }
     }

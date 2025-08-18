@@ -1,5 +1,6 @@
 import { Resource } from "sst";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
+const PRIMARY_EMAIL = 'hi@touchgrassdc.com';
 
 interface EmailRequest {
   to: string;
@@ -58,7 +59,7 @@ export const handler = async (event: any) => {
     
     const toEmail = isSandboxMode ? 
       (process.env.SES_VERIFIED_EMAIL || "noreply@example.com") : 
-      "hi@touchgrassdc.com";
+      PRIMARY_EMAIL;
     
     const command = new SendEmailCommand({
       Source: fromEmail,

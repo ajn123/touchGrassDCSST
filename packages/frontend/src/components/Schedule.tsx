@@ -9,7 +9,7 @@ interface ScheduleProps {
   className?: string;
 }
 
-export function Schedule({ schedules, className = '' }: ScheduleProps) {
+export function Schedule({ schedules, className = "" }: ScheduleProps) {
   if (!schedules || !Array.isArray(schedules) || schedules.length === 0) {
     return null;
   }
@@ -21,33 +21,73 @@ export function Schedule({ schedules, className = '' }: ScheduleProps) {
     if (days.length === 2) {
       return `${days[0]} & ${days[1]}`;
     }
-    return `${days.slice(0, -1).join(', ')} & ${days[days.length - 1]}`;
+    return `${days.slice(0, -1).join(", ")} & ${days[days.length - 1]}`;
   };
 
   const getRecurrenceIcon = (type: string) => {
     switch (type.toLowerCase()) {
-      case 'weekly':
+      case "weekly":
         return (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
         );
-      case 'daily':
+      case "daily":
         return (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
           </svg>
         );
-      case 'monthly':
+      case "monthly":
         return (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
           </svg>
         );
       default:
         return (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
         );
     }
@@ -57,7 +97,10 @@ export function Schedule({ schedules, className = '' }: ScheduleProps) {
     <div className={`space-y-2 my-2 ${className}`}>
       <h3 className="text-lg font-semibold text-gray-700 mb-2">Schedule</h3>
       {schedules.map((schedule, index) => (
-        <div key={index} className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+        <div
+          key={index}
+          className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg"
+        >
           <div className="flex-shrink-0 text-green-600">
             {getRecurrenceIcon(schedule.recurrence_type)}
           </div>
@@ -73,4 +116,4 @@ export function Schedule({ schedules, className = '' }: ScheduleProps) {
       ))}
     </div>
   );
-} 
+}

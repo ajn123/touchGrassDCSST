@@ -7,9 +7,10 @@ import { resolveImageUrl } from "@/lib/image-utils";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 
-export default function SearchPage() {
+// Component that uses useSearchParams - wrapped in Suspense
+function SearchPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [events, setEvents] = useState<any[]>([]);
@@ -267,5 +268,28 @@ export default function SearchPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Loading fallback component
+function SearchPageLoading() {
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading search page...</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Main page component with Suspense boundary
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<SearchPageLoading />}>
+      <SearchPageContent />
+    </Suspense>
   );
 }

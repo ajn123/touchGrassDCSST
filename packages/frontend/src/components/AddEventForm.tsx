@@ -246,9 +246,14 @@ export function AddEventForm() {
         formDataObj.append("image_url", formData.image_url);
       }
 
-      // Only admins can make events public, non-admins always have is_public = false
+      // Always include is_public field - unchecked checkboxes don't get sent in form data
       const finalIsPublic = isAdmin ? formData.is_public : false;
       formDataObj.append("is_public", finalIsPublic.toString());
+      console.log(
+        `🔒 Form submission - is_public: ${
+          formData.is_public
+        } -> finalIsPublic: ${finalIsPublic} -> string: "${finalIsPublic.toString()}"`
+      );
 
       const result = await createEvent(formDataObj);
 
@@ -266,7 +271,7 @@ export function AddEventForm() {
           cost: "",
           selectedCategories: [],
           image_url: "",
-          is_public: isAdmin ? false : false, // Non-admins always false, admins can choose
+          is_public: false, // Reset to false for new events
         });
         setUploadedImageUrl("");
         setErrors({}); // Clear any validation errors

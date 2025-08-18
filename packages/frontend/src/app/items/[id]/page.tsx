@@ -163,7 +163,9 @@ export default async function ItemPage({
           </div>
 
           {/* Admin Actions */}
-          <AdminEventActions event={item} />
+          <AdminEventActions
+            event={item as { pk: string; title: string; is_public: boolean }}
+          />
 
           {/* JSON Editor for Admins */}
           <div className="mt-6">

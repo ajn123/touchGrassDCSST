@@ -242,12 +242,15 @@ export async function getEvents() {
   try {
     const command = new ScanCommand({
       TableName: Resource.Db.name,
-      FilterExpression: "begins_with(#pk, :eventPrefix)",
+      FilterExpression:
+        "begins_with(#pk, :eventPrefix) AND #isPublic = :isPublic",
       ExpressionAttributeNames: {
         "#pk": "pk",
+        "#isPublic": "is_public",
       },
       ExpressionAttributeValues: {
         ":eventPrefix": { S: "EVENT" },
+        ":isPublic": { BOOL: true },
       },
     });
     const result = await client.send(command);
@@ -678,17 +681,19 @@ async function searchEventsWithLimit(filters: any) {
       console.log("🏷️ Adding category filter to scan for:", filters.categories);
 
       // Create OR expression for categories using DynamoDB FilterExpression
-      const categoryExpressions = filters.categories.map((_, index) => {
-        const nameKey = `#cat${index}`;
-        const valueKey = `:cat${index}`;
-        scanParams.ExpressionAttributeNames[nameKey] = "category";
-        scanParams.ExpressionAttributeValues[valueKey] = {
-          S: filters.categories[index],
-        };
-        // Use contains for array fields - this will check if the category array contains the specified value
-        // For DynamoDB, contains works with both strings and arrays
-        return `contains(#cat${index}, :cat${index})`;
-      });
+      const categoryExpressions = filters.categories.map(
+        (category: string, index: number) => {
+          const nameKey = `#cat${index}`;
+          const valueKey = `:cat${index}`;
+          scanParams.ExpressionAttributeNames[nameKey] = "category";
+          scanParams.ExpressionAttributeValues[valueKey] = {
+            S: category,
+          };
+          // Use contains for array fields - this will check if the category array contains the specified value
+          // For DynamoDB, contains works with both strings and arrays
+          return `contains(#cat${index}, :cat${index})`;
+        }
+      );
 
       filterExpressions.push(`(${categoryExpressions.join(" OR ")})`);
     }
@@ -924,6 +929,10 @@ export async function createEvent(event: any) {
         // Skip eventId as it's already handled
         const stringValue = String(value);
 
+        console.log(
+          `🔍 Processing field: ${key} = "${value}" (stringValue: "${stringValue}")`
+        );
+
         // Skip empty values to avoid DynamoDB index issues
         if (!stringValue.trim()) {
           continue;
@@ -962,8 +971,13 @@ export async function createEvent(event: any) {
             );
           }
         } else if (key === "is_public") {
-          // Handle boolean field
-          item[key] = { BOOL: stringValue.toLowerCase() === "true" };
+          // Handle boolean field - ensure proper boolean conversion
+          const boolValue = stringValue.toLowerCase() === "true";
+          item[key] = { BOOL: boolValue };
+          console.log(
+            `🔒 is_public field: "${stringValue}" -> ${boolValue} (type: ${typeof boolValue})`
+          );
+          console.log(`🔒 DynamoDB item[key]:`, JSON.stringify(item[key]));
         } else {
           item[key] = { S: stringValue };
         }
@@ -1016,6 +1030,8 @@ export async function createEvent(event: any) {
         // Continue without coordinates if geocoding fails
       }
     }
+
+    console.log("📦 Final item to be stored:", JSON.stringify(item, null, 2));
 
     const command = new PutItemCommand({
       TableName: Resource.Db.name,
@@ -1504,7 +1520,14 @@ export async function updateEventJson(eventId: string, eventData: any) {
 
           // Special handling for is_public to ensure it's stored as boolean
           if (key === "is_public") {
-            item[key] = { BOOL: Boolean(value) };
+            const boolValue =
+              typeof value === "string"
+                ? value.toLowerCase() === "true"
+                : Boolean(value);
+            item[key] = { BOOL: boolValue };
+            console.log(
+              `🔒 updateEventJSON - is_public field: "${value}" -> ${boolValue} (type: ${typeof boolValue})`
+            );
           }
         }
       }

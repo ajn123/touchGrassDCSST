@@ -38,10 +38,23 @@ export async function POST(request: NextRequest) {
     }
 
     // Send notification email to admin
-    await sendContactFormEmail(body as EmailData);
+    const adminEmailData: EmailData = {
+      to: "hi@touchgrassdc.com", // Admin email
+      subject: `Contact Form: ${body.subject}`,
+      body: `New contact form submission from ${body.name} (${body.email}):\n\n${body.message}`,
+      from: "hi@touchgrassdc.com",
+      replyTo: body.email,
+    };
+    await sendContactFormEmail(adminEmailData);
     
     // Send confirmation email to user
-    await sendConfirmationEmail(body as EmailData);
+    const userEmailData: EmailData = {
+      to: body.email,
+      subject: "Thank you for your message - TouchGrass DC",
+      body: `Hi ${body.name},\n\nThank you for reaching out to TouchGrass DC. We've received your message about "${body.subject}" and will get back to you as soon as possible.\n\nBest regards,\nThe TouchGrass DC Team`,
+      from: "hi@touchgrassdc.com",
+    };
+    await sendConfirmationEmail(userEmailData);
 
     // Return success response
     return NextResponse.json(

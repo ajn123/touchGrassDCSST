@@ -145,15 +145,14 @@ export default function SearchFilters({
   };
 
   const resetFilters = () => {
-    console.log("🔄 Reset filters button clicked");
-    const resetFilters = {
+    const resetFilters: SearchFilters = {
       query: "",
       categories: [],
       costRange: {},
       location: [],
       dateRange: {},
       sortBy: "date",
-      sortOrder: "asc",
+      sortOrder: "asc" as const,
     };
     setFilters(resetFilters);
     router.push("/search?sortBy=date&sortOrder=asc");

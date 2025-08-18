@@ -3,11 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+  { params }: { params: Promise<{ id: string }> }
+): Promise<Response> {
   try {
-    const eventId = params.id;
-    
+    const { id: eventId } = await params;
+
     if (!eventId) {
       return NextResponse.json(
         { error: "Event ID is required" },
@@ -19,10 +19,7 @@ export async function GET(
     const event = await getEvent(eventId);
 
     if (!event) {
-      return NextResponse.json(
-        { error: "Event not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
     console.log(`✅ Event found: ${event.title}`);
@@ -33,11 +30,11 @@ export async function GET(
   } catch (error) {
     console.error(`❌ Error fetching event:`, error);
     return NextResponse.json(
-      { 
+      {
         error: "Failed to fetch event",
-        details: error instanceof Error ? error.message : "Unknown error"
+        details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );
   }
-} 
+}

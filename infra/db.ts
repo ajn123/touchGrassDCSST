@@ -45,6 +45,11 @@ export const db = new sst.aws.Dynamo("Db", {
       hashKey: "category",
       rangeKey: "productName",
     },
+    // GSI for events by category (category -> createdAt)
+    eventCategoryIndex: {
+      hashKey: "category",
+      rangeKey: "createdAt",
+    },
     // GSI for public events (is_public -> createdAt)
     publicEventsIndex: {
       hashKey: "is_public",

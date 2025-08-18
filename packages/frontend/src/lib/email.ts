@@ -1,36 +1,48 @@
-// Email functionality disabled - just logging to console
-// import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
-const PRIMARY_EMAIL = 'hi@touchgrassdc.com';
+import { EmailData } from "./api";
 
-export interface EmailData {
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-}
+// Re-export EmailData interface for use in other modules
+export type { EmailData };
 
+/**
+ * Send a contact form email notification
+ */
 export async function sendContactFormEmail(data: EmailData): Promise<void> {
-  // Email functionality disabled - just log the data
-  console.log('=== CONTACT FORM EMAIL (DISABLED) ===');
-  console.log('To: ' + PRIMARY_EMAIL);
-  console.log('Subject: New Contact Form Submission: ' + data.subject);
-  console.log('Name: ' + data.name);
-  console.log('Email: ' + data.email);
-  console.log('Message: ' + data.message);
-  console.log('=====================================');
-  
-  // Simulate successful email sending
-  console.log('Contact form email logged successfully (email sending disabled)');
+  try {
+    // For now, this is a placeholder implementation
+    // You can replace this with actual email service integration
+    console.log("Contact form email would be sent:", {
+      to: data.to,
+      subject: data.subject,
+      body: data.body,
+    });
+
+    // TODO: Implement actual email sending logic
+    // You can use AWS SES, Resend, SendGrid, or other email services
+    // See EMAIL_INTEGRATION.md for implementation examples
+  } catch (error) {
+    console.error("Failed to send contact form email:", error);
+    throw new Error("Failed to send email");
+  }
 }
 
+/**
+ * Send a confirmation email to the user
+ */
 export async function sendConfirmationEmail(data: EmailData): Promise<void> {
-  // Email functionality disabled - just log the data
-  console.log('=== CONFIRMATION EMAIL (DISABLED) ===');
-  console.log('To: ' + data.email);
-  console.log('Subject: Thank you for contacting TouchGrass DC');
-  console.log('Name: ' + data.name);
-  console.log('=====================================');
-  
-  // Simulate successful email sending
-  console.log('Confirmation email logged successfully (email sending disabled)');
-} 
+  try {
+    // For now, this is a placeholder implementation
+    // You can replace this with actual email service integration
+    console.log("Confirmation email would be sent:", {
+      to: data.to,
+      subject: data.subject,
+      body: data.body,
+    });
+
+    // TODO: Implement actual email sending logic
+    // You can use AWS SES, Resend, SendGrid, or other email services
+    // See EMAIL_INTEGRATION.md for implementation examples
+  } catch (error) {
+    console.error("Failed to send confirmation email:", error);
+    throw new Error("Failed to send email");
+  }
+}

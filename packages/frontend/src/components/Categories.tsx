@@ -1,6 +1,6 @@
 import { faTags } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
+import { IconSection } from "./IconSection";
 
 interface Category {
   category: string;
@@ -18,41 +18,39 @@ export default function Categories({
   categories,
   selectedCategories = [],
   onCategoryChange,
-  displayMode = "selection",
+  displayMode = "display",
   eventCategories,
 }: CategoriesProps) {
   // Display mode for showing event categories
   if (displayMode === "display" && eventCategories) {
     return (
-      <>
-        <div className="inline-flex items-center gap-2 py-2">
-          <FontAwesomeIcon
-            icon={faTags}
-            className="inline-flex w-10 h-10 items-center gap-2 px-3 py-2 "
-          />
-          {Array.isArray(eventCategories)
-            ? eventCategories.map((cat: string, index: number) => (
-                <Link
-                  key={index}
-                  href={`/events/category/${encodeURIComponent(cat)}`}
-                >
-                  <span className="px-3 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer">
-                    {cat}
-                  </span>
-                </Link>
-              ))
-            : eventCategories.split(",").map((cat: string, index: number) => (
-                <Link
-                  key={index}
-                  href={`/events/category/${encodeURIComponent(cat.trim())}`}
-                >
-                  <span className="px-3 py-2 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer">
-                    {cat.trim()}
-                  </span>
-                </Link>
-              ))}
-        </div>
-      </>
+      <IconSection icon={faTags} className="py-2">
+        {Array.isArray(eventCategories)
+          ? eventCategories.map((cat: string, index: number) => (
+              <Link
+                key={index}
+                href={`/search?categories=${encodeURIComponent(
+                  cat
+                )}&sortBy=date&sortOrder=asc`}
+              >
+                <span className="px-3 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer">
+                  {cat}
+                </span>
+              </Link>
+            ))
+          : eventCategories.split(",").map((cat: string, index: number) => (
+              <Link
+                key={index}
+                href={`/search?categories=${encodeURIComponent(
+                  cat.trim()
+                )}&sortBy=date&sortOrder=asc`}
+              >
+                <span className="px-3 py-2 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer">
+                  {cat.trim()}
+                </span>
+              </Link>
+            ))}
+      </IconSection>
     );
   }
 
@@ -85,11 +83,11 @@ export default function Categories({
                 <h3 className="text-lg font-semibold">{category.category}</h3>
               </button>
             ) : (
-              // Navigation mode (original functionality)
+              // Navigation mode (modified to go to search page with category)
               <Link
-                href={`/events/category/${encodeURIComponent(
+                href={`/search?categories=${encodeURIComponent(
                   category.category
-                )}`}
+                )}&sortBy=date&sortOrder=asc`}
                 className="hover:text-blue-500"
               >
                 <div className="bg-white rounded-lg shadow-md p-6 text-center cursor-pointer hover:shadow-lg transition-shadow transform hover:scale-105 duration-300 slow-transition">

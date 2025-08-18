@@ -1,7 +1,7 @@
 "use server";
 
+import { cookies as getCookies, headers as getHeaders } from "next/headers";
 import { redirect } from "next/navigation";
-import { headers as getHeaders, cookies as getCookies } from "next/headers";
 import { subjects } from "../../../auth/subjects";
 import { client, setTokens } from "../../auth";
 
@@ -22,7 +22,10 @@ export async function auth() {
     refresh: refreshToken?.value,
   });
 
-  console.log("Auth check: Verification result:", verified.err ? "error" : "success");
+  console.log(
+    "Auth check: Verification result:",
+    verified.err ? "error" : "success"
+  );
 
   if (verified.err) {
     console.log("Auth check: Verification failed, returning false");
@@ -56,32 +59,30 @@ export async function login() {
   const protocol = host?.includes("localhost") ? "http" : "https";
   const { url } = await client.authorize(
     `${protocol}://${host}/api/callback`,
-    "code",
+    "code"
   );
   redirect(url);
 }
 
 export async function logout() {
   const cookies = await getCookies();
-  
+
   console.log("Logout: Starting logout process...");
-  
+
   // Check current cookies before clearing
   const accessToken = cookies.get("access_token");
 
   const refreshToken = cookies.get("refresh_token");
   console.log("Logout: Current access token exists:", !!accessToken);
   console.log("Logout: Current refresh token exists:", !!refreshToken);
-  
-
 
   cookies.delete("access_token");
   cookies.delete("refresh_token");
 
   console.log("Logout: Cookies cleared, redirecting...");
-  
+
   // Add a small delay to ensure cookies are set before redirect
-  await new Promise(resolve => setTimeout(resolve, 100));
-  
+  await new Promise((resolve) => setTimeout(resolve, 100));
+
   redirect("/admin");
 }

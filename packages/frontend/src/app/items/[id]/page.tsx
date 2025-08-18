@@ -1,4 +1,5 @@
 import { auth } from "@/app/actions";
+import { AdminEventActions } from "@/components/AdminEventActions";
 import Categories from "@/components/Categories";
 import { Cost } from "@/components/Cost";
 import { DateDisplay } from "@/components/Date";
@@ -8,6 +9,7 @@ import EventMap from "@/components/EventMap";
 import { JsonEditor } from "@/components/JsonEditor";
 import { LoadingImage } from "@/components/LoadingImage";
 import { PrivateImage } from "@/components/PrivateImage";
+import { ReportWrongInfoButton } from "@/components/ReportWrongInfoButton";
 import { Schedule } from "@/components/Schedule";
 import { Socials } from "@/components/Socials";
 import { getEventByTitle } from "@/lib/dynamodb-events";
@@ -24,12 +26,46 @@ export default async function ItemPage({
   const user = await auth();
   const awaitedParams = await params;
 
+  // Check if user is admin
+  const isAdmin =
+    user &&
+    user.properties &&
+    user.properties.id &&
+    [
+      "hi@touchgrassdc.com",
+      "hello@touchgrassdc.com",
+      "admin@example.com",
+    ].includes(user.properties.id.toLowerCase());
+
+  const WHITELIST: any = [];
+
   // This runs on the server during rendering
   const item = await getEventByTitle(decodeURIComponent(awaitedParams.id));
 
   console.log(item);
   if (!item) {
     return <div>Item not found</div>;
+  }
+
+  // Check if event is public - if not, only admins can see it
+  if (!item.is_public && !isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            Event Not Available
+          </h1>
+          <p className="text-gray-600 mb-4">
+            This event is currently private and not available for public
+            viewing.
+          </p>
+          <p className="text-sm text-gray-500">
+            Please check back later or contact an administrator if you believe
+            this is an error.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   // Parse delay from query parameter for testing
@@ -65,7 +101,7 @@ export default async function ItemPage({
       )}
 
       {/* Admin Mode - Show all event details */}
-      {user && (
+      {isAdmin && (
         <div className="mb-8 p-4 bg-gray-50 rounded-lg border">
           <h2 className="text-xl font-bold mb-4 text-gray-800">
             Admin View - Complete Event Details
@@ -126,6 +162,9 @@ export default async function ItemPage({
             </div>
           </div>
 
+          {/* Admin Actions */}
+          <AdminEventActions event={item} />
+
           {/* JSON Editor for Admins */}
           <div className="mt-6">
             <JsonEditor eventId={item.pk} initialData={item} />
@@ -135,7 +174,10 @@ export default async function ItemPage({
 
       {/* Public View - Enhanced display */}
       <div className="border-t pt-6">
-        <h1 className="text-3xl font-bold mb-6">{item.title}</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold">{item.title}</h1>
+          <ReportWrongInfoButton eventTitle={item.title} eventId={item.pk} />
+        </div>
 
         {/* Image and Map Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -166,14 +208,17 @@ export default async function ItemPage({
             <div className="space-y-4">
               {<Cost cost={item.cost} />}
               {item.socials && <Socials socials={item.socials} />}
+
+              {item.eventDate && <DateDisplay date={item.eventDate} />}
+
               {item.category && (
                 <Categories
                   displayMode="display"
                   eventCategories={item.category}
                 />
               )}
+              {item.schedules && <Schedule schedules={item.schedules} />}
             </div>
-            <div>{item.eventDate && <DateDisplay date={item.eventDate} />}</div>
           </div>
         </div>
         <hr className="my-6 border-t border-gray-800" />
@@ -197,36 +242,9 @@ export default async function ItemPage({
           </div>
         )}
 
-        {/* Schedules */}
-        {item.schedules && (
-          <div className="mb-6">
-            <Schedule schedules={item.schedules} />
-          </div>
-        )}
-
         {/* Additional Fields */}
         {Object.entries(item)
-          .filter(
-            ([key]) =>
-              ![
-                "pk",
-                "sk",
-                "cost",
-                "id",
-                "description",
-                "title",
-                "createdAt",
-                "updatedAt",
-                "image_url",
-                "coordinates",
-                "location",
-                "socials",
-                "email",
-                "category",
-                "schedules",
-                "eventDate",
-              ].includes(key)
-          )
+          .filter(([key]) => WHITELIST.includes(key))
           .map(([key, value]) => (
             <div key={key} className="mb-2 p-3 bg-gray-50 rounded">
               <strong className="text-gray-700">{key}:</strong>{" "}
@@ -248,7 +266,7 @@ export default async function ItemPage({
                 (key === "createdAt" || key === "updatedAt") ? (
                 new Date(value).toLocaleString()
               ) : (
-                String(value)
+                String(value) + ""
               )}
             </div>
           ))}

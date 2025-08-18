@@ -13,7 +13,7 @@ export default $config({
     // Import infrastructure modules
     const { db } = await import("./infra/db");
     const { api } = await import("./infra/api");
-    const { web } = await import('./infra/web');
+    const { web } = await import("./infra/web");
     const { bucket } = await import("./infra/storage");
     const { email } = await import("./infra/email");
     const { auth } = await import("./infra/auth");

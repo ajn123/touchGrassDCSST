@@ -1,6 +1,4 @@
-
-'use server'
-import { Resource } from "sst";
+"use server";
 
 export interface EmailData {
   to: string;
@@ -29,10 +27,10 @@ export interface ApiResponse<T = any> {
  */
 export async function sendEmail(emailData: EmailData): Promise<ApiResponse> {
   try {
-    const response = await fetch(Resource.SendEmail.url, {
-      method: 'POST',
+    const response = await fetch("/api/sendEmail", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(emailData),
     });
@@ -42,20 +40,20 @@ export async function sendEmail(emailData: EmailData): Promise<ApiResponse> {
     if (!response.ok) {
       return {
         success: false,
-        error: result.error || 'Failed to send email'
+        error: result.error || "Failed to send email",
       };
     }
 
     return {
       success: true,
       message: result.message,
-      data: result
+      data: result,
     };
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error("Error sending email:", error);
     return {
       success: false,
-      error: 'Network error occurred'
+      error: "Network error occurred",
     };
   }
 }
@@ -63,16 +61,18 @@ export async function sendEmail(emailData: EmailData): Promise<ApiResponse> {
 /**
  * Submit a contact form using the API
  */
-export async function submitContactForm(formData: ContactFormData): Promise<ApiResponse> {
+export async function submitContactForm(
+  formData: ContactFormData
+): Promise<ApiResponse> {
   try {
-    const response = await fetch(Resource.SendEmail.url, {
-      method: 'POST',
+    const response = await fetch("/api/sendEmail", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        type: 'contact-form',
-        data: formData
+        type: "contact-form",
+        data: formData,
       }),
     });
 
@@ -81,20 +81,20 @@ export async function submitContactForm(formData: ContactFormData): Promise<ApiR
     if (!response.ok) {
       return {
         success: false,
-        error: result.error || 'Failed to submit contact form'
+        error: result.error || "Failed to submit contact form",
       };
     }
 
     return {
       success: true,
       message: result.message,
-      data: result
+      data: result,
     };
   } catch (error) {
-    console.error('Error submitting contact form:', error);
+    console.error("Error submitting contact form:", error);
     return {
       success: false,
-      error: 'Network error occurred'
+      error: "Network error occurred",
     };
   }
 }
@@ -113,7 +113,7 @@ export async function sendNotification(
     subject,
     body: message,
     from: options?.from,
-    replyTo: options?.replyTo
+    replyTo: options?.replyTo,
   });
 }
 
@@ -126,17 +126,24 @@ export async function sendWelcomeEmail(
 ): Promise<ApiResponse> {
   return sendEmail({
     to,
-    subject: 'Welcome to TouchGrass DC!',
-    body: `
+    subject: "Welcome to TouchGrass DC!",
+    body: `🎉 WELCOME TO TOUCHGRASS DC!
+
 Dear ${name},
 
 Welcome to TouchGrass DC! We're excited to have you join our community.
 
+🚀 WHAT'S NEXT?
+================
 We'll keep you updated on upcoming events and activities in the DC area.
 
+📧 STAY CONNECTED
+==================
+Feel free to reach out if you have any questions or suggestions.
+
+---
 Best regards,
-The TouchGrass DC Team
-    `.trim()
+The TouchGrass DC Team`.trim(),
   });
 }
 
@@ -153,19 +160,24 @@ export async function sendEventReminder(
   return sendEmail({
     to,
     subject: `Reminder: ${eventTitle} tomorrow!`,
-    body: `
+    body: `⏰ EVENT REMINDER
+
 Dear ${name},
 
 This is a friendly reminder about tomorrow's event:
 
+📅 EVENT DETAILS
+================
 Event: ${eventTitle}
 Date: ${eventDate}
 Location: ${eventLocation}
 
+🎯 DON'T FORGET!
+================
 We look forward to seeing you there!
 
+---
 Best regards,
-The TouchGrass DC Team
-    `.trim()
+The TouchGrass DC Team`.trim(),
   });
-} 
+}

@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useModal } from '../hooks/useModal';
+import Modal from './Modal';
 
 interface ImageUploadProps {
   eventId: string;
@@ -11,6 +13,7 @@ export default function ImageUpload({ eventId, onUploadComplete }: ImageUploadPr
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const { showError, modalState, hideModal } = useModal();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -72,7 +75,7 @@ export default function ImageUpload({ eventId, onUploadComplete }: ImageUploadPr
 
     } catch (error) {
       console.error('Upload failed:', error);
-      alert('Upload failed. Please try again.');
+      showError('Upload Failed', 'Upload failed. Please try again.');
     } finally {
       setUploading(false);
       setUploadProgress(0);
@@ -137,6 +140,15 @@ export default function ImageUpload({ eventId, onUploadComplete }: ImageUploadPr
       >
         {uploading ? 'Uploading...' : 'Upload Image'}
       </button>
+
+      {/* Notification Modal */}
+      <Modal
+        isOpen={modalState.isOpen}
+        onClose={hideModal}
+        title={modalState.title}
+        message={modalState.message}
+        type={modalState.type}
+      />
     </div>
   );
 } 

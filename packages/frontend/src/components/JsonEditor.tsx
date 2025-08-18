@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useModal } from '../hooks/useModal';
+import Modal from './Modal';
 
 interface JsonEditorProps {
   eventId: string;
@@ -13,6 +15,7 @@ export function JsonEditor({ eventId, initialData }: JsonEditorProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
+  const { showSuccess, modalState, hideModal } = useModal();
 
   useEffect(() => {
     setJsonText(JSON.stringify(initialData, null, 2));
@@ -63,8 +66,10 @@ export function JsonEditor({ eventId, initialData }: JsonEditorProps) {
       setIsEditing(false);
       
       // Show success message and refresh the page
-      alert('Event updated successfully!');
-      window.location.reload();
+      showSuccess('Success!', 'Event updated successfully!');
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save changes');
@@ -149,6 +154,15 @@ export function JsonEditor({ eventId, initialData }: JsonEditorProps) {
       <div className="mt-2 text-xs text-gray-600">
         <strong>Warning:</strong> This will update the event in the database. Make sure the JSON is valid and contains all required fields.
       </div>
+
+      {/* Notification Modal */}
+      <Modal
+        isOpen={modalState.isOpen}
+        onClose={hideModal}
+        title={modalState.title}
+        message={modalState.message}
+        type={modalState.type}
+      />
     </div>
   );
 } 

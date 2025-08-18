@@ -1,7 +1,13 @@
 import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { IconSection } from "./IconSection";
 
-export const Cost = ({ cost }: { cost: any }) => {
+export const Cost = ({
+  cost,
+  className = "",
+}: {
+  cost: any;
+  className?: string;
+}) => {
   const formatAmount = (amount: string | number) => {
     if (typeof amount === "string" && amount.includes("-")) {
       return amount;
@@ -11,7 +17,7 @@ export const Cost = ({ cost }: { cost: any }) => {
 
   const getCostDisplay = () => {
     if (!cost) {
-      return <span className="text-gray-500">No data available</span>;
+      return <span className="text-gray-500">unknown</span>;
     }
 
     switch (cost.type) {
@@ -39,16 +45,14 @@ export const Cost = ({ cost }: { cost: any }) => {
   };
 
   return (
-    <>
-      <div>
-        <FontAwesomeIcon
-          icon={faDollarSign}
-          className="inline-flex w-10 h-10 items-center gap-2 px-3 py-2 "
-        />
-        <div className="inline-flex items-center p-6 py-1 bg-gray-100 rounded-full text-sm">
-          {getCostDisplay()}
-        </div>
+    <IconSection
+      icon={faDollarSign}
+      iconClassName="text-black"
+      className={className}
+    >
+      <div className="inline-flex items-center gap-2 px-3 py-2 bg-purple-50 text-purple-700 rounded-lg border border-purple-200">
+        {getCostDisplay()}
       </div>
-    </>
+    </IconSection>
   );
 };

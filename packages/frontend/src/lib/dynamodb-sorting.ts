@@ -1,12 +1,72 @@
 import { DynamoDBClient, QueryCommand, ScanCommand } from '@aws-sdk/client-dynamodb';
+import { Resource } from 'sst';
 
 const client = new DynamoDBClient({
   region: process.env.AWS_REGION || 'us-east-1',
 });
 
+// Event-specific sorting function for the search functionality
+export function sortEvents(events: any[], sortBy: string, ascending: boolean = true) {
+  console.log(`🔄 Sorting ${events.length} events by ${sortBy}, ascending: ${ascending}`);
+  
+  return events.sort((a, b) => {
+    let aValue: any = a[sortBy];
+    let bValue: any = b[sortBy];
+
+    // Handle date sorting
+    if (sortBy === "date") {
+      aValue = new Date(aValue || 0);
+      bValue = new Date(bValue || 0);
+    }
+
+    // Handle cost sorting
+    if (sortBy === "cost") {
+      aValue = typeof aValue === "object" 
+        ? parseFloat(aValue.amount) 
+        : parseFloat(aValue) || 0;
+      bValue = typeof bValue === "object" 
+        ? parseFloat(bValue.amount) 
+        : parseFloat(bValue) || 0;
+    }
+
+    // Handle title sorting (case-insensitive)
+    if (sortBy === "title") {
+      aValue = (aValue || "").toLowerCase();
+      bValue = (bValue || "").toLowerCase();
+    }
+
+    // Handle venue/location sorting (case-insensitive)
+    if (sortBy === "venue" || sortBy === "location") {
+      aValue = (aValue || "").toLowerCase();
+      bValue = (bValue || "").toLowerCase();
+    }
+
+    // Handle numeric values
+    if (typeof aValue === "number" && typeof bValue === "number") {
+      return ascending ? aValue - bValue : bValue - aValue;
+    }
+
+    // Handle string values
+    if (typeof aValue === "string" && typeof bValue === "string") {
+      return ascending ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+    }
+
+    // Handle date objects
+    if (aValue instanceof Date && bValue instanceof Date) {
+      return ascending ? aValue.getTime() - bValue.getTime() : bValue.getTime() - aValue.getTime();
+    }
+
+    // Fallback for undefined/null values
+    if (aValue === undefined || aValue === null) return ascending ? -1 : 1;
+    if (bValue === undefined || bValue === null) return ascending ? 1 : -1;
+
+    return 0;
+  });
+}
+
 // 1. Sort by application (after Scan) - Not recommended for large datasets
 export async function scanAndSort(field: string, ascending: boolean = true) {
-  const tableName = process.env.DB_NAME;
+  const tableName = Resource.Db.name;
   if (!tableName) throw new Error('Table name not configured');
 
   const result = await client.send(new ScanCommand({
@@ -43,7 +103,7 @@ export async function scanAndSort(field: string, ascending: boolean = true) {
 
 // 2. Query with range key sorting (efficient for specific partition)
 export async function queryWithSort(partitionKey: string, ascending: boolean = true) {
-  const tableName = process.env.DB_NAME;
+  const tableName = Resource.Db.name;
   if (!tableName) throw new Error('Table name not configured');
 
   const result = await client.send(new QueryCommand({
@@ -64,7 +124,7 @@ export async function queryWithSort(partitionKey: string, ascending: boolean = t
 
 // 3. Query all items using a GSI (Global Secondary Index)
 export async function queryWithGSI(indexName: string, ascending: boolean = true) {
-  const tableName = process.env.DB_NAME;
+  const tableName = Resource.Db.name;
   if (!tableName) throw new Error('Table name not configured');
 
   const result = await client.send(new QueryCommand({
@@ -87,7 +147,7 @@ export async function scanWithPaginationAndSort(
   limit: number = 10,
   lastEvaluatedKey?: any
 ) {
-  const tableName = process.env.DB_NAME;
+  const tableName = Resource.Db.name;
   if (!tableName) throw new Error('Table name not configured');
 
   const result = await client.send(new ScanCommand({
@@ -129,7 +189,7 @@ export async function scanWithPaginationAndSort(
 
 // 5. Sort by multiple fields
 export async function scanAndSortByMultiple(fields: Array<{field: string, ascending: boolean}>) {
-  const tableName = process.env.DB_NAME;
+  const tableName = Resource.Db.name;
   if (!tableName) throw new Error('Table name not configured');
 
   const result = await client.send(new ScanCommand({

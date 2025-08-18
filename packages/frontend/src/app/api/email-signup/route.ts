@@ -52,20 +52,24 @@ export async function POST(request: NextRequest) {
 
     // Send email notification about the new signup
     try {
-      const emailBody = `
-New Email Signup on TouchGrass DC
+      const emailBody = `📧 NEW EMAIL SIGNUP ON TOUCHGRASS DC
 
-Signup Details:
-- Name: ${name}
-- Email: ${email}
-- Categories of Interest: ${categories.join(', ')}
-- Signup ID: ${signupId}
-- Signed up at: ${new Date().toLocaleString()}
+📋 SIGNUP DETAILS
+=================
+Name: ${name}
+Email: ${email}
+Categories of Interest: ${categories.join(', ')}
+Signup ID: ${signupId}
+Signed up at: ${new Date().toLocaleString()}
 
+🎯 WHAT THIS MEANS
+==================
 This person will now receive email updates about events in their selected categories.
-      `.trim();
 
-      const response = await fetch(Resource.SendEmail.url, {
+---
+This signup was submitted through the TouchGrass DC website.`.trim();
+
+      const response = await fetch('/api/sendEmail', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

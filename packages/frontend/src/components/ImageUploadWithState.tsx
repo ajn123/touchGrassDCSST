@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { ImageUpload } from './ImageUpload';
+import { useModal } from '../hooks/useModal';
+import Modal from './Modal';
 
 interface UploadResult {
   key: string;
@@ -26,6 +28,7 @@ export function ImageUploadWithState({
   const [uploadedImages, setUploadedImages] = useState<UploadResult[]>([]);
   const [lastUploadedKey, setLastUploadedKey] = useState<string | null>(null);
   const [isAttachedToForm, setIsAttachedToForm] = useState(false);
+  const { showError, modalState, hideModal } = useModal();
 
   const handleUploadComplete = (result: UploadResult) => {
     console.log('Upload successful:', result);
@@ -39,7 +42,7 @@ export function ImageUploadWithState({
 
   const handleUploadError = (error: string) => {
     console.error('Upload failed:', error);
-    alert(`Upload failed: ${error}`);
+    showError('Upload Failed', `Upload failed: ${error}`);
   };
 
   // Add hidden input to form when image is uploaded
@@ -108,6 +111,15 @@ export function ImageUploadWithState({
           )}
         </div>
       )}
+
+      {/* Notification Modal */}
+      <Modal
+        isOpen={modalState.isOpen}
+        onClose={hideModal}
+        title={modalState.title}
+        message={modalState.message}
+        type={modalState.type}
+      />
     </div>
   );
 } 

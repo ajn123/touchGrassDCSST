@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { DeleteButton } from '../components/delete-button';
 import { getEvents, createEvent } from '@/lib/dynamodb-events';
 import { Suspense } from 'react';
-import EventList from '@/app/events/EventList';
 import { ImageUploadWithState } from '../components/ImageUploadWithState';
 import { LoadingImage } from '@/components/LoadingImage';
 import { getCategories } from '@/lib/dynamodb-events';

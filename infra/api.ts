@@ -1,11 +1,15 @@
 import { db } from "./db";
 import { bucket } from "./storage";
 
-
 export const api = new sst.aws.ApiGatewayV2("Api", {
   link: [db],
+  defaults: {
+    function: {
+      timeout: 30, // 30 seconds timeout
+      memory: "1024 MB", // Increase memory for better performance
+    },
+  },
 });
-
 
 
 api.route("GET /events", "packages/functions/src/events/api.getEvents");

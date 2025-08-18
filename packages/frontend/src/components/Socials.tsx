@@ -1,15 +1,13 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faGlobe, 
-  faLink 
-} from '@fortawesome/free-solid-svg-icons';
-import { 
-  faInstagram, 
-  faFacebook, 
-  faTwitter, 
-  faYoutube, 
-  faLinkedin 
-} from '@fortawesome/free-brands-svg-icons';
+import {
+  faFacebook,
+  faInstagram,
+  faLinkedin,
+  faTwitter,
+  faYoutube,
+} from "@fortawesome/free-brands-svg-icons";
+import { faGlobe, faLink } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { IconSection } from "./IconSection";
 
 interface SocialsData {
   website?: string;
@@ -27,8 +25,8 @@ interface SocialsProps {
   className?: string;
 }
 
-export function Socials({ socials, className = '' }: SocialsProps) {
-  if (!socials || typeof socials !== 'object') {
+export function Socials({ socials, className = "" }: SocialsProps) {
+  if (!socials || typeof socials !== "object") {
     return null;
   }
 
@@ -39,24 +37,24 @@ export function Socials({ socials, className = '' }: SocialsProps) {
     twitter: faTwitter,
     youtube: faYoutube,
     linkedin: faLinkedin,
-    meetup: faLink // Using generic link icon for meetup
+    meetup: faLink, // Using generic link icon for meetup
   };
 
   const getSocialName = (key: string) => {
     const names: { [key: string]: string } = {
-      website: 'Website',
-      instagram: 'Instagram',
-      facebook: 'Facebook',
-      twitter: 'Twitter',
-      youtube: 'YouTube',
-      linkedin: 'LinkedIn',
-      meetup: 'Meetup'
+      website: "Website",
+      instagram: "Instagram",
+      facebook: "Facebook",
+      twitter: "Twitter",
+      youtube: "YouTube",
+      linkedin: "LinkedIn",
+      meetup: "Meetup",
     };
     return names[key] || key.charAt(0).toUpperCase() + key.slice(1);
   };
 
-  const validSocials = Object.entries(socials).filter(([key, value]) => 
-    value && typeof value === 'string' && value.trim() !== ''
+  const validSocials = Object.entries(socials).filter(
+    ([key, value]) => value && typeof value === "string" && value.trim() !== ""
   );
 
   if (validSocials.length === 0) {
@@ -64,31 +62,22 @@ export function Socials({ socials, className = '' }: SocialsProps) {
   }
 
   return (
-    <div className={`space-y-2 py-4 ${className}`}>
-      <div className="flex flex-wrap gap-2">
-
-        <FontAwesomeIcon
-          icon={faGlobe}
-          className="inline-flex w-10 h-10 items-center gap-2 px-3 py-2 "
-        
-        />
-
-        {validSocials.map(([key, url]) => (
-          <a
-            key={key}
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-3 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors duration-200 border border-purple-200 hover:shadow-md"
-          >
-            <FontAwesomeIcon 
-              icon={socialIcons[key as keyof typeof socialIcons] || faLink} 
-              className="w-4 h-4"
-            />
-            <span className="text-sm font-medium">{getSocialName(key)}</span>
-          </a>
-        ))}
-      </div>
-    </div>
+    <IconSection icon={faGlobe} className={`py-4 ${className}`}>
+      {validSocials.map(([key, url]) => (
+        <a
+          key={key}
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-3 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors duration-200 border border-purple-200 hover:shadow-md"
+        >
+          <FontAwesomeIcon
+            icon={socialIcons[key as keyof typeof socialIcons] || faLink}
+            className="w-4 h-4"
+          />
+          <span className="text-sm font-medium">{getSocialName(key)}</span>
+        </a>
+      ))}
+    </IconSection>
   );
-} 
+}

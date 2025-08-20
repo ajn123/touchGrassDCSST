@@ -179,7 +179,22 @@ export default function EventMap({
     <div className={`relative ${className}`}>
       <a
         className="button-blue mb-10"
-        href={`https://www.google.com/maps/search/?api=1&query=${coordinates}`}
+        href={(() => {
+          if (address) {
+            // Use address if available - more reliable for navigation
+            return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+              address
+            )}`;
+          } else if (coordinates) {
+            // Use coordinates with better formatting
+            const [lat, lng] = coordinates
+              .split(",")
+              .map((coord) => coord.trim());
+            return `https://www.google.com/maps?q=${lat},${lng}`;
+          }
+          // Fallback to DC coordinates
+          return "https://www.google.com/maps?q=38.9072,-77.0369";
+        })()}
         target="_blank"
         rel="noopener noreferrer"
       >

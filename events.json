@@ -660,18 +660,6 @@
     "is_public": true
   },
   {
-    "title": "The Anthem",
-    "category": ["Music"],
-    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTval1lI2sNV45iuL83j5KJ_MC-_RBkC7z-Sw&s",
-    "location": "The Anthem, Washington, DC",
-    "description": "The Anthem is a music venue and auditorium in the Southwest Waterfront neighborhood of Washington, D.C. The venue opened on October 12, 2017, with a performance opened by The Struts and headlined by the Foo Fighters. The Anthem is part of The Wharf, a comprehensive redevelopment of the Southwest Waterfront area.",
-    "socials": {
-      "website": "https://theanthemdc.com/",
-      "instagram": "https://www.instagram.com/theanthemdc/"
-    },
-    "is_public": true
-  },
-  {
     "title": "Politics and Prose Book Clubs",
     "category": ["Book Club"],
     "image_url": "https://upload.wikimedia.org/wikipedia/en/a/a7/Politics_and_Prose.jpg",
@@ -681,5 +669,40 @@
       "website": "https://politics-prose.com/book-groups"
     },
     "is_public": true
+  },
+  {
+    "title": "Jessie Murph",
+    "category": ["music"],
+    "location": "The Anthem, Washington, DC",
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "15-100"
+    },
+    "socials": {
+      "website": "https://theanthemdc.com/event/jessie-murph-worldwide-hysteria/"
+    },
+    "description": "Jessie Murph is a singer-songwriter from Washington, D.C. She is known for her unique sound and style. She is a member of the indie pop band The Neighbourhood.",
+    "is_public": true
+  },
+  {
+    "title": "Trivia @ Kingfisher",
+    "category": ["Trivia"],
+    "image_url": "https://s3.amazonaws.com/motherbrain-prod/vlogo_1623076943575",
+    "location": "Kingfisher, Washington, DC",
+    "description": "Every Tuesday is trivia night in DC! Get a team together, or play solo, and come by tonight for one of the best trivia nights in town, hosted by the lovely geeks of GeeksWhoDrink.com. The games start at 8:00, but get here early to grab a seat and a little of that sweet happy hour action. It's free to play and you can win beer.",
+    "socials": {
+      "website": "https://www.geekswhodrink.com/venues/450002160/"
+    },
+    "is_public": true,
+    "host": "Geek Who Drinks",
+    "entryFee": 0,
+    "recurring": true,
+    "frequency": "weekly",
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    }
   }
 ]

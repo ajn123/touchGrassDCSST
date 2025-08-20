@@ -3,7 +3,6 @@ import { AdminEventActions } from "@/components/AdminEventActions";
 import Categories from "@/components/Categories";
 import { Cost } from "@/components/Cost";
 import { DateDisplay } from "@/components/Date";
-import { DeleteButton } from "@/components/delete-button";
 import { Description } from "@/components/Description";
 import EventMap from "@/components/EventMap";
 import { JsonEditor } from "@/components/JsonEditor";
@@ -84,8 +83,6 @@ export default async function ItemPage({
         borderRadius: "1rem",
       }}
     >
-      {user && <DeleteButton eventId={item.pk} />}
-
       {artificialDelay > 0 && (
         <div
           style={{

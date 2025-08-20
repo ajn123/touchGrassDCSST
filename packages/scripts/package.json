@@ -3,15 +3,34 @@
   "version": "0.0.0",
   "type": "module",
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.864.0",
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/util-dynamodb": "^3.0.0",
     "@monorepo-template/core": "*",
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0",
     "dotenv": "^17.0.1",
+    "node-cron": "^3.0.0",
+    "puppeteer": "^21.0.0",
     "sst": "*"
   },
   "scripts": {
-    "shell": "sst shell tsx"
+    "shell": "sst shell tsx",
+    "setup": "tsx src/setup-crawler.ts",
+    "demo": "tsx src/simple-test.ts",
+    "parse-demo": "tsx src/parse-demo.ts",
+    "crawl": "tsx src/scheduled-crawler.ts",
+    "crawl:manual": "tsx src/scheduled-crawler.ts manual",
+    "crawl:sources": "tsx src/scheduled-crawler.ts sources",
+    "crawl:history": "tsx src/scheduled-crawler.ts history",
+    "crawl:test": "tsx src/test-crawler.ts",
+    "ai:demo": "tsx src/ai-demo.ts",
+    "ai:test": "tsx src/ai-test.ts",
+    "crawl:hybrid": "tsx src/hybrid-crawler.ts"
   },
   "devDependencies": {
     "@types/node": "^22",
+    "@types/node-cron": "^3.0.0",
     "tsx": "^4"
   }
 }

@@ -660,8 +660,34 @@
     "is_public": true
   },
   {
+    "title": "National Building Meseum",
+    "category": ["Museum", "Smithsonian"],
+    "image_url": "https://cdn.vox-cdn.com/thumbor/EnL45Lw2XgQ-IPeUabRSXuWFLlw=/1400x1050/filters:format(jpeg)/cdn.vox-cdn.com/uploads/chorus_asset/file/18279645/g_ncqGuC.jpg",
+    "location": "401 F St. NW, Washington, DC 20001, United States",
+    "socials": {
+      "website": "https://nbm.org/"
+    },
+    "schedules": {
+      "days": ["Thursday", "Friday", "Saturday", "Sunday"],
+      "recurrence_type": "weekly",
+      "time": "10:00 AM - 4:00 PM"
+    }
+  },
+  {
+    "title": "National Archives Museum",
+
+    "category": ["Museum", "Smithsonian"],
+    "image_url": "https://visit.archives.gov/sites/default/files/styles/hero/public/2024-04/rotunda-20150219-01-021-l.jpg?h=10d202d3&itok=RCKXS6CZ",
+    "location": "National Archives Museum, Washington, DC",
+    "description": "The National Archives Museum is a museum in Washington, D.C. that showcases the history of the United States. It is located on the National Mall and is part of the Smithsonian Institution.",
+    "socials": {
+      "website": "https://visit.archives.gov/"
+    },
+    "is_public": true
+  },
+  {
     "title": "Politics and Prose Book Clubs",
-    "category": ["Book Club"],
+    "category": ["Book Club", "Group"],
     "image_url": "https://upload.wikimedia.org/wikipedia/en/a/a7/Politics_and_Prose.jpg",
     "location": "Politics and Prose, Washington, DC",
     "description": "Check the website for more information. Politics and Prose is a book club that meets at the Politics and Prose bookstore in Washington, D.C. The club is open to all and is free to join. The club meets on the first Tuesday of the month at 7:00 PM.",
@@ -688,6 +714,13 @@
   {
     "title": "Trivia @ Kingfisher",
     "category": ["Trivia"],
+    "schedules": [
+      {
+        "days": ["Tuesday"],
+        "recurrence_type": "weekly",
+        "time": "8:00 PM"
+      }
+    ],
     "image_url": "https://s3.amazonaws.com/motherbrain-prod/vlogo_1623076943575",
     "location": "Kingfisher, Washington, DC",
     "description": "Every Tuesday is trivia night in DC! Get a team together, or play solo, and come by tonight for one of the best trivia nights in town, hosted by the lovely geeks of GeeksWhoDrink.com. The games start at 8:00, but get here early to grab a seat and a little of that sweet happy hour action. It's free to play and you can win beer.",

@@ -1,10 +1,7 @@
 "use client";
 
-import { Cost } from "@/components/Cost";
-import { DateDisplay } from "@/components/Date";
+import FeaturedEvent from "@/components/FeaturedEvent";
 import SearchFilters from "@/components/SearchFilters";
-import { resolveImageUrl } from "@/lib/image-utils";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
@@ -181,85 +178,7 @@ function SearchPageContent() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {events.map((event: any, index: number) => (
-                    <Link
-                      key={event.pk || event.id || `event-${index}`}
-                      href={`/items/${encodeURIComponent(event.title || "")}`}
-                      className="block"
-                    >
-                      <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                        {/* Event Image */}
-                        <div className="relative h-48">
-                          {event.image_url ? (
-                            <Image
-                              src={
-                                resolveImageUrl(event.image_url) ||
-                                "/images/placeholder.jpg"
-                              }
-                              alt={event.title || "Event"}
-                              fill
-                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                              className="object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                              <span className="text-gray-500">No Image</span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Event Details */}
-                        <div className="p-6">
-                          {event.date && (
-                            <div className="mb-2">
-                              <DateDisplay date={event.date} />
-                            </div>
-                          )}
-
-                          <h3 className="text-xl font-semibold mb-2 text-black">
-                            {event.title}
-                          </h3>
-                          <p className="text-gray-600 mb-4">
-                            {event.venue || event.location}
-                          </p>
-
-                          {event.cost && (
-                            <div className="mb-2">
-                              <Cost cost={event.cost} />
-                            </div>
-                          )}
-
-                          {event.category && (
-                            <div className="flex flex-wrap gap-2 mt-3">
-                              {Array.isArray(event.category)
-                                ? event.category.map(
-                                    (cat: string, catIndex: number) => (
-                                      <span
-                                        key={`${
-                                          event.pk || event.id || index
-                                        }-cat-${catIndex}`}
-                                        className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full"
-                                      >
-                                        {cat}
-                                      </span>
-                                    )
-                                  )
-                                : event.category
-                                    .split(",")
-                                    .map((cat: string, catIndex: number) => (
-                                      <span
-                                        key={`${
-                                          event.pk || event.id || index
-                                        }-cat-${catIndex}`}
-                                        className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full"
-                                      >
-                                        {cat.trim()}
-                                      </span>
-                                    ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </Link>
+                    <FeaturedEvent key={index} event={event} index={index} />
                   ))}
                 </div>
               </div>

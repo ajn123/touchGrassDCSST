@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:fields": "node test-field-projection.js",
+    "test:map": "node test-homepage-map.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.839.0",

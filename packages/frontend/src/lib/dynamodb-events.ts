@@ -279,6 +279,7 @@ export async function searchEvents(filters: {
   dateRange?: { start?: string; end?: string };
   sortBy?: string;
   sortOrder?: "asc" | "desc";
+  fields?: string[];
 }) {
   const startTime = Date.now();
   console.log(
@@ -416,6 +417,26 @@ export async function searchEvents(filters: {
       TableName: Resource.Db.name,
     };
 
+    // Add ProjectionExpression if fields are specified
+    if (filters.fields && filters.fields.length > 0) {
+      console.log("🎯 Adding ProjectionExpression for fields:", filters.fields);
+
+      // Always include pk as it's required for the primary key
+      const requiredFields = ["pk"];
+      const allFields = [...new Set([...requiredFields, ...filters.fields])];
+
+      scanParams.ProjectionExpression = allFields
+        .map((_, index) => `#f${index}`)
+        .join(", ");
+
+      // Add field names to ExpressionAttributeNames
+      allFields.forEach((field, index) => {
+        if (!expressionAttributeNames[`#f${index}`]) {
+          expressionAttributeNames[`#f${index}`] = field;
+        }
+      });
+    }
+
     if (filterExpression) {
       scanParams.FilterExpression = filterExpression;
       scanParams.ExpressionAttributeNames = expressionAttributeNames;
@@ -536,6 +557,7 @@ export async function searchEventsOptimized(filters: {
   sortOrder?: "asc" | "desc";
   limit?: number;
   is_public?: boolean;
+  fields?: string[];
 }) {
   const startTime = Date.now();
   console.log(
@@ -544,57 +566,60 @@ export async function searchEventsOptimized(filters: {
   );
 
   try {
+    let events: any[] = [];
+
     // If we have a text query, use the optimized title search
     if (filters.query && filters.query.trim()) {
       console.log("🔍 Using optimized title search for query:", filters.query);
       try {
-        return await searchEventsByTitle(filters);
+        events = await searchEventsByTitle(filters);
       } catch (error) {
         console.error(
           "❌ Title search failed, falling back to limited scan:",
           error
         );
-        return await searchEventsWithLimit(filters);
+        events = await searchEventsWithLimit(filters);
       }
     }
-
     // If we have specific categories, use GSI-based category search with fallback
-    if (filters.categories && filters.categories.length > 0) {
+    else if (filters.categories && filters.categories.length > 0) {
       console.log(
         "🎯 Using GSI-based search for categories:",
         filters.categories
       );
       try {
-        return await searchEventsByCategories(filters);
+        events = await searchEventsByCategories(filters);
       } catch (error) {
         console.error(
           "❌ Category search failed, falling back to limited scan:",
           error
         );
-        return await searchEventsWithLimit(filters);
+        events = await searchEventsWithLimit(filters);
       }
     }
-
     // If we have a date range, we can use date-based queries
-    if (
+    else if (
       filters.dateRange &&
       (filters.dateRange.start || filters.dateRange.end)
     ) {
       console.log("📅 Using date-based search");
       try {
-        return await searchEventsByDate(filters);
+        events = await searchEventsByDate(filters);
       } catch (error) {
         console.error(
           "❌ Date search failed, falling back to limited scan:",
           error
         );
-        return await searchEventsWithLimit(filters);
+        events = await searchEventsWithLimit(filters);
       }
     }
-
     // Fall back to the original scan method but with limits
-    console.log("⚠️ Falling back to scan method with limits");
-    return await searchEventsWithLimit(filters);
+    else {
+      console.log("⚠️ Falling back to scan method with limits");
+      events = await searchEventsWithLimit(filters);
+    }
+
+    return events;
   } catch (error) {
     console.error("❌ Error in searchEventsOptimized:", error);
     const totalTime = Date.now() - startTime;
@@ -603,7 +628,8 @@ export async function searchEventsOptimized(filters: {
     // Final fallback: try the original searchEvents function
     console.log("🔄 Attempting fallback to original searchEvents function");
     try {
-      return await searchEvents(filters);
+      const events = await searchEvents(filters);
+      return events;
     } catch (fallbackError) {
       console.error("❌ Fallback searchEvents also failed:", fallbackError);
       return [];
@@ -672,6 +698,24 @@ async function searchEventsWithLimit(filters: any) {
         ":eventPrefix": { S: "EVENT" },
       },
     };
+
+    // Add ProjectionExpression if fields are specified
+    if (filters.fields && filters.fields.length > 0) {
+      console.log("🎯 Adding ProjectionExpression for fields:", filters.fields);
+
+      // Always include pk as it's required for the primary key
+      const requiredFields = ["pk"];
+      const allFields = [...new Set([...requiredFields, ...filters.fields])];
+
+      scanParams.ProjectionExpression = allFields
+        .map((_, index) => `#f${index}`)
+        .join(", ");
+
+      // Add field names to ExpressionAttributeNames
+      allFields.forEach((field, index) => {
+        scanParams.ExpressionAttributeNames[`#f${index}`] = field;
+      });
+    }
 
     // Build the complete filter expression
     let filterExpressions = ["begins_with(#pk, :eventPrefix)"];
@@ -842,7 +886,7 @@ async function searchEventsByTitle(filters: any) {
       "📊 Index: eventTitleIndex | Partition Key: title | Sort Key: createdAt"
     );
 
-    const command = new QueryCommand({
+    const queryParams: any = {
       TableName: Resource.Db.name,
       IndexName: "eventTitleIndex",
       KeyConditionExpression: "begins_with(#title, :titlePrefix)",
@@ -861,12 +905,33 @@ async function searchEventsByTitle(filters: any) {
         },
       },
       Limit: filters.limit || 100,
-    });
+    };
+
+    // Add ProjectionExpression if fields are specified
+    if (filters.fields && filters.fields.length > 0) {
+      console.log("🎯 Adding ProjectionExpression for fields:", filters.fields);
+
+      // Always include pk and title as they're required for the index
+      const requiredFields = ["pk", "title"];
+      const allFields = [...new Set([...requiredFields, ...filters.fields])];
+
+      queryParams.ProjectionExpression = allFields
+        .map((_, index) => `#f${index}`)
+        .join(", ");
+
+      // Add field names to ExpressionAttributeNames
+      allFields.forEach((field, index) => {
+        queryParams.ExpressionAttributeNames[`#f${index}`] = field;
+      });
+    }
+
+    const command = new QueryCommand(queryParams);
 
     console.log("🔧 Query command details:", {
       indexName: command.input.IndexName,
       keyCondition: command.input.KeyConditionExpression,
       filterExpression: command.input.FilterExpression,
+      projectionExpression: command.input.ProjectionExpression,
       tableName: command.input.TableName,
     });
 

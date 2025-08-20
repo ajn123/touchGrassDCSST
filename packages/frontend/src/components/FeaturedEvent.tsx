@@ -81,8 +81,8 @@ export default function FeaturedEvent({ event }: { event: Event }) {
 
   return (
     <Link href={`/items/${eventTitle}`}>
-      <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 hover:scale-105 transform">
-        <div className="relative h-48">
+      <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 hover:scale-105 transform h-full flex flex-col min-h-[400px]">
+        <div className="relative h-48 flex-shrink-0">
           {event.image_url ? (
             <>
               {/* Actual image - always rendered */}
@@ -145,19 +145,21 @@ export default function FeaturedEvent({ event }: { event: Event }) {
             </div>
           )}
         </div>
-        <div className="p-6">
+        <div className="p-6 flex-1 flex flex-col">
           {event.date && (
             <div className="mb-2">
               <DateDisplay date={event.date} />
             </div>
           )}
 
-          <h3 className="text-xl font-semibold mb-2 text-black">
+          <h3 className="text-xl font-semibold mb-2 text-black line-clamp-2 min-h-[3rem]">
             {event.title}
           </h3>
-          <p className="text-gray-600 mb-4">{event.venue || event.location}</p>
+          <p className="text-gray-600 mb-4 flex-1 line-clamp-2 min-h-[2.5rem]">
+            {event.venue || event.location}
+          </p>
 
-          <div className="mb-2">
+          <div className="mt-auto">
             <Cost cost={event.cost} />
           </div>
         </div>

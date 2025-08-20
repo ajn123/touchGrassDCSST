@@ -26,6 +26,11 @@
     "crawl:test": "tsx src/test-crawler.ts",
     "ai:demo": "tsx src/ai-demo.ts",
     "ai:test": "tsx src/ai-test.ts",
+    "ai:live": "tsx src/ai-live-test.ts",
+    "compare": "tsx src/comparison-test.ts",
+    "live:parse": "tsx src/live-ai-parser.ts",
+    "simple:parse": "tsx src/simple-live-parser.ts",
+    "demo:parse": "tsx src/demo-live-parser.ts",
     "crawl:hybrid": "tsx src/hybrid-crawler.ts"
   },
   "devDependencies": {

@@ -38,6 +38,8 @@ export async function GET(request: NextRequest) {
         : searchParams.get("is_public") === "false"
         ? false
         : undefined;
+    const fields =
+      searchParams.get("fields")?.split(",").filter(Boolean) || undefined;
 
     // Build filters object
     const filters = {
@@ -57,6 +59,7 @@ export async function GET(request: NextRequest) {
       sortOrder,
       limit,
       is_public: isPublic,
+      fields,
     };
 
     console.log("🔍 Using searchEventsOptimized with filters:", filters);

@@ -2,6 +2,40 @@
 
 A template to create a monorepo SST v3 project. [Learn more](https://sst.dev/docs/set-up-a-monorepo).
 
+## Features
+
+### Event Search with Field Projection
+
+The events API supports field projection to return only specific fields, improving performance and reducing data transfer.
+
+**Usage:**
+
+```bash
+# Return only title, location, and cost fields
+GET /api/events?fields=title,location,cost
+
+# Return only title and cost fields with a search query
+GET /api/events?q=concert&fields=title,cost
+```
+
+**Supported Fields:** title, location, cost, description, venue, date, category, is_public, createdAt, updatedAt
+
+**Implementation:** Uses DynamoDB's `ProjectionExpression` for efficient database queries.
+
+### Interactive Events Map
+
+A comprehensive homepage map component that displays all events with location data on a single Google Map.
+
+**Features:**
+
+- Interactive map with custom markers for each event
+- Automatic bounds adjustment to show all locations
+- Rich info windows with event details
+- Efficient data fetching using field projection
+- Responsive design for all screen sizes
+
+**Usage:** Automatically integrated into the homepage, showing all public events with coordinates.
+
 ## Get started
 
 1. Use this template to [create your own repo](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
@@ -64,7 +98,7 @@ This template uses [npm Workspaces](https://docs.npmjs.com/cli/v8/using-npm/work
 
 3. `scripts/`
 
-    This is for any scripts that you can run on your SST app using the `sst shell` CLI and [`tsx`](https://www.npmjs.com/package/tsx). For example, you can run the example script using:
+   This is for any scripts that you can run on your SST app using the `sst shell` CLI and [`tsx`](https://www.npmjs.com/package/tsx). For example, you can run the example script using:
 
    ```bash
    npm run shell src/example.ts

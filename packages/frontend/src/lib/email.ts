@@ -1,3 +1,4 @@
+"use server";
 import { Resource } from "sst";
 
 const PRIMARY_EMAIL = "hi@touchgrassdc.com";
@@ -42,8 +43,6 @@ export async function sendEmail(emailData: {
     throw error;
   }
 }
-
-("use server");
 
 export interface EmailData {
   to: string;

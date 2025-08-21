@@ -98,8 +98,6 @@ export function EmailSignupForm({ categories }: EmailSignupFormProps) {
     setSubmitStatus("idle");
 
     try {
-      // Use a server action to send the email signup
-      ("use server");
       const response = await sendEmailSignup({
         to: formData.email,
         subject: "Thank you for signing up for TouchGrass DC",

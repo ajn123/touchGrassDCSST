@@ -2,6 +2,7 @@
 
 import FeaturedEvent from "@/components/FeaturedEvent";
 import SearchFilters from "@/components/SearchFilters";
+import { trackSearch } from "@/lib/analyticsTrack";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
@@ -78,6 +79,8 @@ function SearchPageContent() {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
+
+        trackSearch(queryParams);
 
         const data = await response.json();
         console.log(

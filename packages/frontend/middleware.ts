@@ -15,7 +15,10 @@ export function middleware(request: NextRequest) {
       timestamp: new Date().toISOString(),
       userAgent: request.headers.get("user-agent"),
       referer: request.headers.get("referer"),
-      ip: request.ip || request.headers.get("x-forwarded-for"),
+      ip:
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("x-real-ip") ||
+        "unknown",
     });
 
     return response;

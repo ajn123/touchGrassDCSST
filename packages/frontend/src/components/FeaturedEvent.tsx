@@ -1,5 +1,6 @@
 "use client";
 
+import { trackEventPageVisit } from "@/lib/analyticsTrack";
 import { resolveImageUrl } from "@/lib/image-utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -83,14 +84,11 @@ export default function FeaturedEvent({ event }: { event: Event }) {
     <Link
       href={`/items/${eventTitle}`}
       onClick={() => {
-        fetch("/api/analytics/track", {
-          method: "POST",
-          body: JSON.stringify({
-            event: "view_event",
-            userId: "123",
-            properties: { eventId },
-          }),
-        });
+        if (eventId) {
+          trackEventPageVisit(eventId);
+        } else {
+          console.log("No event ID");
+        }
       }}
     >
       <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 hover:scale-105 transform h-full flex flex-col min-h-[400px]">

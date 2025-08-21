@@ -1,5 +1,6 @@
 import Categories from "@/components/Categories";
 import FeaturedEvents from "@/components/FeaturedEvents";
+import HomepageAnalytics from "@/components/HomepageAnalytics";
 import HomepageMap from "@/components/HomepageMap";
 import SearchBar from "@/components/SearchBar";
 import { createEvent, getCategories } from "@/lib/dynamodb-events";
@@ -64,6 +65,9 @@ export default async function Home() {
       </section>
 
       <Categories categories={categories as Category[]} />
+
+      {/* Analytics Component */}
+      <HomepageAnalytics />
 
       {/* <RecurringEvent /> */}
     </main>

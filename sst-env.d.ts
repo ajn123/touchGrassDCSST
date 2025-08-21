@@ -39,6 +39,10 @@ declare module "sst" {
       "sender": string
       "type": "sst.aws.Email"
     }
+    "user_analytics": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
   }
 }
 /// <reference path="sst-env.d.ts" />

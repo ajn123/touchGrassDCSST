@@ -17,6 +17,7 @@ export default $config({
     const { bucket } = await import("./infra/storage");
     const { email } = await import("./infra/email");
     const { auth } = await import("./infra/auth");
+    const { queue } = await import("./infra/queue");
 
     return {
       Db: db,
@@ -25,6 +26,7 @@ export default $config({
       Web: web,
       Email: email,
       Auth: auth,
+      Queue: queue,
     };
   },
 });

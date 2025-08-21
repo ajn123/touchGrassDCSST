@@ -80,7 +80,19 @@ export default function FeaturedEvent({ event }: { event: Event }) {
   };
 
   return (
-    <Link href={`/items/${eventTitle}`}>
+    <Link
+      href={`/items/${eventTitle}`}
+      onClick={() => {
+        fetch("/api/analytics/track", {
+          method: "POST",
+          body: JSON.stringify({
+            event: "view_event",
+            userId: "123",
+            properties: { eventId },
+          }),
+        });
+      }}
+    >
       <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 hover:scale-105 transform h-full flex flex-col min-h-[400px]">
         <div className="relative h-48 flex-shrink-0">
           {event.image_url ? (

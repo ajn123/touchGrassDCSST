@@ -33,9 +33,9 @@ export async function GET(request: NextRequest) {
       ? parseInt(searchParams.get("limit")!)
       : 100;
     const isPublic =
-      searchParams.get("is_public") === "true"
+      searchParams.get("isPublic") === "true"
         ? true
-        : searchParams.get("is_public") === "false"
+        : searchParams.get("isPublic") === "false"
         ? false
         : undefined;
     const fields =

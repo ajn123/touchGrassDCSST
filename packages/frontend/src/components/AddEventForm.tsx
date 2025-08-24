@@ -17,7 +17,7 @@ interface EventFormData {
   cost?: string;
   selectedCategories: string[];
   image_url?: string;
-  is_public: boolean;
+  isPublic: boolean;
 }
 
 interface FormErrors {
@@ -50,7 +50,7 @@ export function AddEventForm() {
     cost: "",
     selectedCategories: [],
     image_url: "",
-    is_public: false,
+    isPublic: false,
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -247,11 +247,11 @@ export function AddEventForm() {
       }
 
       // Always include is_public field - unchecked checkboxes don't get sent in form data
-      const finalIsPublic = isAdmin ? formData.is_public : false;
-      formDataObj.append("is_public", finalIsPublic.toString());
+      const finalIsPublic = isAdmin ? formData.isPublic : false;
+      formDataObj.append("isPublic", finalIsPublic.toString());
       console.log(
-        `🔒 Form submission - is_public: ${
-          formData.is_public
+        `🔒 Form submission - isPublic: ${
+          formData.isPublic
         } -> finalIsPublic: ${finalIsPublic} -> string: "${finalIsPublic.toString()}"`
       );
 
@@ -271,7 +271,7 @@ export function AddEventForm() {
           cost: "",
           selectedCategories: [],
           image_url: "",
-          is_public: false, // Reset to false for new events
+          isPublic: false, // Reset to false for new events
         });
         setUploadedImageUrl("");
         setErrors({}); // Clear any validation errors
@@ -527,11 +527,11 @@ export function AddEventForm() {
             <label className="flex items-center">
               <input
                 type="checkbox"
-                id="is_public"
-                name="is_public"
-                checked={formData.is_public}
+                id="isPublic"
+                name="isPublic"
+                checked={formData.isPublic}
                 onChange={(e) =>
-                  setFormData({ ...formData, is_public: e.target.checked })
+                  setFormData({ ...formData, isPublic: e.target.checked })
                 }
                 className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />

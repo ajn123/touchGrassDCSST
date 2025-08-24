@@ -18,7 +18,7 @@ GET /api/events?fields=title,location,cost
 GET /api/events?q=concert&fields=title,cost
 ```
 
-**Supported Fields:** title, location, cost, description, venue, date, category, is_public, createdAt, updatedAt
+**Supported Fields:** title, location, cost, description, venue, date, category, isPublic, createdAt, updatedAt
 
 **Implementation:** Uses DynamoDB's `ProjectionExpression` for efficient database queries.
 

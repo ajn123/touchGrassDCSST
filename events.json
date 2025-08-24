@@ -17,7 +17,7 @@
       "currency": "USD",
       "amount": "25-58"
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "Cherry Blossom Festival",
@@ -36,7 +36,7 @@
       "currency": "USD",
       "amount": 0
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "Washington Monument",
@@ -53,7 +53,7 @@
       "currency": "USD",
       "amount": 0
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "American History Museum",
@@ -84,7 +84,7 @@
         "time": "10:00 AM - 5:30 PM"
       }
     ],
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "Washington Area Roadskaters",
@@ -107,7 +107,7 @@
       "website": "https://www.skatedc.org/",
       "meetup": "https://www.meetup.com/washington-area-roadskaters/events/"
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "Fire House Fridays",
@@ -138,7 +138,7 @@
     "socials": {
       "instagram": "https://www.instagram.com/firehousefridays/?hl=en"
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "North East Track Club",
@@ -167,7 +167,7 @@
       "instagram": "https://www.instagram.com/ne_trackclub/",
       "website": "https://www.netrackclub.com/"
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "Dupont Circle Farmers Market",
@@ -194,7 +194,7 @@
         "time": "8:30 AM - 1:30 PM"
       }
     ],
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "Smithsonian National Zoo",
@@ -226,7 +226,7 @@
     "socials": {
       "website": "https://www.si.edu/zoo"
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "NOMA Run Club",
@@ -265,7 +265,7 @@
       "website": "https://www.nomarunclub.com/",
       "instagram": "https://www.instagram.com/nomarunclub/"
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "Volo Sports",
@@ -283,7 +283,7 @@
     "socials": {
       "website": "https://www.volosports.com/Washington-DC"
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "Eastern Market Farmers Market",
@@ -317,7 +317,7 @@
         "time": "9:00 AM - 3:00 PM"
       }
     ],
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "Clarendon Run Club",
@@ -339,7 +339,7 @@
         "time": "6:30 PM - 8:30 PM"
       }
     ],
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "DC Fray",
@@ -355,7 +355,7 @@
       "website": "https://www.dcfray.com/",
       "instagram": "https://www.instagram.com/dcfray/?hl=en"
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "Pitch A Friend",
@@ -371,7 +371,7 @@
       "website": "https://pitchafriend.com/dc",
       "instagram": "https://www.instagram.com/pitchafriend.dc/#"
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "Shuffle Dating",
@@ -386,7 +386,7 @@
     "socials": {
       "website": "https://events.shuffle.dating/dc"
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "DC Swoon Speed Dating",
@@ -401,7 +401,7 @@
     "socials": {
       "website": "https://cityswoon.com/speed-dating-washingtondc.jsp?gad_source=1&gclid=Cj0KCQiA_Yq-BhC9ARIsAA6fbAiHc1e24Wd23FyP3WuRobpVma7-OfUnvdgB9BButZLcrAepcfw9nRgaAn1YEALw_wcB#topOfEvents"
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "DC Singles Meetup",
@@ -416,7 +416,7 @@
     "socials": {
       "website": "https://www.reddit.com/r/DCSinglesMeetup/"
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "District Running Collective",
@@ -449,7 +449,7 @@
         "time": "8:30 AM"
       }
     ],
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "DC City Girls",
@@ -466,7 +466,7 @@
       "currency": "USD",
       "amount": 0
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "Dudes In The District",
@@ -483,7 +483,7 @@
       "currency": "USD",
       "amount": 0
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "Time Left DC",
@@ -499,7 +499,7 @@
       "currency": "USD",
       "amount": 15
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "National Portrait Gallery",
@@ -515,7 +515,7 @@
       "currency": "USD",
       "amount": 0
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "Washington Nationals",
@@ -532,7 +532,7 @@
       "currency": "USD",
       "amount": "15-100"
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "Washington Commanders",
@@ -543,7 +543,7 @@
       "website": "https://www.washingtoncommanders.com/"
     },
     "description": "The Washington Commanders are a professional football team based in Washington, D.C. They are a member of the National Football League (NFL) and play their home games at FedExField. The Commanders were founded in 1932 and became a NFL team in 1937. The team's colors are red, white, and blue, and their mascot is a bear named Chief. The Commanders have won one Super Bowl championship, in 1982.",
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "Washington Capitals",
@@ -559,7 +559,7 @@
       "currency": "USD",
       "amount": "15-100+"
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "930 Club",
@@ -570,7 +570,7 @@
     "socials": {
       "website": "https://www.930.com/"
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "The Kennedy Center",
@@ -581,7 +581,7 @@
     "socials": {
       "website": "https://www.kennedy-center.org/?gad_source=1&gad_campaignid=18931138018&gbraid=0AAAAADnuhU9vadex18nat04DDNy-o44ib&gclid=Cj0KCQjwj8jDBhD1ARIsACRV2TsCoRn1c-hODiH29DAk8mpINkk3Pw0JgyRWoQCNP_0KTzi1goiRNuwaAk8rEALw_wcB"
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "National Building Museum",
@@ -619,7 +619,7 @@
         "time": "10:00 AM - 4:00 PM"
       }
     ],
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "National African American Museum",
@@ -629,7 +629,7 @@
     "socials": {
       "website": "https://nmaahc.si.edu/"
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "National Building Meseum",
@@ -655,7 +655,7 @@
     "socials": {
       "website": "https://visit.archives.gov/"
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "Politics and Prose Book Clubs",
@@ -666,7 +666,7 @@
     "socials": {
       "website": "https://politics-prose.com/book-groups"
     },
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "Jessie Murph",
@@ -681,7 +681,7 @@
       "website": "https://theanthemdc.com/event/jessie-murph-worldwide-hysteria/"
     },
     "description": "Jessie Murph is a singer-songwriter from Washington, D.C. She is known for her unique sound and style. She is a member of the indie pop band The Neighbourhood.",
-    "is_public": true
+    "isPublic": true
   },
   {
     "title": "Trivia @ Kingfisher",
@@ -699,7 +699,7 @@
     "socials": {
       "website": "https://www.geekswhodrink.com/venues/450002160/"
     },
-    "is_public": true,
+    "isPublic": true,
     "host": "Geek Who Drinks",
     "entryFee": 0,
     "recurring": true,

@@ -47,7 +47,7 @@ export default async function ItemPage({
   }
 
   // Check if event is public - if not, only admins can see it
-  if (!item.is_public && !isAdmin) {
+  if (!(item.is_public || item.isPublic) && !isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -161,7 +161,11 @@ export default async function ItemPage({
 
           {/* Admin Actions */}
           <AdminEventActions
-            event={item as { pk: string; title: string; is_public: boolean }}
+            event={{
+              pk: item.pk,
+              title: item.title,
+              isPublic: item.is_public || item.isPublic || false,
+            }}
           />
 
           {/* JSON Editor for Admins */}

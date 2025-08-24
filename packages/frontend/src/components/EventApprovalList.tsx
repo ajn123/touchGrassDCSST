@@ -12,7 +12,7 @@ interface Event {
   location: string;
   eventDate: string;
   createdAt: string;
-  is_public: boolean;
+  isPublic: boolean;
 }
 
 interface EventApprovalListProps {
@@ -31,7 +31,7 @@ export function EventApprovalList({ onEventAction }: EventApprovalListProps) {
   const fetchPendingEvents = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/events?is_public=false");
+      const response = await fetch("/api/events?isPublic=false");
       if (!response.ok) {
         throw new Error("Failed to fetch pending events");
       }

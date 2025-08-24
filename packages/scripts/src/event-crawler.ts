@@ -522,7 +522,7 @@ class EventCrawler {
           ...event,
           createdAt: timestamp,
           updatedAt: timestamp,
-          is_public: event.is_public ?? true,
+          isPublic: (event.is_public ?? true).toString(),
         };
 
         // Add titlePrefix for efficient searches

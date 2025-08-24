@@ -272,9 +272,10 @@ export async function main() {
         }
       }
 
-      // Add is_public field (default to true for seed data)
-      item.is_public =
-        eventData.is_public !== undefined ? eventData.is_public : true;
+      // Add isPublic field (default to true for seed data) - store as string
+      item.isPublic = (
+        eventData.isPublic !== undefined ? eventData.isPublic : true
+      ).toString();
 
       // Handle location data specifically (simulate the createEvent logic)
       const location = eventData.location;

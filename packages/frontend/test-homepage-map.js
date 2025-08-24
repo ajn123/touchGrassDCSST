@@ -14,7 +14,7 @@ async function testHomepageMap() {
     // Test 1: Fetch events with location data using field projection
     console.log("📍 Test 1: Fetch events with location data");
     const locationResponse = await fetch(
-      `${API_BASE}/events?fields=title,description,location,coordinates,cost,category,date&is_public=true`
+      `${API_BASE}/events?fields=title,description,location,coordinates,cost,category,date&isPublic=true`
     );
     
     if (!locationResponse.ok) {
@@ -47,7 +47,7 @@ async function testHomepageMap() {
 
     // Test 3: Test field projection efficiency
     console.log("\n🎯 Test 3: Field projection efficiency");
-    const allFieldsResponse = await fetch(`${API_BASE}/events?is_public=true&limit=5`);
+    const allFieldsResponse = await fetch(`${API_BASE}/events?isPublic=true&limit=5`);
     const allFieldsData = await allFieldsResponse.json();
     
     if (allFieldsData.events?.[0]) {
@@ -61,7 +61,7 @@ async function testHomepageMap() {
 
     // Test 4: Test different field combinations
     console.log("\n🎯 Test 4: Different field combinations");
-    const titleOnlyResponse = await fetch(`${API_BASE}/events?fields=title,coordinates&is_public=true&limit=3`);
+    const titleOnlyResponse = await fetch(`${API_BASE}/events?fields=title,coordinates&isPublic=true&limit=3`);
     const titleOnlyData = await titleOnlyResponse.json();
     
     if (titleOnlyData.events?.[0]) {

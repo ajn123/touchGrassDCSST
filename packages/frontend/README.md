@@ -34,7 +34,7 @@ The following fields can be specified in the `fields` parameter:
 - `venue` - Event venue
 - `date` - Event date
 - `category` - Event categories
-- `is_public` - Public visibility flag
+- `isPublic` - Public visibility flag
 - `createdAt` - Creation timestamp
 - `updatedAt` - Last update timestamp
 
@@ -103,7 +103,7 @@ export default function HomePage() {
 The component automatically fetches events using:
 
 ```bash
-GET /api/events?fields=title,description,location,coordinates,cost,category,date&is_public=true
+GET /api/events?fields=title,description,location,coordinates,cost,category,date&isPublic=true
 ```
 
 This ensures:

@@ -1,0 +1,41 @@
+[
+  {
+    "title": "District Cleanups",
+    "image_url": "https://static.wixstatic.com/media/177a96_368f8d284dc442e8afb71fe2237e3cff~mv2.jpg/v1/fill/w_1010,h_1080,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/177a96_368f8d284dc442e8afb71fe2237e3cff~mv2.jpg",
+    "category": ["Volunteer"],
+    "description": "We clean up the streets of DC to make it a better place to live.  Check their calendar for upcoming events.",
+    "socials": {
+      "website": "https://www.districtcleanups.com"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "The Ballston Runaways",
+    "category": ["Running"],
+    "description": "A running group in Ballston.  Meets in front of the Compass Coffee in Ballston.  Check the intagram for more details",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSVwO3bqazv0vCQWFYQ5-TX4JQgQ-K5rp6KA&s",
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "instagram": "https://www.instagram.com/theballstonrunaways"
+    },
+    "schedules": [
+      {
+        "days": ["Tuesday"],
+        "recurrence_type": "weekly",
+        "time": "6:15 AM",
+        "location": "Compass Coffee, Ballston, VA"
+      },
+      {
+        "days": ["Saturday"],
+        "recurrence_type": "weekly",
+        "time": "9:00 AM",
+        "location": "Compass Coffee, Ballston, VA"
+      }
+    ],
+    "isPublic": true
+  }
+]

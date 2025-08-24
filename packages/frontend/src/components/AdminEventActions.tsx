@@ -7,7 +7,7 @@ import { useState } from "react";
 interface Event {
   pk: string;
   title: string;
-  is_public: boolean;
+  isPublic: boolean;
 }
 
 interface AdminEventActionsProps {
@@ -79,15 +79,15 @@ export function AdminEventActions({ event }: AdminEventActionsProps) {
       <div className="flex items-center space-x-4 mb-4">
         <span
           className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-            event.is_public
+            event.isPublic
               ? "bg-green-100 text-green-800"
               : "bg-yellow-100 text-yellow-800"
           }`}
         >
-          {event.is_public ? "Public" : "Pending Approval"}
+          {event.isPublic ? "Public" : "Pending Approval"}
         </span>
 
-        {!event.is_public && (
+        {!event.isPublic && (
           <span className="text-sm text-gray-600">
             This event needs admin approval to become public
           </span>
@@ -95,7 +95,7 @@ export function AdminEventActions({ event }: AdminEventActionsProps) {
       </div>
 
       <div className="flex space-x-3">
-        {!event.is_public && (
+        {!event.isPublic && (
           <button
             onClick={handleApprove}
             disabled={actionLoading}

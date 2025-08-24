@@ -246,11 +246,11 @@ export async function getEvents() {
         "begins_with(#pk, :eventPrefix) AND #isPublic = :isPublic",
       ExpressionAttributeNames: {
         "#pk": "pk",
-        "#isPublic": "is_public",
+        "#isPublic": "isPublic",
       },
       ExpressionAttributeValues: {
         ":eventPrefix": { S: "EVENT" },
-        ":isPublic": { BOOL: true },
+        ":isPublic": { S: "true" },
       },
     });
     const result = await client.send(command);
@@ -556,7 +556,7 @@ export async function searchEventsOptimized(filters: {
   sortBy?: string;
   sortOrder?: "asc" | "desc";
   limit?: number;
-  is_public?: boolean;
+  isPublic?: boolean;
   fields?: string[];
 }) {
   const startTime = Date.now();
@@ -742,17 +742,17 @@ async function searchEventsWithLimit(filters: any) {
       filterExpressions.push(`(${categoryExpressions.join(" OR ")})`);
     }
 
-    // Add is_public filter
-    if (filters.is_public !== undefined) {
-      scanParams.ExpressionAttributeNames["#isPublic"] = "is_public";
+    // Add isPublic filter
+    if (filters.isPublic !== undefined) {
+      scanParams.ExpressionAttributeNames["#isPublic"] = "isPublic";
       scanParams.ExpressionAttributeValues[":isPublic"] = {
-        BOOL: filters.is_public,
+        S: filters.isPublic.toString(),
       };
       filterExpressions.push("#isPublic = :isPublic");
     } else {
       // Default to only public events if no filter specified
-      scanParams.ExpressionAttributeNames["#isPublic"] = "is_public";
-      scanParams.ExpressionAttributeValues[":isPublic"] = { BOOL: true };
+      scanParams.ExpressionAttributeNames["#isPublic"] = "isPublic";
+      scanParams.ExpressionAttributeValues[":isPublic"] = { S: "true" };
       filterExpressions.push("#isPublic = :isPublic");
     }
 
@@ -895,13 +895,16 @@ async function searchEventsByTitle(filters: any) {
       ExpressionAttributeNames: {
         "#title": "title",
         "#pk": "pk",
-        "#isPublic": "is_public",
+        "#isPublic": "isPublic",
       },
       ExpressionAttributeValues: {
         ":titlePrefix": { S: query },
         ":eventPrefix": { S: "EVENT" },
         ":isPublic": {
-          BOOL: filters.is_public !== undefined ? filters.is_public : true,
+          S: (filters.isPublic !== undefined
+            ? filters.isPublic
+            : true
+          ).toString(),
         },
       },
       Limit: filters.limit || 100,
@@ -1035,12 +1038,11 @@ export async function createEvent(event: any) {
               `🏷️ Added titlePrefix: "${stringValue}" -> "${titlePrefix}"`
             );
           }
-        } else if (key === "is_public") {
-          // Handle boolean field - ensure proper boolean conversion
-          const boolValue = stringValue.toLowerCase() === "true";
-          item[key] = { BOOL: boolValue };
+        } else if (key === "isPublic") {
+          // Handle isPublic field - store as string
+          item[key] = { S: stringValue };
           console.log(
-            `🔒 is_public field: "${stringValue}" -> ${boolValue} (type: ${typeof boolValue})`
+            `🔒 isPublic field: "${stringValue}" -> stored as string`
           );
           console.log(`🔒 DynamoDB item[key]:`, JSON.stringify(item[key]));
         } else {
@@ -1266,11 +1268,11 @@ export async function approveEvent(eventId: string) {
       },
       UpdateExpression: "SET #isPublic = :isPublic, #updatedAt = :updatedAt",
       ExpressionAttributeNames: {
-        "#isPublic": "is_public",
+        "#isPublic": "isPublic",
         "#updatedAt": "updatedAt",
       },
       ExpressionAttributeValues: {
-        ":isPublic": { BOOL: true },
+        ":isPublic": { S: "true" },
         ":updatedAt": { N: Date.now().toString() },
       },
     });
@@ -1583,15 +1585,12 @@ export async function updateEventJson(eventId: string, eventData: any) {
             }
           }
 
-          // Special handling for is_public to ensure it's stored as boolean
-          if (key === "is_public") {
-            const boolValue =
-              typeof value === "string"
-                ? value.toLowerCase() === "true"
-                : Boolean(value);
-            item[key] = { BOOL: boolValue };
+          // Special handling for isPublic to ensure it's stored as string
+          if (key === "isPublic" && value != null) {
+            const stringValue = String(value);
+            item[key] = { S: stringValue };
             console.log(
-              `🔒 updateEventJSON - is_public field: "${value}" -> ${boolValue} (type: ${typeof boolValue})`
+              `🔒 updateEventJSON - isPublic field: "${value}" -> "${stringValue}" (stored as string)`
             );
           }
         }

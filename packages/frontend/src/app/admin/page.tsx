@@ -27,15 +27,15 @@ export default function AdminPage() {
   useEffect(() => {
     // Check URL parameters for tab selection on mount
     const urlParams = new URLSearchParams(window.location.search);
-    const tabParam = urlParams.get('tab');
-    if (tabParam === 'approve-events') {
-      setActiveTab('approve-events');
+    const tabParam = urlParams.get("tab");
+    if (tabParam === "approve-events") {
+      setActiveTab("approve-events");
     }
   }, []);
 
   const fetchPendingEventsCount = async () => {
     try {
-      const response = await fetch("/api/events?is_public=false");
+      const response = await fetch("/api/events?isPublic=false");
       if (response.ok) {
         const data = await response.json();
         setPendingEventsCount(data.count || 0);

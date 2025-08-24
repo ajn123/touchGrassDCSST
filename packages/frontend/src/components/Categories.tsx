@@ -15,6 +15,7 @@ interface CategoriesProps {
   onCategoryChange?: (category: string) => void;
   displayMode?: "selection" | "display";
   eventCategories?: string | string[];
+  disableLinks?: boolean;
 }
 
 export default function Categories({
@@ -23,36 +24,55 @@ export default function Categories({
   onCategoryChange,
   displayMode = "display",
   eventCategories,
+  disableLinks = false,
 }: CategoriesProps) {
   // Display mode for showing event categories
   if (displayMode === "display" && eventCategories) {
     return (
       <IconSection icon={faTags} className="py-2">
         {Array.isArray(eventCategories)
-          ? eventCategories.map((cat: string, index: number) => (
-              <Link
-                key={index}
-                href={`/search?categories=${encodeURIComponent(
-                  cat
-                )}&sortBy=date&sortOrder=asc`}
-              >
-                <span className="px-3 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer">
+          ? eventCategories.map((cat: string, index: number) =>
+              disableLinks ? (
+                <span
+                  key={index}
+                  className="px-3 bg-green-100 text-green-800 text-sm rounded-full font-medium"
+                >
                   {cat}
                 </span>
-              </Link>
-            ))
-          : eventCategories.split(",").map((cat: string, index: number) => (
-              <Link
-                key={index}
-                href={`/search?categories=${encodeURIComponent(
-                  cat.trim()
-                )}&sortBy=date&sortOrder=asc`}
-              >
-                <span className="px-3 py-2 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer">
+              ) : (
+                <Link
+                  key={index}
+                  href={`/search?categories=${encodeURIComponent(
+                    cat
+                  )}&sortBy=date&sortOrder=asc`}
+                >
+                  <span className="px-3 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer">
+                    {cat}
+                  </span>
+                </Link>
+              )
+            )
+          : eventCategories.split(",").map((cat: string, index: number) =>
+              disableLinks ? (
+                <span
+                  key={index}
+                  className="px-3 py-2 bg-green-100 text-green-800 text-sm rounded-full font-medium"
+                >
                   {cat.trim()}
                 </span>
-              </Link>
-            ))}
+              ) : (
+                <Link
+                  key={index}
+                  href={`/search?categories=${encodeURIComponent(
+                    cat.trim()
+                  )}&sortBy=date&sortOrder=asc`}
+                >
+                  <span className="px-3 py-2 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer">
+                    {cat.trim()}
+                  </span>
+                </Link>
+              )
+            )}
       </IconSection>
     );
   }

@@ -119,7 +119,15 @@ export default async function GroupPage({
               <strong>Public:</strong> {group.isPublic ? "Yes" : "No"}
             </div>
             <div>
-              <strong>Categories:</strong> {group.category || "Uncategorized"}
+              <strong>Categories:</strong>
+              {group.category ? (
+                <Categories
+                  displayMode="display"
+                  eventCategories={group.category}
+                />
+              ) : (
+                "Uncategorized"
+              )}
               <Socials socials={group.socials || {}} />
               {transformedSchedules.length > 0 ? (
                 <Schedule schedules={transformedSchedules} />

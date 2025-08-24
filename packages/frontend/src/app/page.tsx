@@ -1,5 +1,6 @@
 import Categories from "@/components/Categories";
 import FeaturedEvents from "@/components/FeaturedEvents";
+import FeaturedGroups from "@/components/FeaturedGroups";
 import HomepageAnalytics from "@/components/HomepageAnalytics";
 import HomepageMap from "@/components/HomepageMap";
 import SearchBar from "@/components/SearchBar";
@@ -58,6 +59,9 @@ export default async function Home() {
 
       {/* Featured Events Section */}
       <FeaturedEvents />
+
+      {/* Featured Groups Section */}
+      <FeaturedGroups />
 
       {/* Homepage Map Section */}
       <section className="py-16 px-4 max-w-7xl mx-auto">

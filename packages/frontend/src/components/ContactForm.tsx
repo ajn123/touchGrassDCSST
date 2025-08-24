@@ -1,7 +1,8 @@
 "use client";
 
 import { trackEmailSent } from "@/lib/analyticsTrack";
-import { ContactFormData, submitContactForm } from "@/lib/email";
+import { sendEmail } from "@/lib/email";
+
 import { useState } from "react";
 
 interface FormData {
@@ -90,12 +91,18 @@ export function ContactForm() {
     setSubmitStatus("idle");
 
     try {
-      const result = await submitContactForm(formData as ContactFormData);
+      const result = await sendEmail({
+        to: "hi@touchgrassdc.com",
+        subject: `Contact Form: ${formData.subject}`,
+        body: `New contact form submission from ${formData.name} (${formData.email}):\n\n${formData.message}`,
+        from: "hi@touchgrassdc.com",
+        replyTo: formData.email,
+      });
 
       trackEmailSent(formData);
 
       if (!result.success) {
-        throw new Error(result.error || "Failed to send message");
+        throw new Error("Failed to send message");
       }
 
       setSubmitStatus("success");

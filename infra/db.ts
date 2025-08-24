@@ -9,16 +9,11 @@ export const db = new sst.aws.Dynamo("Db", {
 
     // Event fields (only the ones we actually index)
     title: "string", // Event title
-    category: "string", // Event category
-    eventDate: "string",
-    organizerId: "string",
-    is_public: "boolean", // Whether the event is publicly visible
+    category: "string", // Event category (comma-separated string for GSI compatibility)
+    isPublic: "string", // Whether the event is publicly visible
 
-    // Order fields
-    customerId: "string",
-
-    // Product fields
-    productName: "string",
+    scheduleDay: "string", // Day of the week for group schedules
+    scheduleTime: "string", // Time for group schedules
   },
   primaryIndex: {
     hashKey: "pk",
@@ -30,35 +25,25 @@ export const db = new sst.aws.Dynamo("Db", {
       hashKey: "createdAt",
       rangeKey: "pk",
     },
-    // GSI for user events (organizerId -> eventDate)
-    userEventsIndex: {
-      hashKey: "organizerId",
-      rangeKey: "eventDate",
-    },
-    // GSI for orders by customer
-    customerOrdersIndex: {
-      hashKey: "customerId",
-      rangeKey: "createdAt",
-    },
-    // GSI for products by category
-    productCategoryIndex: {
-      hashKey: "category",
-      rangeKey: "productName",
-    },
     // GSI for events by category (category -> createdAt)
     eventCategoryIndex: {
       hashKey: "category",
       rangeKey: "createdAt",
     },
-    // GSI for public events (is_public -> createdAt)
+    // GSI for public events (isPublic -> createdAt)
     publicEventsIndex: {
-      hashKey: "is_public",
+      hashKey: "isPublic",
       rangeKey: "createdAt",
     },
     // GSI for events by title (title -> createdAt)
     eventTitleIndex: {
       hashKey: "title",
       rangeKey: "createdAt",
+    },
+    // GSI for groups by schedule details
+    groupScheduleIndex: {
+      hashKey: "scheduleDay",
+      rangeKey: "scheduleTime",
     },
   },
 });

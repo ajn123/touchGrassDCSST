@@ -21,3 +21,8 @@ api.route("GET /events/{id}", "packages/functions/src/events/api.getEventById");
 api.route("PUT /events/{id}", "packages/functions/src/events/api.updateEvent");
 
 api.route("DELETE /events/{id}", "packages/functions/src/events/api.deleteEvent");
+
+// Group routes
+api.route("GET /groups", "packages/functions/src/groups/api.getGroups");
+
+api.route("GET /groups/{id}", "packages/functions/src/groups/api.getGroupById");

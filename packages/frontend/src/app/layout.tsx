@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import Header from "@/components/Header";
 import { UserProvider } from "@/contexts/UserContext";
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 
 import "./globals.css";
 
@@ -19,24 +19,24 @@ const geistMono = Geist_Mono({
 async function getLayoutData() {
   // Fetch any data you need for the layout
   return {
-    title: 'My App',
-    description: 'Server-side rendered app'
+    title: "TouchGrass DC",
+    description: "Server-side rendered app",
   };
 }
 
 export async function generateMetadata(): Promise<Metadata> {
   const data = await getLayoutData();
-  
+
   return {
     title: data.title,
     description: data.description,
-  }
+  };
 }
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
@@ -47,5 +47,5 @@ export default function RootLayout({
         </UserProvider>
       </body>
     </html>
-  )
+  );
 }

@@ -419,34 +419,6 @@
     "is_public": true
   },
   {
-    "title": "The Ballston Runaways",
-    "location": "Compass Coffee, Ballston, VA",
-    "category": ["Sports", "Running", "Social"],
-    "description": "A running group in Ballston.  Meets in front of the Compass Coffee in Ballston.  Check the intagram for more details",
-    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSVwO3bqazv0vCQWFYQ5-TX4JQgQ-K5rp6KA&s",
-    "cost": {
-      "type": "free",
-      "currency": "USD",
-      "amount": 0
-    },
-    "socials": {
-      "instagram": "https://www.instagram.com/theballstonrunaways"
-    },
-    "schedules": [
-      {
-        "days": ["Tuesday"],
-        "recurrence_type": "weekly",
-        "time": "6:15 AM"
-      },
-      {
-        "days": ["Saturday"],
-        "recurrence_type": "weekly",
-        "time": "9:00 AM"
-      }
-    ],
-    "is_public": true
-  },
-  {
     "title": "District Running Collective",
     "description": "District Running Collective We proudly represent Washington, DC through each mile Weekly runs - Wednesdays at 6:30PM, Thursdays at 6:30AM, Saturdays at 8:30 AM",
     "image_url": "https://images.squarespace-cdn.com/content/v1/5cd9ccf9c46f6d3f45f57ddd/1558361863427-5XTF06GZE41NXMJS7TUJ/District+Running+Collective+-+DC+-+UA+Running-71.jpg",

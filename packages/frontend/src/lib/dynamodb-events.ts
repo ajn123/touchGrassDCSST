@@ -240,6 +240,13 @@ export async function getEventByTitle(title: string) {
 
 export async function getEvents() {
   try {
+    console.log("🔍 getEvents: Starting to fetch events from DynamoDB...");
+    console.log("🔍 getEvents: Table name:", Resource.Db.name);
+    console.log(
+      "🔍 getEvents: AWS Region:",
+      process.env.AWS_REGION || "us-east-1"
+    );
+
     const command = new ScanCommand({
       TableName: Resource.Db.name,
       FilterExpression:
@@ -253,25 +260,47 @@ export async function getEvents() {
         ":isPublic": { S: "true" },
       },
     });
+
+    console.log("🔍 getEvents: Scan command prepared:", {
+      TableName: Resource.Db.name,
+      FilterExpression:
+        "begins_with(#pk, :eventPrefix) AND #isPublic = :isPublic",
+      ExpressionAttributeValues: {
+        ":eventPrefix": "EVENT",
+        ":isPublic": "true",
+      },
+    });
+
     const result = await client.send(command);
+    console.log("🔍 getEvents: DynamoDB scan completed");
+    console.log(
+      "🔍 getEvents: Raw DynamoDB result count:",
+      result.Items?.length || 0
+    );
+    console.log("🔍 getEvents: Raw DynamoDB result:", result);
 
-    console.log("Raw DynamoDB result:", result);
-
-    return (
+    const events =
       result.Items?.map((item) => {
         // Use AWS SDK's unmarshall utility to convert DynamoDB format to regular object
         const unmarshalledItem = unmarshall(item);
-        console.log("Unmarshalled item:", unmarshalledItem);
+        console.log("🔍 getEvents: Unmarshalled item:", unmarshalledItem);
         return unmarshalledItem;
-      }) || []
-    );
+      }) || [];
+
+    console.log("🔍 getEvents: Final events array length:", events.length);
+    return events;
   } catch (error) {
-    console.error("Error fetching events:", error);
+    console.error("❌ getEvents: Error fetching events:", error);
+    console.error("❌ getEvents: Error details:", {
+      message: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : "Unknown error type",
+    });
     return [];
   }
 }
 
-export async function searchEvents(filters: {
+export async function searchEventsAndGroups(filters: {
   query?: string;
   categories?: string[];
   costRange?: { min?: number; max?: number; type?: string };
@@ -283,7 +312,7 @@ export async function searchEvents(filters: {
 }) {
   const startTime = Date.now();
   console.log(
-    "🔍 searchEvents called with filters:",
+    "🔍 searchEventsAndGroups called with filters:",
     JSON.stringify(filters, null, 2)
   );
 
@@ -298,10 +327,8 @@ export async function searchEvents(filters: {
 
     console.log("🔧 Building DynamoDB filter expressions");
 
-    // Only consider EVENT items
-    filterExpressions.push("begins_with(#pk, :eventPrefix)");
-    expressionAttributeNames["#pk"] = "pk";
-    expressionAttributeValues[":eventPrefix"] = { S: "EVENT" };
+    // Search all items regardless of key prefix
+    // No need to filter by pk prefix - search everything in the table
 
     // Text search with case-insensitive matching for title and other fields
     if (filters.query && filters.query.trim()) {
@@ -323,19 +350,33 @@ export async function searchEvents(filters: {
         "contains(#description, :q1)",
         "contains(#description, :q2)",
         "contains(#description, :q3)",
+      ];
+
+      // Add venue and location fields for all items
+      textSearchExpressions.push(
         "contains(#venue, :q1)",
         "contains(#venue, :q2)",
         "contains(#venue, :q3)",
         "contains(#location, :q1)",
         "contains(#location, :q2)",
-        "contains(#location, :q3)",
-      ];
+        "contains(#location, :q3)"
+      );
+
+      // Add category field for both events and groups
+      textSearchExpressions.push(
+        "contains(#category, :q1)",
+        "contains(#category, :q2)",
+        "contains(#category, :q3)"
+      );
 
       filterExpressions.push(`(${textSearchExpressions.join(" OR ")})`);
 
       // Add attribute names
       expressionAttributeNames["#title"] = "title";
       expressionAttributeNames["#description"] = "description";
+      expressionAttributeNames["#category"] = "category";
+
+      // Add venue and location for all items
       expressionAttributeNames["#venue"] = "venue";
       expressionAttributeNames["#location"] = "location";
 
@@ -372,7 +413,7 @@ export async function searchEvents(filters: {
       expressionAttributeNames["#cost"] = "cost";
     }
 
-    // Location filter
+    // Location filter for all items
     if (filters.location && filters.location.length > 0) {
       console.log("📍 Adding location filter for:", filters.location);
       const locationExpressions = filters.location.map((_, index) => {
@@ -385,7 +426,7 @@ export async function searchEvents(filters: {
       filterExpressions.push(`(${locationExpressions.join(" OR ")})`);
     }
 
-    // Date range filter
+    // Date range filter for all items
     if (filters.dateRange) {
       console.log("📅 Adding date filter:", filters.dateRange);
       if (filters.dateRange.start) {
@@ -465,49 +506,71 @@ export async function searchEvents(filters: {
       return [];
     }
 
-    let events = result.Items.map((item) => unmarshall(item));
-    console.log("🔄 Unmarshalled", events.length, "events from DynamoDB");
+    let items = result.Items.map((item) => unmarshall(item));
+    console.log("🔄 Unmarshalled", items.length, "items from DynamoDB");
 
-    // Apply client-side cost filtering (due to mixed data shapes in DynamoDB)
+    // Separate events and groups for better handling
+    const events = items.filter((item) => item.pk?.startsWith("EVENT"));
+    const groups = items.filter((item) => item.pk?.startsWith("GROUP"));
+
+    console.log(`📊 Found ${events.length} events and ${groups.length} groups`);
+
+    // Apply client-side cost filtering to all items
     if (
       filters.costRange &&
       (filters.costRange.min !== undefined ||
         filters.costRange.max !== undefined)
     ) {
       console.log("💰 Applying client-side cost filtering");
-      events = events.filter((event: any) => {
-        if (!event.cost) return true;
+      const filteredItems = items.filter((item: any) => {
+        if (!item.cost) return true;
 
-        let eventCost = 0;
-        if (typeof event.cost === "object" && event.cost.amount) {
-          eventCost = parseFloat(event.cost.amount);
-        } else if (typeof event.cost === "string") {
-          eventCost = parseFloat(event.cost) || 0;
+        let itemCost = 0;
+        if (typeof item.cost === "object" && item.cost.amount) {
+          itemCost = parseFloat(item.cost.amount);
+        } else if (typeof item.cost === "string") {
+          itemCost = parseFloat(item.cost) || 0;
         }
 
         if (
           filters.costRange!.min !== undefined &&
-          eventCost < filters.costRange!.min
+          itemCost < filters.costRange!.min
         ) {
           return false;
         }
 
         if (
           filters.costRange!.max !== undefined &&
-          eventCost > filters.costRange!.max
+          itemCost > filters.costRange!.max
         ) {
           return false;
         }
 
         return true;
       });
-      console.log(
-        "💰 Cost filtering completed, remaining events:",
-        events.length
+
+      // Re-separate filtered items into events and groups
+      const filteredEvents = filteredItems.filter((item) =>
+        item.pk?.startsWith("EVENT")
       );
+      const filteredGroups = filteredItems.filter((item) =>
+        item.pk?.startsWith("GROUP")
+      );
+
+      console.log(
+        "💰 Cost filtering completed, remaining items:",
+        filteredItems.length,
+        `(${filteredEvents.length} events, ${filteredGroups.length} groups)`
+      );
+
+      // Update the events and groups arrays
+      events.length = 0;
+      events.push(...filteredEvents);
+      groups.length = 0;
+      groups.push(...filteredGroups);
     }
 
-    // Apply sorting using the dedicated sorting utility
+    // Apply sorting to all items
     if (filters.sortBy) {
       console.log(
         "🔄 Applying sorting by:",
@@ -516,34 +579,94 @@ export async function searchEvents(filters: {
         filters.sortOrder
       );
 
+      // Sort all items together, then re-separate
+      const allItems = [...events, ...groups];
+
       // Use the sorting utility from dynamodb-sorting.ts
       const { sortEvents } = await import("./dynamodb-sorting");
-      events = sortEvents(
-        events,
+      const sortedItems = sortEvents(
+        allItems,
         filters.sortBy,
         filters.sortOrder === "desc" ? false : true
       );
+
+      // Re-separate sorted items into events and groups
+      const sortedEvents = sortedItems.filter((item) =>
+        item.pk?.startsWith("EVENT")
+      );
+      const sortedGroups = sortedItems.filter((item) =>
+        item.pk?.startsWith("GROUP")
+      );
+
+      // Update the arrays
+      events.length = 0;
+      events.push(...sortedEvents);
+      groups.length = 0;
+      groups.push(...sortedGroups);
+
+      console.log(
+        `🔄 Sorting completed: ${sortedEvents.length} events, ${sortedGroups.length} groups`
+      );
     }
 
-    console.log("✅ Search completed. Final result:", events.length, "events");
+    console.log(
+      "✅ Search completed. Final result:",
+      events.length,
+      "events and",
+      groups.length,
+      "groups"
+    );
     console.log(
       "🔍 Final events:",
       events.map((e) => ({ title: e.title, id: e.pk }))
     );
+    console.log(
+      "🔍 Final groups:",
+      groups.map((g) => ({ title: g.title, id: g.pk }))
+    );
 
     const totalTime = Date.now() - startTime;
-    console.log(`⏱️ Total searchEvents execution time: ${totalTime}ms`);
+    console.log(
+      `⏱️ Total searchEventsAndGroups execution time: ${totalTime}ms`
+    );
 
-    return events;
+    // Return both events and groups in a structured format
+    return {
+      events,
+      groups,
+      total: events.length + groups.length,
+    };
   } catch (error) {
-    console.error("❌ Error searching events:", error);
+    console.error("❌ Error searching events and groups:", error);
     console.error("🔍 Error details:", {
       message: error instanceof Error ? error.message : "Unknown error",
       stack: error instanceof Error ? error.stack : undefined,
       filters: filters,
     });
-    return [];
+    return {
+      events: [],
+      groups: [],
+      total: 0,
+    };
   }
+}
+
+// Backward compatibility function - searches only events
+export async function searchEvents(filters: {
+  query?: string;
+  categories?: string[];
+  costRange?: { min?: number; max?: number; type?: string };
+  location?: string[];
+  dateRange?: { start?: string; end?: string };
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  fields?: string[];
+}) {
+  const result = await searchEventsAndGroups({
+    ...filters,
+    itemType: "events",
+  });
+  return result.events;
 }
 
 // Add a more efficient search function that uses Query instead of Scan when possible
@@ -632,7 +755,11 @@ export async function searchEventsOptimized(filters: {
       return events;
     } catch (fallbackError) {
       console.error("❌ Fallback searchEvents also failed:", fallbackError);
-      return [];
+      return {
+        events: [],
+        groups: [],
+        total: 0,
+      };
     }
   }
 }

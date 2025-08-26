@@ -1,9 +1,9 @@
-
 // Create a custom email function that uses existing SES identity
 
-const email = $app.stage === "production"
-      ? sst.aws.Email.get("hi", "hi@touchgrassdc.com")
-      : new sst.aws.Email("hi", {
+const email =
+  $app.stage === "production"
+    ? sst.aws.Email.get("hi", "hi@touchgrassdc.com")
+    : new sst.aws.Email("hi", {
         sender: "hi@touchgrassdc.com",
       });
 

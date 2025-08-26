@@ -5,6 +5,8 @@ export default async function FeaturedGroups() {
   try {
     const allGroups = await getPublicGroups();
 
+    console.log("🔍 FeaturedGroups: All groups:", allGroups);
+
     // Get 5 random groups
     const shuffled = allGroups.sort(() => 0.5 - Math.random());
     const featuredGroups = shuffled.slice(0, 5);
@@ -19,9 +21,15 @@ export default async function FeaturedGroups() {
           Featured Groups
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-          {featuredGroups.map((group: any) => (
-            <FeaturedGroup key={group.pk} group={group} />
-          ))}
+          {featuredGroups.length > 0 &&
+            featuredGroups.map((group: any) => (
+              <FeaturedGroup key={group.pk} group={group} />
+            ))}
+          {featuredGroups.length === 0 && (
+            <div className="text-center text-white">
+              No featured groups found
+            </div>
+          )}
         </div>
       </section>
     );

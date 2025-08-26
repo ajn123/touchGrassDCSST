@@ -37,5 +37,169 @@
       }
     ],
     "isPublic": true
+  },
+  {
+    "title": "DC City Girls",
+    "image_url": "https://media.licdn.com/dms/image/v2/D4E22AQH-ePILqH1XyQ/feedshare-shrink_800/B4EZXt1EfsGYAg-/0/1743451871406?e=2147483647&v=beta&t=dpvkN2c7JoGnmKsD4bEsYOfz9LG5CILhCvNCeIwbRNM",
+    "socials": {
+      "website": "https://www.citygirlswhowalkdc.org/",
+      "discord": "https://discord.com/invite/7axRj2mdbE",
+      "instagram": "https://www.instagram.com/citygirlsdc/?hl=en"
+    },
+    "description": "DC’s free social club for women.  They have some coed events as well.  Check the website for more details",
+    "category": ["Social"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Clarendon Run Club",
+    "description": "A run club in clarendon.  Meets in front of Tatte (2805 Clarendon Blvd)",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT73ru5MCh6bPDryTviCqFbK1dFLv7Y6x6UiA&s",
+    "socials": {
+      "instagram": "https://www.instagram.com/clarendonrunclub/"
+    },
+    "category": ["Sports", "Running"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "schedules": [
+      {
+        "days": ["Monday"],
+        "recurrence_type": "weekly",
+        "time": "6:30 PM - 8:30 PM",
+        "location": "2800 Clarendon Blvd, Arlington, Virginia 22201"
+      }
+    ],
+    "isPublic": true
+  },
+  {
+    "title": "North East Track Club",
+    "venue": "Check website for location",
+    "description": "At NETC, new, amateur, veteran, and elite runners share a space, cross the same paths, and celebrate each others wins. We push and pull in different directions to make meaningful change through community, camaraderie, and service to our city.",
+    "category": ["Sports", "Running"],
+    "image_url": "https://images.unsplash.com/photo-1502904550040-7534597429ae",
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "schedules": [
+      {
+        "days": ["Tuesday"],
+        "recurrence_type": "weekly",
+        "time": "6:45 PM - 8:30 PM"
+      },
+      {
+        "days": ["Saturday"],
+        "recurrence_type": "weekly",
+        "time": "Start time is 8 am during the summer months and 9 or 10 am during other parts of the year"
+      }
+    ],
+    "socials": {
+      "instagram": "https://www.instagram.com/ne_trackclub/",
+      "website": "https://www.netrackclub.com/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "District Running Collective",
+    "description": "District Running Collective We proudly represent Washington, DC through each mile Weekly runs - Wednesdays at 6:30PM, Thursdays at 6:30AM, Saturdays at 8:30 AM",
+    "image_url": "https://images.squarespace-cdn.com/content/v1/5cd9ccf9c46f6d3f45f57ddd/1558361863427-5XTF06GZE41NXMJS7TUJ/District+Running+Collective+-+DC+-+UA+Running-71.jpg",
+    "category": ["Sports", "Running"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://www.districtrunningcollective.com/",
+      "instagram": "https://www.instagram.com/districtrunningcollective/?hl=en"
+    },
+    "schedules": [
+      {
+        "days": ["Wednesday"],
+        "recurrence_type": "weekly",
+        "time": "6:30 PM"
+      },
+      {
+        "days": ["Thursday"],
+        "recurrence_type": "weekly",
+        "time": "6:30 AM"
+      },
+      {
+        "days": ["Saturday"],
+        "recurrence_type": "weekly",
+        "time": "8:30 AM"
+      }
+    ],
+    "isPublic": true
+  },
+  {
+    "title": "Dudes In The District",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ5yAP-4Z7PUT4T1Kg-Z608YAhoTo1qyDyeSw&s",
+    "socials": {
+      "website": "https://www.dudesinthedistrict.com/",
+      "instagram": "https://www.instagram.com/dudesinthedistrict/",
+      "discord": "https://discord.com/invite/K7UB9KfDRX"
+    },
+    "description": "Dudes In The District is a group of men who meet up for social events in DC.  Check the website for more details",
+    "category": ["Social"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Labrynth Board Game Night",
+    "image_url": "https://d3flpus5evl89n.cloudfront.net/611434a2e9d13377b7079d53/611435dfe9d13377b7079ef9/scaled_384.jpg",
+    "description": "A group of people who meet up to play board games.  Check the website for more details Thursday is open gaming night here at Labyrinth! Registration is not required but seating is limited. To make the most of our available seating this event will be on a first come, first served basis.",
+    "socials": {
+      "website": "https://www.labyrinthdc.com/events/calendar/"
+    },
+    "schedules": [
+      {
+        "days": ["Thursday"],
+        "recurrence_type": "weekly",
+        "time": "6:00 PM - 10:00 PM"
+      }
+    ],
+    "category": ["Board Games"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Washington Area Roadskaters",
+    "description": "The Washington Area Roadskaters (WAR) is a non-profit organization whose mission is to promote safe and enjoyable skating in the Washington, D.C. area. WAR was founded in 1987 as Washington Area Rollerskaters and is one of the oldest skate clubs in the US.  Thousands of individuals have joined together to safely enjoy inline and roller skating in the streets of our fine city.",
+    "category": ["Sports"],
+    "image_url": "https://plus.unsplash.com/premium_photo-1668613402894-655404b07e74?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8cm9sbGVyc2thdGluZ3xlbnwwfHwwfHx8MA%3D%3D",
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "schedules": [
+      {
+        "days": ["Sunday"],
+        "recurrence_type": "weekly",
+        "time": "11:00 AM - 12:00 PM"
+      }
+    ],
+    "socials": {
+      "website": "https://www.skatedc.org/",
+      "meetup": "https://www.meetup.com/washington-area-roadskaters/events/"
+    },
+    "isPublic": true
   }
 ]

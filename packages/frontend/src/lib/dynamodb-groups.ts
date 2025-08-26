@@ -237,11 +237,24 @@ export async function searchGroups(filters: {
       ":groupInfo": { S: "GROUP_INFO" },
     };
 
-    // Add text search filter
+    // Add enhanced text search filter
     if (filters.query && filters.query.trim()) {
       const query = filters.query.trim();
-      filterExpressions.push("contains(#title, :query)");
+      
+      // Search across multiple fields for comprehensive results
+      const textSearchExpressions = [
+        "contains(#title, :query)",
+        "contains(#category, :query)",
+        "contains(#description, :query)"
+      ];
+      
+      filterExpressions.push(`(${textSearchExpressions.join(" OR ")})`);
+      
+      // Add attribute names for all searchable fields
       expressionAttributeNames["#title"] = "title";
+      expressionAttributeNames["#category"] = "category";
+      expressionAttributeNames["#description"] = "description";
+      
       expressionAttributeValues[":query"] = { S: query };
     }
 

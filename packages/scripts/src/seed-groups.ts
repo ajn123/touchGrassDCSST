@@ -81,7 +81,7 @@ async function seedGroups() {
             const sortKey = `${day}_${schedule.time.replace(
               /[:\s]/g,
               ""
-            )}_${schedule.location.replace(/[^a-zA-Z0-9]/g, "")}`;
+            )}_${schedule.location?.replace(/[^a-zA-Z0-9]/g, "")}`;
 
             const item = {
               pk: `GROUP#${group.title}`, // Partition key: GROUP#The Ballston Runaways

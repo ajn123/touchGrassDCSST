@@ -100,8 +100,8 @@ export function EmailSignupForm({ categories }: EmailSignupFormProps) {
     try {
       const response = await sendEmailSignup({
         to: formData.email,
-        subject: "Thank you for signing up for TouchGrass DC",
-        body: "Thank you for signing up for TouchGrass DC",
+        subject: `Thank you for signing up for TouchGrass DC ${formData.name}`,
+        body: `Thank you for signing up for TouchGrass DC ${formData.email}`,
       });
 
       trackEmailSignup(formData);

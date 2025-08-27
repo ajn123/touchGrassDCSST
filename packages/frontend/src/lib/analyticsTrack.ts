@@ -9,6 +9,9 @@ export interface VisitData {
   userId?: string;
   sessionId?: string;
   category?: string;
+  email?: string;
+  name?: string;
+  selectedCategories?: string[];
 }
 
 export type AnalyticsAction =
@@ -23,7 +26,9 @@ export type AnalyticsAction =
 
 export function trackPageVisit(
   data: Partial<VisitData>,
-  action: AnalyticsAction = "USER_VISIT"
+  action: AnalyticsAction = "USER_VISIT",
+  pk?: string,
+  sk?: string
 ) {
   const visitData: VisitData = {
     page:
@@ -43,9 +48,11 @@ export function trackPageVisit(
   console.log("Page visit tracked:", visitData);
 
   const body = {
-    userId: getUserId() || getSessionId(),
+    pk: pk || `USER`,
+    sk: sk || `TIME#${Date.now()}`,
     properties: visitData,
     action: action,
+    userId: getUserId() || getSessionId(),
   };
 
   // Only make fetch request in browser environment
@@ -63,54 +70,64 @@ export function trackPageVisit(
   }
 }
 
-export function trackEmailSignup(emailData: any) {
+export function trackEmailSignup(
+  formData: any,
+  pk: string = "EMAIL",
+  sk: string = "TIME"
+) {
   trackPageVisit(
     {
       page: "/api/email-signup",
-      sessionId: getSessionId(),
-      userId: getUserId(),
-      data: emailData,
+      email: formData.email,
+      name: formData.name,
+      selectedCategories: formData.selectedCategories,
     },
-    "EMAIL_SIGNUP_SUBMISSION"
+    "EMAIL_SIGNUP_SUBMISSION",
+    pk,
+    `${sk}#${Date.now()}`
   );
 }
 
-export function trackEmailSent(emailData: any) {
+export function trackEmailSent(
+  emailData: any,
+  pk: string = "EMAIL",
+  sk: string = "TIME"
+) {
   trackPageVisit(
     {
       page: "/api/sendEmail",
-      sessionId: getSessionId(),
-      userId: getUserId(),
       data: emailData,
     },
-    "CONTACT_FORM_SUBMISSION"
+    "CONTACT_FORM_SUBMISSION",
+    pk,
+    `${sk}#${Date.now()}`
   );
 }
 
 export function trackHomepageVisit() {
   trackPageVisit({
     page: "/",
-    sessionId: getSessionId(),
-    userId: getUserId(),
   });
 }
 
-export function trackSearch(filters: any) {
+export function trackSearch(
+  filters: any,
+  pk: string = "SEARCH",
+  sk: string = "TIME"
+) {
   trackPageVisit(
     {
       page: `/search?${new URLSearchParams(filters).toString()}`,
-      sessionId: getSessionId(),
-      userId: getUserId(),
     },
-    "SEARCH"
+    "SEARCH",
+    pk,
+    `${sk}#${Date.now()}`
   );
 }
 
 export function trackEventPageVisit(eventId: string) {
   trackPageVisit({
     page: `/events/${eventId}`,
-    sessionId: getSessionId(),
-    userId: getUserId(),
   });
 }
 

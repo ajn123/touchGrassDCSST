@@ -662,11 +662,8 @@ export async function searchEvents(filters: {
   sortOrder?: "asc" | "desc";
   fields?: string[];
 }) {
-  const result = await searchEventsAndGroups({
-    ...filters,
-    itemType: "events",
-  });
-  return result.events;
+  const result = await searchEventsAndGroups(filters);
+  return Array.isArray(result) ? result : result.events;
 }
 
 // Add a more efficient search function that uses Query instead of Scan when possible

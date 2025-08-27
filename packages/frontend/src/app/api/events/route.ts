@@ -58,23 +58,27 @@ export async function GET(request: NextRequest) {
       sortBy,
       sortOrder,
       limit,
-      is_public: isPublic,
+      isPublic: isPublic,
       fields,
     };
 
     console.log("🔍 Using searchEventsOptimized with filters:", filters);
 
     // Use the optimized search function with timeout handling
-    const events = await searchEventsOptimized(filters);
+    const result = await searchEventsOptimized(filters);
+
+    // Handle both array and object return types
+    const events = Array.isArray(result) ? result : result.events;
+    const count = Array.isArray(result) ? result.length : result.total;
 
     const totalTime = Date.now() - startTime;
     console.log(
-      `⏱️ API route completed in ${totalTime}ms, retrieved ${events.length} events`
+      `⏱️ API route completed in ${totalTime}ms, retrieved ${count} events`
     );
 
     return NextResponse.json({
       events,
-      count: events.length,
+      count,
       executionTime: totalTime,
     });
   } catch (error) {

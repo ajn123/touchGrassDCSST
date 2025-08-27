@@ -19,6 +19,8 @@ export async function sendEmail(emailData: {
   replyTo?: string;
 }) {
   try {
+    console.log("Sending email to:", emailData.to);
+
     // Use the SST Resource for the Lambda function URL
     const response = await fetch(Resource.SendEmail.url, {
       method: "POST",

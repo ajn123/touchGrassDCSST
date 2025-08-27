@@ -104,6 +104,8 @@ export function EmailSignupForm({ categories }: EmailSignupFormProps) {
         body: `Thank you for signing up for TouchGrass DC ${formData.email}`,
       });
 
+      console.log("Sending email signup:", formData);
+
       trackEmailSignup(formData);
 
       if (response.success) {

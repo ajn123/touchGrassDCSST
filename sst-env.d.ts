@@ -25,6 +25,12 @@ declare module "sst" {
       "name": string
       "type": "sst.aws.Bucket"
     }
+    "MySearch": {
+      "password": string
+      "type": "sst.aws.OpenSearch"
+      "url": string
+      "username": string
+    }
     "SendEmail": {
       "name": string
       "type": "sst.aws.Function"

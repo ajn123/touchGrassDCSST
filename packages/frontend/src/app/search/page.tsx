@@ -12,6 +12,7 @@ function SearchPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [events, setEvents] = useState<any[]>([]);
+  const [groups, setGroups] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [allCategories, setAllCategories] = useState<string[]>([]);
 
@@ -75,7 +76,12 @@ function SearchPageContent() {
         if (filters.sortOrder)
           queryParams.append("sortOrder", filters.sortOrder);
 
-        const response = await fetch(`/api/events?${queryParams.toString()}`);
+        // Add types parameter for OpenSearch - search both events and groups
+        queryParams.append("types", "event,group");
+
+        const response = await fetch(
+          `/api/search-opensearch?${queryParams.toString()}`
+        );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -86,13 +92,17 @@ function SearchPageContent() {
         console.log(
           "📦 Retrieved",
           data.events?.length || 0,
-          "events from API"
+          "events and",
+          data.groups?.length || 0,
+          "groups from OpenSearch API"
         );
 
         setEvents(data.events || []);
+        setGroups(data.groups || []);
       } catch (error) {
-        console.error("Error loading events:", error);
+        console.error("Error loading events and groups:", error);
         setEvents([]);
+        setGroups([]);
       } finally {
         setLoading(false);
       }
@@ -156,14 +166,14 @@ function SearchPageContent() {
             {loading ? (
               <div className="text-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading events...</p>
+                <p className="text-gray-600">Loading events and groups...</p>
               </div>
-            ) : events.length === 0 ? (
+            ) : events.length === 0 && groups.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-gray-600">
                   {filters.query
-                    ? `No events found for "${filters.query}"`
-                    : "No events found"}
+                    ? `No events or groups found for "${filters.query}"`
+                    : "No events or groups found"}
                 </p>
                 <Link
                   href="/"
@@ -175,15 +185,96 @@ function SearchPageContent() {
             ) : (
               <div>
                 <p className="text-center text-gray-600 mb-8">
-                  Found {events.length} event
-                  {events.length !== 1 ? "s" : ""}
+                  Found {events.length} event{events.length !== 1 ? "s" : ""}{" "}
+                  and {groups.length} group{groups.length !== 1 ? "s" : ""}
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {events.map((event: any, index: number) => (
-                    <FeaturedEvent key={index} event={event} />
-                  ))}
-                </div>
+                {/* Events Section */}
+                {events.length > 0 && (
+                  <div className="mb-12">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                      Events
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {events.map((event: any, index: number) => (
+                        <FeaturedEvent key={`event-${index}`} event={event} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Groups Section */}
+                {groups.length > 0 && (
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                      Groups
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {groups.map((group: any, index: number) => (
+                        <div
+                          key={`group-${index}`}
+                          className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                        >
+                          <div className="p-6">
+                            <div className="flex items-center mb-4">
+                              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                                <span className="text-green-600 text-xl">
+                                  👥
+                                </span>
+                              </div>
+                              <div>
+                                <h3 className="text-lg font-semibold text-gray-900">
+                                  {group.title}
+                                </h3>
+                                {group.category && (
+                                  <p className="text-sm text-gray-500">
+                                    {Array.isArray(group.category)
+                                      ? group.category.join(", ")
+                                      : group.category}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+
+                            {group.description && (
+                              <p className="text-gray-700 mb-4 line-clamp-3">
+                                {group.description}
+                              </p>
+                            )}
+
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {group.category &&
+                                Array.isArray(group.category) &&
+                                group.category.map(
+                                  (cat: string, catIndex: number) => (
+                                    <span
+                                      key={catIndex}
+                                      className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full"
+                                    >
+                                      {cat}
+                                    </span>
+                                  )
+                                )}
+                            </div>
+
+                            <div className="flex justify-between items-center">
+                              <Link
+                                href={`/groups/${(() => {
+                                  const id = group.id || group.pk;
+                                  if (!id) return "unknown";
+                                  return id.replace(/^(EVENT#|GROUP#)/, "");
+                                })()}`}
+                                className="text-green-600 hover:text-green-800 font-medium"
+                              >
+                                View Group →
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

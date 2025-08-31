@@ -240,21 +240,21 @@ export async function searchGroups(filters: {
     // Add enhanced text search filter
     if (filters.query && filters.query.trim()) {
       const query = filters.query.trim();
-      
+
       // Search across multiple fields for comprehensive results
       const textSearchExpressions = [
         "contains(#title, :query)",
         "contains(#category, :query)",
-        "contains(#description, :query)"
+        "contains(#description, :query)",
       ];
-      
+
       filterExpressions.push(`(${textSearchExpressions.join(" OR ")})`);
-      
+
       // Add attribute names for all searchable fields
       expressionAttributeNames["#title"] = "title";
       expressionAttributeNames["#category"] = "category";
       expressionAttributeNames["#description"] = "description";
-      
+
       expressionAttributeValues[":query"] = { S: query };
     }
 
@@ -324,6 +324,56 @@ export async function searchGroups(filters: {
     return groups;
   } catch (error) {
     console.error("Error searching groups:", error);
+    return [];
+  }
+}
+
+// Simple search function that's more likely to return results
+export async function searchGroupsSimple(filters: {
+  query?: string;
+  categories?: string[];
+  isPublic?: boolean;
+  limit?: number;
+}) {
+  try {
+    console.log("🔍 searchGroupsSimple called with filters:", filters);
+
+    // If no query, just get all groups
+    if (!filters.query || !filters.query.trim()) {
+      console.log("🔍 No query provided, getting all groups...");
+      return await getGroups();
+    }
+
+    const query = filters.query.trim().toLowerCase();
+    console.log("🔍 Searching for query:", query);
+
+    // Get all groups first, then filter client-side for better results
+    const allGroups = await getGroups();
+    console.log("🔍 Total groups available:", allGroups.length);
+
+    // Filter groups that match the query
+    const matchingGroups = allGroups.filter((group) => {
+      const title = (group.title || "").toLowerCase();
+      const description = (group.description || "").toLowerCase();
+      const category = (group.category || "").toLowerCase();
+
+      return (
+        title.includes(query) ||
+        description.includes(query) ||
+        category.includes(query)
+      );
+    });
+
+    console.log("🔍 Matching groups found:", matchingGroups.length);
+
+    // Apply limit if specified
+    if (filters.limit) {
+      return matchingGroups.slice(0, filters.limit);
+    }
+
+    return matchingGroups;
+  } catch (error) {
+    console.error("❌ Error in searchGroupsSimple:", error);
     return [];
   }
 }

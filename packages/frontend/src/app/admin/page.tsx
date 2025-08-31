@@ -35,6 +35,7 @@ export default function AdminPage() {
 
   const fetchPendingEventsCount = async () => {
     try {
+      // Use DynamoDB API for admin operations (unpublished events)
       const response = await fetch("/api/events?isPublic=false");
       if (response.ok) {
         const data = await response.json();

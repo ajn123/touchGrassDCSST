@@ -18,6 +18,7 @@ export default $config({
     const { email } = await import("./infra/email");
     const { auth } = await import("./infra/auth");
     const { queue } = await import("./infra/queue");
+    const { search } = await import("./infra/opensearch");
 
     return {
       Db: db,
@@ -27,6 +28,7 @@ export default $config({
       Email: email,
       Auth: auth,
       Queue: queue,
+      Search: search,
     };
   },
 });

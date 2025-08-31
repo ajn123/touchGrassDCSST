@@ -22,7 +22,8 @@ export type AnalyticsAction =
   | "CATEGORY_SELECTION"
   | "SEARCH"
   | "CONTACT_FORM_SUBMISSION"
-  | "EMAIL_SIGNUP_SUBMISSION";
+  | "EMAIL_SIGNUP_SUBMISSION"
+  | "EVENT_PAGE_VISIT";
 
 export function trackPageVisit(
   data: Partial<VisitData>,
@@ -126,9 +127,14 @@ export function trackSearch(
 }
 
 export function trackEventPageVisit(eventId: string) {
-  trackPageVisit({
-    page: `/events/${eventId}`,
-  });
+  trackPageVisit(
+    {
+      page: `/events/${eventId}`,
+    },
+    "EVENT_PAGE_VISIT",
+    "EVENT_PAGE_VISIT",
+    `${eventId}#${Date.now()}`
+  );
 }
 
 // Utility functions

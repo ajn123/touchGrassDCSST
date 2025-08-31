@@ -32,9 +32,9 @@ export default function HomepageMap({ className = "" }: HomepageMapProps) {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        // Fetch only events with location data, using field projection for efficiency
+        // Fetch only events with location data using OpenSearch for better performance
         const response = await fetch(
-          "/api/events?fields=title,description,location,coordinates,cost,category,date&isPublic=true"
+          "/api/search-opensearch?types=event&isPublic=true&limit=100"
         );
 
         if (!response.ok) {

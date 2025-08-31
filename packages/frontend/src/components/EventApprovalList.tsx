@@ -31,6 +31,7 @@ export function EventApprovalList({ onEventAction }: EventApprovalListProps) {
   const fetchPendingEvents = async () => {
     try {
       setLoading(true);
+      // Use DynamoDB API for admin operations (unpublished events)
       const response = await fetch("/api/events?isPublic=false");
       if (!response.ok) {
         throw new Error("Failed to fetch pending events");

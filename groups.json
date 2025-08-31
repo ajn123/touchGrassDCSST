@@ -158,6 +158,16 @@
     "isPublic": true
   },
   {
+    "title": "Washington Area Frisbee Club",
+    "category": ["Sports", "Frisbee", "Ultimate"],
+    "image_url": "https://dcfray.com/wp-content/uploads/2018/10/frisbee.jpg",
+    "socials": {
+      "website": "https://www.wafc.org/"
+    },
+    "description": "The Washington Area Frisbee Club is a non-profit organization that promotes the sport of ultimate frisbee in the Washington, DC area.  They have a variety of leagues and events for all ages and skill levels.",
+    "isPublic": true
+  },
+  {
     "title": "Labrynth Board Game Night",
     "image_url": "https://d3flpus5evl89n.cloudfront.net/611434a2e9d13377b7079d53/611435dfe9d13377b7079ef9/scaled_384.jpg",
     "description": "A group of people who meet up to play board games.  Check the website for more details Thursday is open gaming night here at Labyrinth! Registration is not required but seating is limited. To make the most of our available seating this event will be on a first come, first served basis.",

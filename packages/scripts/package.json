@@ -5,8 +5,10 @@
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.864.0",
     "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/credential-provider-node": "^3.0.0",
     "@aws-sdk/util-dynamodb": "^3.0.0",
     "@monorepo-template/core": "*",
+    "@opensearch-project/opensearch": "^2.4.0",
     "axios": "^1.6.0",
     "cheerio": "^1.0.0",
     "dotenv": "^17.0.1",
@@ -31,7 +33,16 @@
     "live:parse": "tsx src/live-ai-parser.ts",
     "simple:parse": "tsx src/simple-live-parser.ts",
     "demo:parse": "tsx src/demo-live-parser.ts",
-    "crawl:hybrid": "tsx src/hybrid-crawler.ts"
+    "crawl:hybrid": "tsx src/hybrid-crawler.ts",
+    "migrate:opensearch": "tsx src/migrate-to-opensearch.ts",
+    "migrate:opensearch:recreate": "tsx src/migrate-to-opensearch.ts --recreate",
+    "test:opensearch": "tsx src/test-opensearch.ts",
+    "test:opensearch:search": "tsx src/test-opensearch-search.ts",
+    "node:migrate": "tsx src/migrate-to-opensearch.ts",
+    "node:test": "tsx src/test-opensearch.ts",
+    "node:test:search": "tsx src/test-opensearch-search.ts",
+    "test:categories": "tsx src/test-categories.ts",
+    "setup:env": "tsx src/setup-env.ts"
   },
   "devDependencies": {
     "@types/node": "^22",

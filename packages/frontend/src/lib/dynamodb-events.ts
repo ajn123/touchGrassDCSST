@@ -12,6 +12,7 @@ import {
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { revalidatePath } from "next/cache";
 import { Resource } from "sst";
+import { searchGroupsSimple } from "./dynamodb-groups";
 const PRIMARY_EMAIL = "hi@touchgrassdc.com";
 
 // Geocoding function (copied from seed-data.ts to avoid import issues)
@@ -1842,6 +1843,187 @@ export async function searchEventsByCategoryGSI(
     );
     return [];
   }
+}
+
+// Unified search function for both events and groups
+export async function unifiedSearch(filters: {
+  query?: string;
+  categories?: string[];
+  costRange?: { min?: number; max?: number; type?: string };
+  location?: string[];
+  dateRange?: { start?: string; end?: string };
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  limit?: number;
+  isPublic?: boolean;
+  fields?: string[];
+  types?: ("event" | "group")[]; // Allow filtering by type
+}) {
+  const startTime = Date.now();
+  console.log(
+    "🔍 unifiedSearch called with filters:",
+    JSON.stringify(filters, null, 2)
+  );
+
+  try {
+    const results = {
+      events: [] as any[],
+      groups: [] as any[],
+      total: 0,
+    };
+
+    // Determine what types to search for
+    const searchTypes = filters.types || ["event", "group"];
+    const hasEvents = searchTypes.includes("event");
+    const hasGroups = searchTypes.includes("group");
+
+    // Search events if requested
+    if (hasEvents) {
+      try {
+        const eventResults = await searchEventsOptimized(filters);
+        results.events = Array.isArray(eventResults)
+          ? eventResults
+          : eventResults.events || [];
+      } catch (error) {
+        console.error("❌ Error searching events:", error);
+        results.events = [];
+      }
+    }
+
+    // Search groups if requested
+    if (hasGroups) {
+      try {
+        console.log("🔍 Searching for groups with filters:", {
+          query: filters.query,
+          categories: filters.categories,
+          isPublic: filters.isPublic,
+          limit: filters.limit ? Math.floor(filters.limit / 2) : undefined,
+        });
+
+        // Use the simpler search function that's more reliable
+        const groupResults = await searchGroupsSimple({
+          query: filters.query,
+          categories: filters.categories,
+          isPublic: filters.isPublic,
+          limit: filters.limit ? Math.floor(filters.limit / 2) : undefined, // Distribute limit between types
+        });
+
+        console.log(
+          "✅ Groups search completed, found:",
+          groupResults.length,
+          "groups"
+        );
+        if (groupResults.length > 0) {
+          console.log("🔍 First group:", groupResults[0]);
+        }
+
+        results.groups = groupResults;
+      } catch (error) {
+        console.error("❌ Error searching groups:", error);
+        results.groups = [];
+      }
+    }
+
+    // Combine and sort results if needed
+    if (filters.sortBy && filters.sortOrder) {
+      const allItems = [...results.events, ...results.groups];
+      const sortedItems = sortItems(
+        allItems,
+        filters.sortBy,
+        filters.sortOrder
+      );
+
+      // Re-separate events and groups
+      results.events = sortedItems.filter((item) =>
+        item.pk?.startsWith("EVENT")
+      );
+      results.groups = sortedItems.filter((item) =>
+        item.pk?.startsWith("GROUP")
+      );
+    }
+
+    // Apply global limit if specified
+    if (filters.limit) {
+      const totalItems = results.events.length + results.groups.length;
+      if (totalItems > filters.limit) {
+        // Distribute limit proportionally
+        const eventRatio = results.events.length / totalItems;
+        const groupRatio = results.groups.length / totalItems;
+
+        results.events = results.events.slice(
+          0,
+          Math.floor(filters.limit * eventRatio)
+        );
+        results.groups = results.groups.slice(
+          0,
+          Math.floor(filters.limit * groupRatio)
+        );
+      }
+    }
+
+    results.total = results.events.length + results.groups.length;
+
+    const totalTime = Date.now() - startTime;
+    console.log(
+      `⏱️ Unified search completed in ${totalTime}ms, found ${results.total} total items (${results.events.length} events, ${results.groups.length} groups)`
+    );
+
+    return results;
+  } catch (error) {
+    console.error("❌ Error in unified search:", error);
+    return {
+      events: [],
+      groups: [],
+      total: 0,
+    };
+  }
+}
+
+// Helper function to sort items by various fields
+function sortItems(items: any[], sortBy: string, sortOrder: "asc" | "desc") {
+  return items.sort((a, b) => {
+    let aValue = a[sortBy];
+    let bValue = b[sortBy];
+
+    // Handle different data types
+    if (sortBy === "date" || sortBy === "start_date") {
+      aValue = new Date(aValue || 0).getTime();
+      bValue = new Date(bValue || 0).getTime();
+    } else if (sortBy === "title") {
+      aValue = (aValue || "").toLowerCase();
+      bValue = (bValue || "").toLowerCase();
+    } else if (sortBy === "cost") {
+      // Extract numeric cost value
+      aValue = extractCostValue(a.cost);
+      bValue = extractCostValue(b.cost);
+    }
+
+    // Handle null/undefined values
+    if (aValue == null) aValue = sortOrder === "asc" ? Infinity : -Infinity;
+    if (bValue == null) bValue = sortOrder === "asc" ? Infinity : -Infinity;
+
+    if (sortOrder === "asc") {
+      return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+    } else {
+      return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+    }
+  });
+}
+
+// Helper function to extract numeric cost value for sorting
+function extractCostValue(cost: any): number {
+  if (!cost) return 0;
+
+  if (cost.type === "free") return 0;
+  if (cost.type === "variable") return 50; // Default value for variable costs
+  if (typeof cost.amount === "number") return cost.amount;
+  if (typeof cost.amount === "string") {
+    // Handle ranges like "25-58"
+    const range = cost.amount.split("-");
+    return parseFloat(range[0]) || 0;
+  }
+
+  return 0;
 }
 
 // Function to validate index usage and performance

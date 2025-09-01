@@ -29,7 +29,7 @@ jobs:
           npx sst shell --stage production -- bash -c "
             cd packages/scripts &&
             npm install &&
-            node src/seed-events.ts &&
+            node src/seed-data.ts &&
             node src/seed-groups.ts &&
             npm run migrate:opensearch
           "

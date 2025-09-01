@@ -27,10 +27,11 @@ jobs:
       - name: Setup SST environment and run deployment tasks
         run: |
           npx sst shell --stage production -- bash -c "
+            cd packages/scripts && npm install &&
+            cd ../.. &&
+            npx tsx packages/scripts/src/seed-data.ts &&
+            npx tsx packages/scripts/src/seed-groups.ts &&
             cd packages/scripts &&
-            npm install &&
-            npx tsx src/seed-data.ts &&
-            npx tsx src/seed-groups.ts &&
             npm run migrate:opensearch
           "
         env:

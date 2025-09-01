@@ -21,10 +21,8 @@ export interface SearchResult {
 }
 
 export interface SearchMetadata {
-  total: number;
-  eventsCount: number;
-  groupsCount: number;
-  searchTime: number;
+  executionTime: number;
+  searchMethod: string;
   filters: SearchFilters;
 }
 

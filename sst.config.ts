@@ -9,6 +9,18 @@ export default $config({
       home: "aws",
     };
   },
+  console: {
+    autodeploy: {
+      async workflow({ $, event }) {
+        // Perform deployment workflow actions here
+        await $`cd packages/scripts`;
+        await $`npm install`;
+        await $`node packages/scripts/src/seed-events.ts`;
+        await $`node packages/scripts/src/seed-groups.ts`;
+        await $`npm run migrate:opensearch`;
+      },
+    },
+  },
   async run() {
     // Import infrastructure modules
     const { db } = await import("./infra/db");

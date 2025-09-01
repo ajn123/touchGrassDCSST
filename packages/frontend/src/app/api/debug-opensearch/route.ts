@@ -5,7 +5,11 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get("q") || "";
-    const type = searchParams.get("type") || undefined;
+    const typeParam = searchParams.get("type");
+
+    // Validate type parameter
+    const type =
+      typeParam === "event" || typeParam === "group" ? typeParam : undefined;
 
     console.log("🔍 Debug OpenSearch - Query:", query, "Type:", type);
 

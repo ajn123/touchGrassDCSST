@@ -90,8 +90,8 @@ export function UnifiedSearch() {
         {/* Search Metadata */}
         {metadata && (
           <div className="text-sm text-gray-600 mb-4">
-            Found {metadata.total} results ({metadata.eventsCount} events,{" "}
-            {metadata.groupsCount} groups) in {metadata.searchTime}ms
+            Found {results.total} results ({results.events.length} events,{" "}
+            {results.groups.length} groups) in {metadata.executionTime}ms
           </div>
         )}
       </div>

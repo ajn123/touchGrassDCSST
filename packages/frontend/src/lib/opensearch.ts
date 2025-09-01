@@ -1,12 +1,4 @@
-// Re-export types from server actions
-export type {
-  CategoryAggregation,
-  SearchFilters,
-  SearchResponse,
-  SearchResult,
-} from "./opensearch-actions";
-
-// Import server actions
+// Import server actions and types
 import {
   autocompleteOpenSearch,
   getOpenSearchCategories,
@@ -17,7 +9,19 @@ import {
   searchOpenSearch,
   searchOpenSearchEvents,
   searchOpenSearchGroups,
+  type CategoryAggregation,
+  type SearchFilters,
+  type SearchResponse,
+  type SearchResult,
 } from "./opensearch-actions";
+
+// Re-export types for external use
+export type {
+  CategoryAggregation,
+  SearchFilters,
+  SearchResponse,
+  SearchResult,
+};
 
 class OpenSearchClient {
   constructor() {

@@ -43,15 +43,13 @@ export async function GET(request: NextRequest) {
 
     // Build OpenSearch filters
     const filters = {
-      type: "event", // Only search for events
+      type: "event" as const, // Only search for events
       categories,
       location,
       dateRange: {
         start: dateStart,
         end: dateEnd,
       },
-      sortBy,
-      sortOrder,
       limit,
       offset,
       isPublic,

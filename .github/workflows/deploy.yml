@@ -19,6 +19,11 @@ jobs:
           node-version: "18"
           cache: "npm"
 
+      - name: Install dependencies
+        run: |
+          npm install
+          cd packages/scripts && npm install
+
       - name: Setup SST environment and run deployment tasks
         run: |
           npx sst deploy --stage production

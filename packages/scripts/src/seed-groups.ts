@@ -145,7 +145,7 @@ async function seedGroups() {
 
       try {
         // Debug: Show what the marshalled item looks like
-        const marshalledItem = marshall(item);
+        const marshalledItem = marshall(item, { removeUndefinedValues: true });
         console.log(
           `🔍 Item ${i + 1} marshalled:`,
           JSON.stringify(marshalledItem, null, 2)

@@ -82,7 +82,7 @@ export default function FeaturedEvent({ event }: { event: Event }) {
 
   return (
     <Link
-      href={`/items/${eventTitle}`}
+      href={`/events/${eventTitle}`}
       onClick={() => {
         if (eventId) {
           trackEventPageVisit(eventId);

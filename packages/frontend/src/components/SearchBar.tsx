@@ -1,6 +1,6 @@
 "use client";
 
-import { useAutocomplete, useSearchState } from "@/lib/hooks/useOpenSearch";
+import { useSearchState } from "@/lib/hooks/useOpenSearch";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
@@ -19,14 +19,6 @@ export default function SearchBar() {
     clearSearch,
     clearError,
   } = useSearchState();
-
-  const {
-    suggestions,
-    getSuggestions,
-    clearSuggestions,
-    isLoading: suggestionsLoading,
-    error: suggestionsError,
-  } = useAutocomplete();
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,20 +59,18 @@ export default function SearchBar() {
 
       // Auto-search as user types (with debouncing handled by the hook)
       if (value.trim().length >= 2) {
-        getSuggestions(value);
-        // Also trigger main search to show results
+        // Trigger main search to show results
         search();
         setShowResults(true);
       } else {
         setShowResults(false);
-        clearSuggestions();
       }
     },
-    [updateQuery, getSuggestions, clearSuggestions, error, clearError, search]
+    [updateQuery, error, clearError, search]
   );
 
   const handleInputFocus = () => {
-    if (query.trim().length >= 2 && (suggestions.length > 0 || hasSearched)) {
+    if (query.trim().length >= 2 && hasSearched) {
       setShowResults(true);
     }
   };
@@ -89,15 +79,7 @@ export default function SearchBar() {
     // Delay hiding results to allow clicking on them
     setTimeout(() => {
       setShowResults(false);
-      clearSuggestions();
     }, 200);
-  };
-
-  const handleSuggestionClick = (suggestion: any) => {
-    updateQuery(suggestion.title);
-    clearSuggestions();
-    search();
-    setShowResults(true);
   };
 
   return (
@@ -121,16 +103,13 @@ export default function SearchBar() {
       </form>
 
       {/* Error Display */}
-      {(error || suggestionsError) && (
+      {error && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-red-50 border border-red-200 rounded-lg p-3 z-50">
           <div className="flex items-center">
-            <span className="text-red-600 text-sm">
-              ⚠️ {error || suggestionsError}
-            </span>
+            <span className="text-red-600 text-sm">⚠️ {error}</span>
             <button
               onClick={() => {
                 if (error) clearError();
-                if (suggestionsError) clearSuggestions();
               }}
               className="ml-2 text-red-600 hover:text-red-800"
             >
@@ -143,49 +122,6 @@ export default function SearchBar() {
       {/* Search Results Dropdown */}
       {showResults && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 max-h-96 overflow-y-auto z-50">
-          {/* Autocomplete Suggestions */}
-          {(suggestions.length > 0 || suggestionsLoading) && (
-            <div className="p-3">
-              <h4 className="text-sm font-semibold text-gray-700 mb-2 px-2">
-                {suggestionsLoading
-                  ? "Loading suggestions..."
-                  : `Suggestions (${suggestions.length})`}
-              </h4>
-              {suggestionsLoading ? (
-                <div className="flex items-center justify-center py-4">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600"></div>
-                  <span className="ml-2 text-sm text-gray-600">Loading...</span>
-                </div>
-              ) : (
-                suggestions.map((suggestion, index) => (
-                  <div
-                    key={`suggestion-${index}`}
-                    onClick={() => handleSuggestionClick(suggestion)}
-                    className="flex items-center p-2 hover:bg-gray-50 rounded-md cursor-pointer transition-colors"
-                  >
-                    <div className="flex-shrink-0 w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
-                      <span className="text-purple-600 text-sm">
-                        {suggestion.type === "event" ? "📅" : "👥"}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {suggestion.title}
-                      </p>
-                      {suggestion.category && (
-                        <p className="text-xs text-gray-500 truncate">
-                          {Array.isArray(suggestion.category)
-                            ? suggestion.category.join(", ")
-                            : suggestion.category}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-
           {/* Search Results */}
           {results && results.hits.length > 0 && (
             <>
@@ -315,7 +251,7 @@ export default function SearchBar() {
           )}
 
           {/* No Results */}
-          {results && results.hits.length === 0 && suggestions.length === 0 && (
+          {results && results.hits.length === 0 && (
             <div className="p-4 text-center text-gray-500">
               <p>No results found for "{query}"</p>
             </div>

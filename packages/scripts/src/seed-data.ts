@@ -46,6 +46,7 @@ interface GeocodingResult {
     };
   };
   formatted_address: string;
+  place_id: string;
 }
 
 interface GeocodingResponse {
@@ -107,7 +108,7 @@ async function geocodeAddress(address: string): Promise<{
       const placeDetailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,formatted_address,address_components,geometry&key=${apiKey}`;
 
       const placeResponse = await fetch(placeDetailsUrl);
-      const placeData = await placeResponse.json();
+      const placeData = (await placeResponse.json()) as any;
 
       console.log(
         `Place details response for "${address}":`,
@@ -168,7 +169,7 @@ export async function main() {
 
   console.log(`Found ${sampleEvents.length} events to seed`);
 
-  console.log("🗑️  Deleting all events from the database...");
+  console.log("🗑️  Deleting all events and groups from the database...");
 
   // First, scan the table to get all items
   const scanCommand: any = {
@@ -191,7 +192,9 @@ export async function main() {
     lastEvaluatedKey = scanResult.LastEvaluatedKey;
   } while (lastEvaluatedKey);
 
-  console.log(`📋 Found ${allItems.length} items to delete`);
+  console.log(
+    `📋 Found ${allItems.length} items to delete (events and groups)`
+  );
 
   // Delete all items in batches
   const batchSize = 25; // DynamoDB batch delete limit
@@ -228,7 +231,7 @@ export async function main() {
     }
   }
 
-  console.log("✅ All events deleted successfully!");
+  console.log("✅ All events and groups deleted successfully!");
 
   for (const eventData of sampleEvents) {
     try {

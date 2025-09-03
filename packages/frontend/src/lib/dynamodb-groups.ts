@@ -25,6 +25,7 @@ export interface Group {
   description?: string;
   category: string;
   isPublic: string;
+  location?: string;
   scheduleDay?: string;
   scheduleTime?: string;
   scheduleLocation?: string;

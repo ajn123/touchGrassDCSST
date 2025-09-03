@@ -7,6 +7,7 @@ import { Description } from "@/components/Description";
 import EventMap from "@/components/EventMap";
 import { JsonEditor } from "@/components/JsonEditor";
 import { LoadingImage } from "@/components/LoadingImage";
+import { Location } from "@/components/Location";
 import { PrivateImage } from "@/components/PrivateImage";
 import { ReportWrongInfoButton } from "@/components/ReportWrongInfoButton";
 import { Schedule } from "@/components/Schedule";
@@ -213,7 +214,7 @@ export default async function ItemPage({
               {item.socials && <Socials socials={item.socials} />}
 
               {item.eventDate && <DateDisplay date={item.eventDate} />}
-
+              {item.location && <Location location={item.location} />}
               {item.category && (
                 <Categories
                   displayMode="display"

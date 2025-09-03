@@ -1,0 +1,240 @@
+[
+  {
+    "title": "American History Museum",
+    "location": "American History Museum, Washington, DC",
+    "description": "The American History Museum is a Smithsonian Institution museum in Washington, D.C. It is located on the National Mall, between the Smithsonian Castle and the Smithsonian National Air and Space Museum.",
+    "category": ["Museum"],
+    "image_url": "https://americanhistory.si.edu/sites/default/files/styles/page_hero/public/2024-07/JN2018-00704_1200x675.jpg?h=8ad5a422&itok=CSXMYeIG",
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://americanhistory.si.edu/"
+    },
+    "schedules": [
+      {
+        "days": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday except Christmas Day"
+        ],
+        "recurrence_type": "daily",
+        "time": "10:00 AM - 5:30 PM"
+      }
+    ],
+    "isPublic": true
+  },
+  {
+    "title": "Washington Monument",
+    "location": "Washington Monument, Washington, DC",
+    "venue": "Washington Monument",
+    "description": "The Washington Monument Lodge, located along 15th Street between Madison and Jefferson drives, opens at 8:45 a.m. for distribution of free, same day, timed tickets on a first-come, first-serve basis. One person (16 years +) may obtain up to six tickets as well as request their preferred ticket time. All visitors (including children ages 2+) must have a ticket to enter the Washington Monument. During peak season, tickets run out quickly. Be advised that many visitors form a line to wait long before the ticket window opens.",
+    "category": ["Landmark", "History"],
+    "image_url": "https://www.nps.gov/wamo/learn/historyculture/images/WAMO_Aerial.jpg?maxwidth=650&autorotate=false",
+    "socials": {
+      "website": "https://www.recreation.gov/ticket/facility/234635"
+    },
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Smithsonian National Zoo",
+    "location": "Smithsonian National Zoo, Washington, DC",
+    "description": "Founded in 1889, the Smithsonian's National Zoo and Conservation Biology Institute sits on 163 acres in the heart of Washington, D.C.’s Rock Creek Park and is home to more than 2,100 animals representing almost 400 different species.",
+    "category": ["Landmark"],
+    "image_url": "https://ids.si.edu/ids/deliveryService?id=https://www.si.edu/content/img/museums/banner/nzp.jpg&max_w=600",
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+
+    "schedules": [
+      {
+        "days": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ],
+        "recurrence_type": "daily",
+        "time": "8 a.m. to 6 p.m. daily (Mar. 15–Sept. 14) 8 a.m. to 4 p.m. daily (Sept. 15–Mar. 14) Closed Dec. 25"
+      }
+    ],
+    "socials": {
+      "website": "https://www.si.edu/zoo"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Washington Commanders",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/5/5f/New_Commanders_Stadium_concept.jpg",
+    "location": "FedExField, Washington, DC",
+    "category": ["Sports", "Football"],
+    "socials": {
+      "website": "https://www.washingtoncommanders.com/"
+    },
+    "description": "The Washington Commanders are a professional football team based in Washington, D.C. They are a member of the National Football League (NFL) and play their home games at FedExField. The Commanders were founded in 1932 and became a NFL team in 1937. The team's colors are red, white, and blue, and their mascot is a bear named Chief. The Commanders have won one Super Bowl championship, in 1982.",
+    "isPublic": true
+  },
+  {
+    "title": "Washington Capitals",
+    "image_url": "https://i0.wp.com/russianmachineneverbreaks.com/wp-content/uploads/2024/09/capitals-breakaway-jersey-crest.jpg?fit=2000%2C1333&ssl=1",
+    "location": "Capital One Arena, Washington, DC",
+    "category": ["Sports", "Hockey"],
+    "socials": {
+      "website": "https://www.washingtoncapitals.com/"
+    },
+    "description": "The Washington Capitals are a professional ice hockey team based in Washington, D.C. They are a member of the National Hockey League (NHL) and play their home games at Capital One Arena. The Capitals were founded in 1974 and became a NHL team in 1979. The team's colors are red, white, and blue, and their mascot is a bear named Chief. The Capitals have won one Stanley Cup championship, in 2018.",
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "15-100+"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "930 Club",
+    "description": "The 9:30 Club, originally named Nightclub 9:30 and also known simply as the 9:30, is a nightclub and concert venue in Washington, D.C. In 2018, Rolling Stone named the 9:30 Club one of the 10 best live music venues in the United States.",
+    "image_url": "https://artistwaves.com/wp-content/uploads/2016/11/1ec39-1aiawttr9btzrkteylv8eog.jpeg",
+    "category": ["Music"],
+
+    "socials": {
+      "website": "https://www.930.com/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "The Kennedy Center",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/7/72/Kennedy_Center_for_the_Performing_Arts%2C_Washington%2C_D.C.%2C_LCCN2011632175_%28cropped%29.jpg",
+    "category": ["Music", "Entertainment"],
+    "location": "The Kennedy Center, Washington DC",
+    "description": "The John F. Kennedy Memorial Center for the Performing Arts, commonly known as the Kennedy Center, is the national cultural center of the United States, located on the eastern bank of the Potomac River in Washington, D.C.",
+    "socials": {
+      "website": "https://www.kennedy-center.org/?gad_source=1&gad_campaignid=18931138018&gbraid=0AAAAADnuhU9vadex18nat04DDNy-o44ib&gclid=Cj0KCQjwj8jDBhD1ARIsACRV2TsCoRn1c-hODiH29DAk8mpINkk3Pw0JgyRWoQCNP_0KTzi1goiRNuwaAk8rEALw_wcB"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "National Building Museum",
+    "location": "National Building Museum, Washington, DC",
+    "image_url": "https://nbm.org/wp-content/uploads/bb-plugin/cache/banner_greathall-square.jpeg",
+    "description": "The National Building Museum is a museum in Washington, D.C. that showcases the history of American architecture and design. It is located on the National Mall and is part of the Smithsonian Institution.",
+    "category": ["Museum"],
+    "socials": {
+      "website": "https://nbm.org/"
+    },
+    "schedules": [
+      {
+        "days": ["Monday"],
+        "recurrence_type": "weekly",
+        "time": "10:00 AM - 4:00 PM"
+      },
+      {
+        "days": ["Thursday"],
+        "recurrence_type": "weekly",
+        "time": "10:00 AM - 4:00 PM"
+      },
+      {
+        "days": ["Friday"],
+        "recurrence_type": "weekly",
+        "time": "10:00 AM - 4:00 PM"
+      },
+      {
+        "days": ["Saturday"],
+        "recurrence_type": "weekly",
+        "time": "10:00 AM - 4:00 PM"
+      },
+      {
+        "days": ["Sunday"],
+        "recurrence_type": "weekly",
+        "time": "10:00 AM - 4:00 PM"
+      }
+    ],
+    "isPublic": true
+  },
+  {
+    "title": "National African American Museum",
+    "image_url": "https://ids.si.edu/ids/deliveryService?id=https%3A//www.si.edu/sites/default/files/images/nmaahc-1000x675.jpg&max_w=800",
+    "description": "The National Museum of African American History and Culture, colloquially known as the Blacksonian, is a Smithsonian Institution museum located on the National Mall in Washington, D.C., in the United States. It was established in 2003 and opened its permanent home in 2016 with a ceremony led by President Barack Obama.",
+    "category": ["Museum"],
+    "socials": {
+      "website": "https://nmaahc.si.edu/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "National Building Meseum",
+    "category": ["Museum", "Smithsonian"],
+    "image_url": "https://cdn.vox-cdn.com/thumbor/EnL45Lw2XgQ-IPeUabRSXuWFLlw=/1400x1050/filters:format(jpeg)/cdn.vox-cdn.com/uploads/chorus_asset/file/18279645/g_ncqGuC.jpg",
+    "location": "401 F St. NW, Washington, DC 20001, United States",
+    "socials": {
+      "website": "https://nbm.org/"
+    },
+    "schedules": {
+      "days": ["Thursday", "Friday", "Saturday", "Sunday"],
+      "recurrence_type": "weekly",
+      "time": "10:00 AM - 4:00 PM"
+    }
+  },
+  {
+    "title": "National Archives Museum",
+
+    "category": ["Museum", "Smithsonian"],
+    "image_url": "https://visit.archives.gov/sites/default/files/styles/hero/public/2024-04/rotunda-20150219-01-021-l.jpg?h=10d202d3&itok=RCKXS6CZ",
+    "location": "National Archives Museum, Washington, DC",
+    "description": "The National Archives Museum is a museum in Washington, D.C. that showcases the history of the United States. It is located on the National Mall and is part of the Smithsonian Institution.",
+    "socials": {
+      "website": "https://visit.archives.gov/"
+    },
+    "isPublic": true
+  },
+
+  {
+    "title": "Washington Nationals",
+    "location": "Nationals Park, Washington, DC",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Washington_Nationals_logo.svg/800px-Washington_Nationals_logo.svg.png",
+    "category": ["Sports", "Baseball"],
+    "socials": {
+      "website": "https://www.mlb.com/washington-nationals",
+      "tickets": "https://www.ticketmaster.com/washington-nationals-tickets/artist/948674?landing=c&awtrc=true&home_away=home&c=SEM_TMMLB_ggl_9590244864_124785143219_washington%20nationals%20tickets&GCID=0&gclsrc=aw.ds&gad_source=1&gad_campaignid=9590244864&gbraid=0AAAAAD_KsMKztsi-bB5r2Y4Fg5jyM5pK9&gclid=Cj0KCQjwj8jDBhD1ARIsACRV2TsLtk1omeVPluOu6Bg-18N-EJqrLidbtlSnTxjeQ3BsU-ujp6bw6O8aAobBEALw_wcB"
+    },
+    "description": "The Washington Nationals are a professional baseball team based in Washington, D.C. They are a member of the National League (NL) and play their home games at Nationals Park. The Nationals were founded in 2005 and became a Major League Baseball (MLB) team in 2008. The team's colors are navy blue, red, and white, and their mascot is a bear named Chief. The Nationals have won one World Series championship, in 2019.",
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "15-100"
+    },
+    "isPublic": true
+  },
+
+  {
+    "title": "National Portrait Gallery",
+    "category": ["Museum", "Art"],
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/2/29/National_Portrait_Gallery.jpg",
+    "location": "National Portrait Gallery, Washington, DC",
+    "socials": {
+      "website": "https://npg.si.edu/home/national-portrait-gallery"
+    },
+    "description": "The National Portrait Gallery is an art museum in Washington, D.C., United States. Founded in 1962 and opened in 1968, it is part of the Smithsonian Institution.`",
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "isPublic": true
+  }
+]

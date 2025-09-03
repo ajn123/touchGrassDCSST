@@ -3,6 +3,7 @@ import Categories from "@/components/Categories";
 import { Cost } from "@/components/Cost";
 import { Description } from "@/components/Description";
 import { LoadingImage } from "@/components/LoadingImage";
+import { Location } from "@/components/Location";
 import { Schedule } from "@/components/Schedule";
 import { Socials } from "@/components/Socials";
 import {
@@ -172,6 +173,7 @@ export default async function GroupPage({
             <div className="space-y-4">
               {group.cost && <Cost cost={group.cost} />}
               {group.socials && <Socials socials={group.socials} />}
+              {group.location && <Location location={group.location} />}
               {group.category && (
                 <Categories
                   displayMode="display"

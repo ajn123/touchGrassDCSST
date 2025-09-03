@@ -211,5 +211,170 @@
       "meetup": "https://www.meetup.com/washington-area-roadskaters/events/"
     },
     "isPublic": true
+  },
+  {
+    "title": "NOMA Run Club",
+    "venue": "Check website for location.  Each day meets at a different location",
+    "description": "NOMA Run Club is a social running club that meets every Monday and Thursday at 6:30 PM and Saturday at 8:00 AM. They offer a variety of runs, from easy to challenging, and more! (check the wesbite for more details)",
+    "category": ["Sports", "Running"],
+    "image_url": "https://i0.wp.com/nomarunclub.com/wp-content/uploads/2024/03/20231002_184725-Crop.jpeg?resize=2048%2C746&ssl=1",
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "schedules": [
+      {
+        "days": ["Monday"],
+        "recurrence_type": "weekly",
+        "time": "6:30 PM - 8:30 PM"
+      },
+      {
+        "days": ["Wednesday"],
+        "recurrence_type": "weekly",
+        "time": "6:30 PM - 8:30 PM"
+      },
+      {
+        "days": ["Thursday"],
+        "recurrence_type": "weekly",
+        "time": "6:30 PM - 8:30 PM"
+      },
+      {
+        "days": ["Saturday"],
+        "recurrence_type": "weekly",
+        "time": "8:00 AM - 10:00 AM"
+      }
+    ],
+    "socials": {
+      "website": "https://www.nomarunclub.com/",
+      "instagram": "https://www.instagram.com/nomarunclub/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Volo Sports",
+    "image_url": "https://www.myamericanave.com/media/1512/vince-fleming-azvpxrydijk-unsplash-1.jpg?width=700&mode=crop&quality=80",
+    "description": "Volo Sports is a social sports club that offers a wide range of sports activities for adults. They offer basketball, volleyball, and soccer and more! (check the wesbite for more details)  They also offer a variety of social events, such as happy hours and game nights.",
+    "start_date": "",
+    "end_date": "",
+
+    "category": ["Sports", "Social"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "30-60"
+    },
+    "socials": {
+      "website": "https://www.volosports.com/Washington-DC"
+    },
+    "isPublic": true
+  },
+  ,
+  {
+    "title": "DC Fray",
+    "category": ["Sports", "Social"],
+    "description": "DC Fray is a social sports club that offers a wide range of sports activities for adults. They offer basketball, volleyball, and soccer and more! (check the wesbite for more details)  They also offer a variety of social events, such as happy hours and game nights.",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQyITNzEMaafpG7b_hTvKjqeR9OV96uAgbGMA&s",
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "30-60"
+    },
+    "socials": {
+      "website": "https://www.dcfray.com/",
+      "instagram": "https://www.instagram.com/dcfray/?hl=en"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Politics and Prose Book Clubs",
+    "category": ["Book Club", "Group"],
+    "image_url": "https://upload.wikimedia.org/wikipedia/en/a/a7/Politics_and_Prose.jpg",
+    "location": "Politics and Prose, Washington, DC",
+    "description": "Check the website for more information. Politics and Prose is a book club that meets at the Politics and Prose bookstore in Washington, D.C. The club is open to all and is free to join. The club meets on the first Tuesday of the month at 7:00 PM.",
+    "socials": {
+      "website": "https://politics-prose.com/book-groups"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Time Left DC",
+    "image_url": "https://s3-eu-west-1.amazonaws.com/tpd/logos/65faf27ff7667ef7bae3232c/0x0.png",
+    "socials": {
+      "website": "https://timeleft.com//"
+    },
+
+    "description": "Time Left is a way to meet new people in DC.  Book your seat now and meet 5 strangers over dinner, all matched by our personality algorithm.",
+    "category": ["Social"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": 15
+    },
+    "isPublic": true
+  },
+  {
+    "title": "DC Singles Meetup",
+    "category": ["Dating"],
+    "description": "A meetup group for singles in DC.  Check the website for more details",
+    "image_url": "https://www.meetup.com/_next/static/media/placeholder.b90fcd9a.jpg",
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://www.reddit.com/r/DCSinglesMeetup/"
+    },
+    "isPublic": true
+  },
+
+  {
+    "title": "DC Swoon Speed Dating",
+    "category": ["Dating"],
+    "image_url": "https://cdn.cityswoon.com/serverImages/dating/speed-dating-event.webp",
+    "description": "Cityswoon DC: it's speed dating's cooler, more adventurous cousin.  Check the website for more details",
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "30-50"
+    },
+    "socials": {
+      "website": "https://cityswoon.com/speed-dating-washingtondc.jsp?gad_source=1&gclid=Cj0KCQiA_Yq-BhC9ARIsAA6fbAiHc1e24Wd23FyP3WuRobpVma7-OfUnvdgB9BButZLcrAepcfw9nRgaAn1YEALw_wcB#topOfEvents"
+    },
+    "isPublic": true
+  },
+
+  {
+    "title": "Shuffle Dating",
+    "category": ["Dating"],
+    "description": "Speed dating but done through an app.  Check the website for more details",
+    "image_url": "https://static1.squarespace.com/static/63c05254f20e82345a873cfb/t/661c1c3598a9340c1c0f98c8/1690605190083/vertical-shuffle.png?format=1500w",
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "10-30"
+    },
+    "socials": {
+      "website": "https://events.shuffle.dating/dc"
+    },
+    "isPublic": true
+  },
+
+  {
+    "title": "Pitch A Friend",
+    "category": ["Dating"],
+    "description": "Pitch A Friend is a social event that allows you to meet new people in a fun and interactive way.  Pitching your friend power-point stytle.  The event is free to attend and $5 to sign up to pitch your friend.  Check the website for more details",
+    "image_url": "paf.png",
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://pitchafriend.com/dc",
+      "instagram": "https://www.instagram.com/pitchafriend.dc/#"
+    },
+    "isPublic": true
   }
 ]

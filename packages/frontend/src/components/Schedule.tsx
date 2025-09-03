@@ -10,10 +10,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconSection } from "./IconSection";
 
 interface ScheduleItem {
-  days: string[];
-  recurrence_type: string;
+  // For recurring events
+  days?: string[];
+  recurrence_type?: string;
   time: string;
   location?: string;
+
+  // For one-time events
+  date?: string;
 }
 
 interface ScheduleProps {
@@ -36,7 +40,20 @@ export function Schedule({ schedules, className = "" }: ScheduleProps) {
     return `${days.slice(0, -1).join(", ")} & ${days[days.length - 1]}`;
   };
 
-  const getRecurrenceIcon = (type: string) => {
+  const isRecurringEvent = (schedule: ScheduleItem) => {
+    return schedule.days && schedule.recurrence_type;
+  };
+
+  const isOneTimeEvent = (schedule: ScheduleItem) => {
+    return schedule.date && !schedule.days;
+  };
+
+  const getRecurrenceIcon = (schedule: ScheduleItem) => {
+    if (isOneTimeEvent(schedule)) {
+      return <FontAwesomeIcon icon={faCalendar} className="w-4 h-4" />;
+    }
+
+    const type = schedule.recurrence_type || "";
     switch (type.toLowerCase()) {
       case "weekly":
         return <FontAwesomeIcon icon={faSync} className="w-4 h-4" />;
@@ -49,7 +66,12 @@ export function Schedule({ schedules, className = "" }: ScheduleProps) {
     }
   };
 
-  const getRecurrenceText = (type: string) => {
+  const getRecurrenceText = (schedule: ScheduleItem) => {
+    if (isOneTimeEvent(schedule)) {
+      return "One-time Event";
+    }
+
+    const type = schedule.recurrence_type || "";
     switch (type.toLowerCase()) {
       case "weekly":
         return "Weekly";
@@ -78,19 +100,23 @@ export function Schedule({ schedules, className = "" }: ScheduleProps) {
             key={index}
             className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden"
           >
-            {/* Header with days and recurrence */}
+            {/* Header with days/date and recurrence */}
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="text-blue-600">
-                    {getRecurrenceIcon(schedule.recurrence_type)}
+                    {getRecurrenceIcon(schedule)}
                   </div>
                   <div>
                     <div className="font-semibold text-gray-900 text-sm">
-                      {formatDays(schedule.days)}
+                      {isOneTimeEvent(schedule)
+                        ? schedule.date
+                        : schedule.days
+                        ? formatDays(schedule.days)
+                        : "Schedule"}
                     </div>
                     <div className="text-xs text-gray-600 capitalize">
-                      {getRecurrenceText(schedule.recurrence_type)}
+                      {getRecurrenceText(schedule)}
                     </div>
                   </div>
                 </div>
@@ -109,7 +135,9 @@ export function Schedule({ schedules, className = "" }: ScheduleProps) {
                   <div className="text-sm font-medium text-gray-900">
                     {schedule.time}
                   </div>
-                  <div className="text-xs text-gray-600">Meeting Time</div>
+                  <div className="text-xs text-gray-600">
+                    {isOneTimeEvent(schedule) ? "Event Time" : "Meeting Time"}
+                  </div>
                 </div>
               </div>
 
@@ -125,14 +153,18 @@ export function Schedule({ schedules, className = "" }: ScheduleProps) {
                       {schedule.location}
                     </div>
                     <div className="text-xs text-gray-600">
-                      Meeting Location
+                      {isOneTimeEvent(schedule)
+                        ? "Event Location"
+                        : "Meeting Location"}
                     </div>
                   </div>
                 </div>
               )}
               {schedule.location == null && (
                 <div className="text-xs text-gray-600">
-                  Check the group page for more information
+                  {isOneTimeEvent(schedule)
+                    ? "Check event details for location information"
+                    : "Check the group page for more information"}
                 </div>
               )}
             </div>
@@ -143,8 +175,13 @@ export function Schedule({ schedules, className = "" }: ScheduleProps) {
       {/* Summary */}
       <div className="ml-12 mt-4 p-3 bg-gray-50 rounded-lg">
         <div className="text-sm text-gray-600">
-          <span className="font-medium">{schedules.length}</span> recurring
-          meeting{schedules.length !== 1 ? "s" : ""} scheduled
+          <span className="font-medium">{schedules.length}</span> schedule
+          {schedules.length !== 1 ? "s" : ""}
+          {schedules.some(isRecurringEvent) && schedules.some(isOneTimeEvent)
+            ? " (mix of recurring and one-time events)"
+            : schedules.some(isRecurringEvent)
+            ? " (recurring meetings)"
+            : " (one-time events)"}
         </div>
       </div>
     </IconSection>

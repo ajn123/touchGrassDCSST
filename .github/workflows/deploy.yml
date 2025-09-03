@@ -21,7 +21,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install
           cd packages/scripts && npm install
 
       - name: Setup SST environment and run deployment tasks

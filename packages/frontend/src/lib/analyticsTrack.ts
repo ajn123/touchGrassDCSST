@@ -33,8 +33,7 @@ export function trackPageVisit(
 ) {
   const visitData: VisitData = {
     page:
-      data.page ||
-      (typeof window !== "undefined" ? window.location.pathname : "/"),
+      data.page || (typeof window !== "undefined" ? window.location.href : "/"),
     timestamp: new Date().toISOString(),
     userAgent:
       data.userAgent ||
@@ -127,9 +126,12 @@ export function trackSearch(
 }
 
 export function trackEventPageVisit(eventId: string) {
+  console.log("Tracking event page visit", eventId);
+  // Let trackPageVisit auto-detect the full URL from window.location.href
   trackPageVisit(
     {
-      page: `/events/${eventId}`,
+      // Don't override page - let it auto-detect from window.location
+      // This will capture the full URL including domain, query params, etc.
     },
     "EVENT_PAGE_VISIT",
     "EVENT_PAGE_VISIT",

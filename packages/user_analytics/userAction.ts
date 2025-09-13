@@ -53,7 +53,7 @@ export const handler = async (sqsEvent: any) => {
     // Convert the entire event to DynamoDB format (top level)
     const convertedItem = convertToDynamoDBFormat(eventWithKeys, true);
 
-    console.log("Converted Item", convertedItem);
+    console.log("Converted Item", JSON.stringify(convertedItem, null, 2));
 
     const command = new PutItemCommand({
       TableName: Resource.Db.name,

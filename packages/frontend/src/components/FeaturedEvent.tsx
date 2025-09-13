@@ -1,6 +1,5 @@
 "use client";
 
-import { trackEventPageVisit } from "@/lib/analyticsTrack";
 import { resolveImageUrl } from "@/lib/image-utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -81,16 +80,7 @@ export default function FeaturedEvent({ event }: { event: Event }) {
   };
 
   return (
-    <Link
-      href={`/events/${eventTitle}`}
-      onClick={() => {
-        if (eventId) {
-          trackEventPageVisit(eventId);
-        } else {
-          console.log("No event ID");
-        }
-      }}
-    >
+    <Link href={`/events/${eventTitle}`}>
       <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 hover:scale-105 transform h-full flex flex-col min-h-[400px]">
         <div className="relative h-48 flex-shrink-0">
           {event.image_url ? (

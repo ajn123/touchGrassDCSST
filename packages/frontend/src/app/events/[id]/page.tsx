@@ -5,6 +5,7 @@ import { Cost } from "@/components/Cost";
 import { DateDisplay } from "@/components/Date";
 import { Description } from "@/components/Description";
 import EventMap from "@/components/EventMap";
+import { EventPageTracker } from "@/components/EventPageTracker";
 import { JsonEditor } from "@/components/JsonEditor";
 import { LoadingImage } from "@/components/LoadingImage";
 import { Location } from "@/components/Location";
@@ -84,6 +85,8 @@ export default async function ItemPage({
         borderRadius: "1rem",
       }}
     >
+      {/* Client-side analytics tracking */}
+      <EventPageTracker eventId={awaitedParams.id} />
       {artificialDelay > 0 && (
         <div
           style={{

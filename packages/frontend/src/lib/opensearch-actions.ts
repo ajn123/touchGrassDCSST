@@ -178,20 +178,54 @@ export async function searchOpenSearch(
 
     // Date range filter
     if (filters.dateRange) {
-      const dateFilter: any = {
-        range: {},
-      };
+      // For date range filtering, we want to find events that overlap with the specified range
+      // An event overlaps with a date range if:
+      // - The event starts before or on the end date (event.start_date <= range.end)
+      // - The event ends on or after the start date (event.end_date >= range.start)
+
+      const dateRangeFilters: any[] = [];
 
       if (filters.dateRange.start) {
-        dateFilter.range.start_date = { gte: filters.dateRange.start };
+        // Event must end on or after the start date
+        dateRangeFilters.push({
+          bool: {
+            should: [
+              // If event has an end_date, it must be >= start date
+              { range: { end_date: { gte: filters.dateRange.start } } },
+              // If event only has start_date, it must be >= start date
+              { range: { start_date: { gte: filters.dateRange.start } } },
+              // If event has a general date field, it must be >= start date
+              { range: { date: { gte: filters.dateRange.start } } },
+            ],
+            minimum_should_match: 1,
+          },
+        });
       }
 
       if (filters.dateRange.end) {
-        dateFilter.range.end_date = { lte: filters.dateRange.end };
+        // Event must start on or before the end date
+        dateRangeFilters.push({
+          bool: {
+            should: [
+              // If event has a start_date, it must be <= end date
+              { range: { start_date: { lte: filters.dateRange.end } } },
+              // If event only has end_date, it must be <= end date
+              { range: { end_date: { lte: filters.dateRange.end } } },
+              // If event has a general date field, it must be <= end date
+              { range: { date: { lte: filters.dateRange.end } } },
+            ],
+            minimum_should_match: 1,
+          },
+        });
       }
 
-      if (Object.keys(dateFilter.range).length > 0) {
-        searchBody.query.bool.filter.push(dateFilter);
+      // Add all date range filters
+      if (dateRangeFilters.length > 0) {
+        searchBody.query.bool.filter.push({
+          bool: {
+            must: dateRangeFilters,
+          },
+        });
       }
     }
 

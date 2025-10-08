@@ -27,9 +27,7 @@ export type AnalyticsAction =
 
 export function trackPageVisit(
   data: Partial<VisitData>,
-  action: AnalyticsAction = "USER_VISIT",
-  pk?: string,
-  sk?: string
+  action: AnalyticsAction = "USER_VISIT"
 ) {
   const visitData: VisitData = {
     page:
@@ -48,8 +46,8 @@ export function trackPageVisit(
   console.log("Page visit tracked:", visitData);
 
   const body = {
-    pk: pk || `USER`,
-    sk: sk || `TIME#${Date.now()}`,
+    pk: `ANALYTICS#${action}`,
+    sk: `TIME#${Date.now()}`,
     properties: visitData,
     action: action,
     userId: getUserId() || getSessionId(),
@@ -72,8 +70,7 @@ export function trackPageVisit(
 
 export function trackEmailSignup(
   formData: any,
-  pk: string = "EMAIL",
-  sk: string = "TIME"
+  action: AnalyticsAction = "EMAIL_SIGNUP_SUBMISSION"
 ) {
   trackPageVisit(
     {
@@ -82,25 +79,20 @@ export function trackEmailSignup(
       name: formData.name,
       selectedCategories: formData.selectedCategories,
     },
-    "EMAIL_SIGNUP_SUBMISSION",
-    pk,
-    `${sk}#${Date.now()}`
+    action
   );
 }
 
 export function trackEmailSent(
   emailData: any,
-  pk: string = "EMAIL",
-  sk: string = "TIME"
+  action: AnalyticsAction = "CONTACT_FORM_SUBMISSION"
 ) {
   trackPageVisit(
     {
       page: "/api/sendEmail",
       data: emailData,
     },
-    "CONTACT_FORM_SUBMISSION",
-    pk,
-    `${sk}#${Date.now()}`
+    action
   );
 }
 
@@ -110,22 +102,19 @@ export function trackHomepageVisit() {
   });
 }
 
-export function trackSearch(
-  filters: any,
-  pk: string = "SEARCH",
-  sk: string = "TIME"
-) {
+export function trackSearch(filters: any, action: AnalyticsAction = "SEARCH") {
   trackPageVisit(
     {
       page: `/search?${new URLSearchParams(filters).toString()}`,
     },
-    "SEARCH",
-    pk,
-    `${sk}#${Date.now()}`
+    action
   );
 }
 
-export function trackEventPageVisit(eventId: string) {
+export function trackEventPageVisit(
+  eventId: string,
+  action: AnalyticsAction = "EVENT_PAGE_VISIT"
+) {
   console.log("Tracking event page visit", eventId);
   // Let trackPageVisit auto-detect the full URL from window.location.href
   trackPageVisit(
@@ -133,9 +122,7 @@ export function trackEventPageVisit(eventId: string) {
       // Don't override page - let it auto-detect from window.location
       // This will capture the full URL including domain, query params, etc.
     },
-    "EVENT_PAGE_VISIT",
-    "EVENT_PAGE_VISIT",
-    `${eventId}#${Date.now()}`
+    action
   );
 }
 

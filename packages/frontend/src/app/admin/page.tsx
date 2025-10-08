@@ -2,6 +2,7 @@
 
 import { AddEventForm } from "@/components/AddEventForm";
 import { EventApprovalList } from "@/components/EventApprovalList";
+import { VisitsByDayChart } from "@/components/VisitsByDayChart";
 import { useEffect, useState } from "react";
 import { useUser } from "../../contexts/UserContext";
 import { auth, login, logout } from "../actions";
@@ -9,10 +10,32 @@ import { auth, login, logout } from "../actions";
 export default function AdminPage() {
   const { user, loading, setUser } = useUser();
   const [localLoading, setLocalLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"add-event" | "approve-events">(
-    "add-event"
-  );
+  const [activeTab, setActiveTab] = useState<
+    "add-event" | "approve-events" | "analytics"
+  >("add-event");
   const [pendingEventsCount, setPendingEventsCount] = useState(0);
+
+  const [totalVisits, setTotalVisits] = useState(0);
+  const [analyticsAction, setAnalyticsAction] = useState("USER_VISIT");
+  const [chartType, setChartType] = useState<"line" | "bar">("bar");
+
+  useEffect(() => {
+    // Call a client-side API route instead of a server function directly
+    const fetchTotalVisits = async () => {
+      try {
+        const response = await fetch("/api/statistics/total-visits");
+        if (response.ok) {
+          const data = await response.json();
+          setTotalVisits(data.totalVisits || 0);
+        } else {
+          setTotalVisits(0);
+        }
+      } catch (err) {
+        setTotalVisits(0);
+      }
+    };
+    fetchTotalVisits();
+  }, []);
 
   useEffect(() => {
     checkAuth();
@@ -159,6 +182,16 @@ export default function AdminPage() {
               Add Event
             </button>
             <button
+              onClick={() => setActiveTab("analytics")}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === "analytics"
+                  ? "border-indigo-500 text-indigo-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
+            >
+              Analytics
+            </button>
+            <button
               onClick={() => setActiveTab("approve-events")}
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === "approve-events"
@@ -208,6 +241,9 @@ export default function AdminPage() {
                     </dt>
                     <dd className="text-lg font-medium text-gray-900">
                       Create events
+                    </dd>
+                    <dd className="text-sm font-medium text-gray-500 truncate">
+                      Analytics
                     </dd>
                   </dl>
                 </div>
@@ -310,11 +346,143 @@ export default function AdminPage() {
           </div>
         </div>
 
+        {activeTab === "analytics" && (
+          <div className="space-y-6">
+            {/* Analytics Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="p-5">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+                        <svg
+                          className="w-5 h-5 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="ml-5 w-0 flex-1">
+                      <dl>
+                        <dt className="text-sm font-medium text-gray-500 truncate">
+                          Total Visits
+                        </dt>
+                        <dd className="text-lg font-medium text-gray-900">
+                          {totalVisits}
+                        </dd>
+                      </dl>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="p-5">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
+                        <svg
+                          className="w-5 h-5 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="ml-5 w-0 flex-1">
+                      <dl>
+                        <dt className="text-sm font-medium text-gray-500 truncate">
+                          Analytics Dashboard
+                        </dt>
+                        <dd className="text-sm font-medium text-gray-900">
+                          View detailed charts
+                        </dd>
+                      </dl>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Chart Controls */}
+            <div className="bg-white overflow-hidden shadow rounded-lg">
+              <div className="p-6">
+                <h2 className="text-lg font-medium text-gray-900 mb-4">
+                  Analytics Chart
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Analytics Action
+                    </label>
+                    <select
+                      value={analyticsAction}
+                      onChange={(e) => setAnalyticsAction(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="USER_VISIT">User Visits</option>
+                      <option value="EMAIL_SIGNUP">Email Signups</option>
+                      <option value="EVENT_PAGE_VISIT">
+                        Event Page Visits
+                      </option>
+                      <option value="CONTACT_FORM_SUBMISSION">
+                        Contact Form Submissions
+                      </option>
+                      <option value="SEARCH">Search Actions</option>
+                      <option value="EMAIL_SIGNUP_SUBMISSION">
+                        Email Signup Submissions
+                      </option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Chart Type
+                    </label>
+                    <select
+                      value={chartType}
+                      onChange={(e) =>
+                        setChartType(e.target.value as "line" | "bar")
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="line">Line Chart</option>
+                      <option value="bar">Bar Chart</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Chart Component */}
+                <VisitsByDayChart
+                  action={analyticsAction}
+                  chartType={chartType}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTab === "add-event" ? (
           <AddEventForm />
-        ) : (
+        ) : activeTab === "approve-events" ? (
           <EventApprovalList onEventAction={fetchPendingEventsCount} />
-        )}
+        ) : null}
       </div>
     </div>
   );

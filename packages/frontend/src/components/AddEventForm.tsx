@@ -1,7 +1,7 @@
 "use client";
 
 import { useUser } from "@/contexts/UserContext";
-import { createEvent, getCategories } from "@/lib/dynamodb-events";
+import { createEvent, getCategories } from "@/lib/dynamodb/dynamodb-events";
 import { useEffect, useState } from "react";
 import { ImageUploadWithState } from "./ImageUploadWithState";
 

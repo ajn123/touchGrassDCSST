@@ -1,6 +1,6 @@
 "use client";
 
-import { approveEvent, deleteEvent } from "@/lib/dynamodb-events";
+import { approveEvent, deleteEvent } from "@/lib/dynamodb/dynamodb-events";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 

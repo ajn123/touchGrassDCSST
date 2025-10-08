@@ -1,4 +1,4 @@
-import { validateIndexUsage } from "@/lib/dynamodb-events";
+import { validateIndexUsage } from "@/lib/dynamodb/dynamodb-events";
 import { NextResponse } from "next/server";
 
 export async function GET() {

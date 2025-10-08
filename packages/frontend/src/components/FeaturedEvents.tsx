@@ -1,4 +1,4 @@
-import { getEvents } from "@/lib/dynamodb-events";
+import { getEvents } from "@/lib/dynamodb/dynamodb-events";
 import FeaturedEvent from "./FeaturedEvent";
 
 export default async function FeaturedEvents() {

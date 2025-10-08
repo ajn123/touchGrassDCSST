@@ -11,7 +11,7 @@ import {
   getGroupSchedules,
   GroupSchedule,
   transformSchedulesForDisplay,
-} from "@/lib/dynamodb-groups";
+} from "@/lib/dynamodb/dynamodb-groups";
 import { resolveImageUrl } from "@/lib/image-utils";
 import { Suspense } from "react";
 

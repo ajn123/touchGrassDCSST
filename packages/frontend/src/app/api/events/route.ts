@@ -1,4 +1,4 @@
-import { searchEventsOptimized } from "@/lib/dynamodb-events";
+import { searchEventsOptimized } from "@/lib/dynamodb/dynamodb-events";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {

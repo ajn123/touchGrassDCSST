@@ -13,7 +13,7 @@ import { PrivateImage } from "@/components/PrivateImage";
 import { ReportWrongInfoButton } from "@/components/ReportWrongInfoButton";
 import { Schedule } from "@/components/Schedule";
 import { Socials } from "@/components/Socials";
-import { getEventByTitle } from "@/lib/dynamodb-events";
+import { getEventByTitle } from "@/lib/dynamodb/dynamodb-events";
 import { resolveImageUrl } from "@/lib/image-utils";
 import { Suspense } from "react";
 

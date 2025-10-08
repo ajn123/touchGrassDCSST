@@ -1,4 +1,4 @@
-import { getGroups, searchGroups } from "@/lib/dynamodb-groups";
+import { getGroups, searchGroups } from "@/lib/dynamodb/dynamodb-groups";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {

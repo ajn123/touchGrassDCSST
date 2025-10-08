@@ -1,4 +1,4 @@
-import { getEvent } from "@/lib/dynamodb-events";
+import { getEvent } from "@/lib/dynamodb/dynamodb-events";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(

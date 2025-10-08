@@ -1,6 +1,6 @@
 "use client";
 
-import { approveEvent, deleteEvent } from "@/lib/dynamodb-events";
+import { approveEvent, deleteEvent } from "@/lib/dynamodb/dynamodb-events";
 import { useEffect, useState } from "react";
 
 interface Event {

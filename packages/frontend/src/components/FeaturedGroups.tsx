@@ -1,4 +1,4 @@
-import { getPublicGroups } from "@/lib/dynamodb-groups";
+import { getPublicGroups } from "@/lib/dynamodb/dynamodb-groups";
 import FeaturedGroup from "./FeaturedGroup";
 
 export default async function FeaturedGroups() {

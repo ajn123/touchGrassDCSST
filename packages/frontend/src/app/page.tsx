@@ -4,7 +4,7 @@ import FeaturedGroups from "@/components/FeaturedGroups";
 import HomepageAnalytics from "@/components/HomepageAnalytics";
 import HomepageMap from "@/components/HomepageMap";
 import SearchBar from "@/components/SearchBar";
-import { createEvent, getCategories } from "@/lib/dynamodb-events";
+import { createEvent, getCategories } from "@/lib/dynamodb/dynamodb-events";
 import { revalidatePath } from "next/cache";
 import Image from "next/image";
 import { Resource } from "sst";

@@ -47,7 +47,9 @@
     "test:openweb-single": "tsx src/test-openweb-single.ts",
     "test:openweb-lambda-db": "tsx src/test-openweb-lambda-db.ts",
     "test:api-endpoint": "tsx src/test-api-endpoint.ts",
-    "reindex:events": "tsx src/reindex-new-events.ts"
+    "reindex:events": "tsx src/reindex-new-events.ts",
+    "seed:venues": "tsx src/seed-venues.ts",
+    "full-sync": "tsx src/full-sync.ts"
   },
   "devDependencies": {
     "@types/node": "^22",

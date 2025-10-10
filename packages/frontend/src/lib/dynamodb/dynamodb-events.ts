@@ -131,7 +131,7 @@ export async function getEventsByCategory(category: string) {
         "#pk": "pk",
       },
       ExpressionAttributeValues: {
-        ":eventPrefix": { S: "EVENT" },
+        ":eventPrefix": { S: "EVENT#" },
       },
     });
 
@@ -199,7 +199,7 @@ export async function getEventByTitle(title: string) {
         "#title": "title",
       },
       ExpressionAttributeValues: {
-        ":eventPrefix": { S: "EVENT" },
+        ":eventPrefix": { S: "EVENT#" },
         ":title": { S: title },
       },
     });
@@ -256,7 +256,7 @@ export async function getEvents() {
         "#isPublic": "isPublic",
       },
       ExpressionAttributeValues: {
-        ":eventPrefix": { S: "EVENT" },
+        ":eventPrefix": { S: "EVENT#" },
         ":isPublic": { S: "true" },
       },
     });
@@ -266,7 +266,7 @@ export async function getEvents() {
       FilterExpression:
         "begins_with(#pk, :eventPrefix) AND #isPublic = :isPublic",
       ExpressionAttributeValues: {
-        ":eventPrefix": "EVENT",
+        ":eventPrefix": "EVENT#",
         ":isPublic": "true",
       },
     });
@@ -446,7 +446,7 @@ async function searchEventsWithLimit(filters: any) {
         "#pk": "pk",
       },
       ExpressionAttributeValues: {
-        ":eventPrefix": { S: "EVENT" },
+        ":eventPrefix": { S: "EVENT#" },
       },
     };
 
@@ -650,7 +650,7 @@ async function searchEventsByTitle(filters: any) {
       },
       ExpressionAttributeValues: {
         ":titlePrefix": { S: query },
-        ":eventPrefix": { S: "EVENT" },
+        ":eventPrefix": { S: "EVENT#" },
         ":isPublic": {
           S: (filters.isPublic !== undefined
             ? filters.isPublic
@@ -718,7 +718,7 @@ export async function createEvent(event: any) {
 
     if (!eventId) {
       // Generate a unique event ID if none provided
-      eventId = `EVENT${Date.now()}`;
+      eventId = `EVENT#${Date.now()}`;
     }
 
     // Check if item exists
@@ -1386,7 +1386,7 @@ export async function migrateEventsWithTitlePrefix() {
         "#pk": "pk",
       },
       ExpressionAttributeValues: {
-        ":eventPrefix": { S: "EVENT" },
+        ":eventPrefix": { S: "EVENT#" },
       },
     });
 

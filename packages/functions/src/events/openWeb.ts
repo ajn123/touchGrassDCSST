@@ -97,8 +97,14 @@ function transformOpenWebNinjaEvent(event: OpenWebNinjaEvent) {
   };
 }
 
-// Generate a unique ID for the event based on title, date, and location
+// Generate a unique ID for the event based on external_id, title, date, and location
 function generateEventId(event: any): string {
+  // Use external_id if available (from OpenWebNinja API)
+  if (event.external_id) {
+    return event.external_id;
+  }
+
+  // Fallback to title, date, and location
   const title = event.title.toLowerCase().replace(/[^a-z0-9]/g, "");
   const date = event.start_date || "";
   const location = event.location.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -287,12 +293,19 @@ async function indexEventToOpenSearch(event: any): Promise<void> {
   try {
     const searchableEvent = transformEventForOpenSearch(event);
 
+    // Use the event's primary key as the document ID to prevent duplicates
+    const eventId =
+      event.pk || event.id || `event-${Date.now()}-${Math.random()}`;
+
     await openSearchClient.index({
       index: "events-groups-index",
+      id: eventId, // Explicitly set the document ID
       body: searchableEvent,
     });
 
-    console.log(`✅ Indexed event to OpenSearch: ${event.title}`);
+    console.log(
+      `✅ Indexed event to OpenSearch: ${event.title} (ID: ${eventId})`
+    );
   } catch (error) {
     console.error(
       `❌ Error indexing event to OpenSearch: ${event.title}`,

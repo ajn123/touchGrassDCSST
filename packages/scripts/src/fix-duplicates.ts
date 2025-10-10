@@ -146,6 +146,7 @@ async function fixDuplicates() {
 
       await client.index({
         index: "events-groups-index",
+        id: group.pk || `group-${Date.now()}`,
         body: searchableGroup,
       });
     }
@@ -178,6 +179,7 @@ async function fixDuplicates() {
 
       await client.index({
         index: "events-groups-index",
+        id: event.pk || `event-${Date.now()}`,
         body: searchableEvent,
       });
     }

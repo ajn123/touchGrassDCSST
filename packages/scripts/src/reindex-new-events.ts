@@ -164,6 +164,7 @@ class EventReindexer {
 
         await this.client.index({
           index: "events-groups-index",
+          id: eventId, // Explicitly set the document ID to prevent duplicates
           body: searchableEvent,
         });
 

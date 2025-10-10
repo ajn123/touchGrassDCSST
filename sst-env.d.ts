@@ -31,6 +31,10 @@ declare module "sst" {
       "url": string
       "username": string
     }
+    "OPENWEBNINJA_API_KEY": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
     "SendEmail": {
       "name": string
       "type": "sst.aws.Function"

@@ -7,7 +7,6 @@
     "@aws-sdk/client-dynamodb": "^3.0.0",
     "@aws-sdk/credential-provider-node": "^3.0.0",
     "@aws-sdk/util-dynamodb": "^3.0.0",
-    "@monorepo-template/core": "*",
     "@opensearch-project/opensearch": "^2.4.0",
     "axios": "^1.6.0",
     "cheerio": "^1.0.0",
@@ -42,7 +41,13 @@
     "node:test": "tsx src/test-opensearch.ts",
     "node:test:search": "tsx src/test-opensearch-search.ts",
     "test:categories": "tsx src/test-categories.ts",
-    "setup:env": "tsx src/setup-env.ts"
+    "setup:env": "tsx src/setup-env.ts",
+    "openwebninja:query": "tsx src/openwebninja-query.ts",
+    "test:openweb-lambda": "tsx src/test-openweb-lambda.ts",
+    "test:openweb-single": "tsx src/test-openweb-single.ts",
+    "test:openweb-lambda-db": "tsx src/test-openweb-lambda-db.ts",
+    "test:api-endpoint": "tsx src/test-api-endpoint.ts",
+    "reindex:events": "tsx src/reindex-new-events.ts"
   },
   "devDependencies": {
     "@types/node": "^22",

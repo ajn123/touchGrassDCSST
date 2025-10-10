@@ -31,9 +31,11 @@ export default $config({
     const { auth } = await import("./infra/auth");
     const { queue } = await import("./infra/queue");
     const { search } = await import("./infra/opensearch");
+    const { cron } = await import("./infra/cron");
 
     return {
       Db: db,
+      Cron: cron,
       Api: api,
       Bucket: bucket,
       Web: web,

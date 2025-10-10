@@ -3,7 +3,10 @@
   "version": "0.0.0",
   "type": "module",
   "dependencies": {
-    "@monorepo-template/core": "*",
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/lib-dynamodb": "^3.0.0",
+    "@opensearch-project/opensearch": "^2.4.0",
+    "axios": "^1.6.0",
     "sst": "*"
   },
   "devDependencies": {

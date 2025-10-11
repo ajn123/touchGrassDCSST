@@ -215,7 +215,6 @@ export default async function ItemPage({
             <div className="space-y-4">
               {<Cost cost={item.cost} />}
               {item.socials && <Socials socials={item.socials} />}
-
               {item.eventDate && <DateDisplay date={item.eventDate} />}
               {item.location && <Location location={item.location} />}
               {item.category && (

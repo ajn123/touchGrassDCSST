@@ -137,9 +137,10 @@ export default function MonthlyCalendar() {
   const getCostDisplay = (cost: any) => {
     if (!cost) return "Free";
     if (cost.type === "free") return "Free";
+    if (cost.type === "unknown") return "Unknown";
     if (cost.type === "variable") return `$${cost.amount}`;
     if (typeof cost.amount === "number") return `$${cost.amount}`;
-    return cost.amount || "Free";
+    return cost.amount || "Unknown";
   };
 
   const handleEventClick = (event: Event) => {

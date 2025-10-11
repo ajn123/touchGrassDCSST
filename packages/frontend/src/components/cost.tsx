@@ -23,6 +23,8 @@ export const Cost = ({
     switch (cost.type) {
       case "free":
         return <span className="text-green-600 font-semibold">Free</span>;
+      case "unknown":
+        return <span className="text-gray-500 font-semibold">Unknown</span>;
       case "variable":
         return (
           <span className="text-blue-600 font-semibold">

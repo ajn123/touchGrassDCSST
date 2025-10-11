@@ -16,6 +16,10 @@ export default function EventMap({
   eventTitle,
   className = "",
 }: EventMapProps) {
+  // Don't render if no location data is available
+  if (!coordinates && !address) {
+    return null;
+  }
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<any>(null);
   const [marker, setMarker] = useState<any>(null);
@@ -151,28 +155,7 @@ export default function EventMap({
   }, [coordinates, address, eventTitle]);
 
   if (error) {
-    return (
-      <div className={`bg-gray-100 rounded-lg p-4 text-center ${className}`}>
-        <p className="text-gray-600">Unable to load map</p>
-        {coordinates && (
-          <p className="text-sm text-gray-500 mt-2">
-            Coordinates: {coordinates}
-          </p>
-        )}
-        <details className="mt-4 text-left">
-          <summary className="cursor-pointer text-sm text-gray-500">
-            Debug Info
-          </summary>
-          <div className="mt-2 text-xs text-gray-600 max-h-32 overflow-y-auto">
-            {debugInfo.map((info, index) => (
-              <div key={index} className="mb-1">
-                {info}
-              </div>
-            ))}
-          </div>
-        </details>
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -205,12 +188,6 @@ export default function EventMap({
         className="w-full h-64 rounded-lg shadow-md mt-2"
         style={{ minHeight: "256px", marginTop: "10px" }}
       />
-
-      {!coordinates && (
-        <div className="absolute inset-0 bg-gray-100 rounded-lg flex items-center justify-center">
-          <p className="text-gray-600">No location data available</p>
-        </div>
-      )}
 
       {/* Debug info panel */}
       {process.env.NODE_ENV === "development" && (

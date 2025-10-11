@@ -1,6 +1,6 @@
 import { auth } from "@/app/actions";
 import Categories from "@/components/Categories";
-import { Cost } from "@/components/Cost";
+import { Cost } from "@/components/cost";
 import { Description } from "@/components/Description";
 import { LoadingImage } from "@/components/LoadingImage";
 import { Location } from "@/components/Location";

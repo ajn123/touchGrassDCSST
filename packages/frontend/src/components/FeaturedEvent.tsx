@@ -4,7 +4,7 @@ import { resolveImageUrl } from "@/lib/image-utils";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { Cost } from "./Cost";
+import { Cost } from "./cost";
 import { DateDisplay } from "./Date";
 
 interface Event {

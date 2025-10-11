@@ -1,4 +1,8 @@
-import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
+import {
+  DynamoDBClient,
+  PutItemCommand,
+  ScanCommand,
+} from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
 import * as fs from "fs";
 import * as path from "path";
@@ -41,6 +45,25 @@ async function seedGroups() {
   console.log("  - Table name length:", tableName.length);
   console.log("  - Current working directory:", process.cwd());
 
+  console.log("🔍 Checking for existing groups to avoid duplicates...");
+
+  // Get existing group IDs to avoid duplicates
+  const existingGroupsCommand = new ScanCommand({
+    TableName: tableName,
+    FilterExpression: "begins_with(pk, :groupPrefix)",
+    ExpressionAttributeValues: {
+      ":groupPrefix": { S: "GROUP#" },
+    },
+    ProjectionExpression: "pk",
+  });
+
+  const existingGroupsResult = await client.send(existingGroupsCommand);
+  const existingGroupIds = new Set(
+    existingGroupsResult.Items?.map((item) => item.pk?.S).filter(Boolean) || []
+  );
+
+  console.log(`📋 Found ${existingGroupIds.size} existing groups in database`);
+
   try {
     // Read the groups.json file
     const groupsPath = path.join(process.cwd(), "groups.json");
@@ -55,6 +78,14 @@ async function seedGroups() {
 
     // Process each group
     for (const group of groupsData) {
+      const groupPk = `GROUP#${group.title}`;
+
+      // Skip if group already exists
+      if (existingGroupIds.has(groupPk)) {
+        console.log(`⏭️  Skipping existing group: ${group.title}`);
+        continue;
+      }
+
       // Always create an INFO item for the group
       const groupInfoItem = {
         pk: `GROUP#${group.title}`,

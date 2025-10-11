@@ -209,9 +209,9 @@ class FullSyncManager {
       console.log("=".repeat(50));
       console.log(`⏱️ Total duration: ${duration} seconds`);
       console.log("📋 Summary:");
-      console.log("  ✅ Events seeded from events.json");
-      console.log("  ✅ Groups seeded from groups.json");
-      console.log("  ✅ Venues seeded from venues.json");
+      console.log("  ✅ Events seeded from events.json (new events only)");
+      console.log("  ✅ Groups seeded from groups.json (new groups only)");
+      console.log("  ✅ Venues seeded from venues.json (new venues only)");
       console.log("  ✅ OpenWeb events synced");
       console.log("  ✅ Duplicates fixed in OpenSearch");
       console.log("  ✅ All data reindexed");

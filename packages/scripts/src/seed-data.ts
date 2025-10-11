@@ -1,5 +1,4 @@
 import {
-  BatchWriteItemCommand,
   DynamoDBClient,
   PutItemCommand,
   ScanCommand,
@@ -169,69 +168,26 @@ export async function main() {
 
   console.log(`Found ${sampleEvents.length} events to seed`);
 
-  console.log("🗑️  Deleting all events and groups from the database...");
+  console.log("🔍 Checking for existing events to avoid duplicates...");
 
-  // First, scan the table to get all items
-  const scanCommand: any = {
+  // Get existing event IDs to avoid duplicates
+  const existingEventsCommand = new ScanCommand({
     TableName: Resource.Db.name,
-  };
+    FilterExpression:
+      "(begins_with(pk, :eventPrefixNew) OR begins_with(pk, :eventPrefixOld))",
+    ExpressionAttributeValues: {
+      ":eventPrefixNew": { S: "EVENT-" },
+      ":eventPrefixOld": { S: "EVENT#" },
+    },
+    ProjectionExpression: "pk",
+  });
 
-  let allItems: any[] = [];
-  let lastEvaluatedKey = undefined;
-
-  do {
-    const scanParams: any = {
-      ...scanCommand,
-      ...(lastEvaluatedKey && { ExclusiveStartKey: lastEvaluatedKey }),
-    };
-
-    const scanResult = await client.send(new ScanCommand(scanParams));
-    if (scanResult.Items) {
-      allItems = allItems.concat(scanResult.Items);
-    }
-    lastEvaluatedKey = scanResult.LastEvaluatedKey;
-  } while (lastEvaluatedKey);
-
-  console.log(
-    `📋 Found ${allItems.length} items to delete (events and groups)`
+  const existingEventsResult = await client.send(existingEventsCommand);
+  const existingEventIds = new Set(
+    existingEventsResult.Items?.map((item) => item.pk?.S).filter(Boolean) || []
   );
 
-  // Delete all items in batches
-  const batchSize = 25; // DynamoDB batch delete limit
-  for (let i = 0; i < allItems.length; i += batchSize) {
-    const batch = allItems.slice(i, i + batchSize);
-
-    const deleteRequests = batch.map((item) => ({
-      DeleteRequest: {
-        Key: {
-          pk: item.pk,
-          sk: item.sk,
-        },
-      },
-    }));
-
-    const batchDeleteCommand = {
-      RequestItems: {
-        [Resource.Db.name]: deleteRequests,
-      },
-    };
-
-    try {
-      await client.send(new BatchWriteItemCommand(batchDeleteCommand));
-      console.log(
-        `🗑️  Deleted batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(
-          allItems.length / batchSize
-        )}`
-      );
-    } catch (error) {
-      console.error(
-        `❌ Error deleting batch ${Math.floor(i / batchSize) + 1}:`,
-        error
-      );
-    }
-  }
-
-  console.log("✅ All events and groups deleted successfully!");
+  console.log(`📋 Found ${existingEventIds.size} existing events in database`);
 
   for (const eventData of sampleEvents) {
     try {
@@ -241,6 +197,17 @@ export async function main() {
         `EVENT-${eventData.title
           ?.replace(/\s+/g, "-")
           .toLowerCase()}-${Date.now()}`;
+
+      // Skip if event already exists
+      if (existingEventIds.has(eventId)) {
+        console.log(
+          `⏭️  Skipping existing event: ${
+            eventData.title || eventData.id || "Unknown"
+          }`
+        );
+        continue;
+      }
+
       const timestamp = Date.now();
 
       // Handle category field - ensure it's a string

@@ -367,12 +367,46 @@ export const handler = async (event: any) => {
       throw new Error("DB_NAME environment variable not set");
     }
 
-    // Make a single API call for Washington DC events
-    const query = "Events in Washington DC";
-    console.log(`Making API call for: "${query}"`);
+    // Make targeted API calls for Washington DC events including special events
+    const queries = [
+      "Events in Washington DC",
+      "Special events DC festivals concerts cultural exhibitions",
+    ];
 
-    const events = await queryOpenWebNinjaEvents(query, 50);
-    console.log(`✅ API call successful! Found ${events.length} events`);
+    let allEvents: OpenWebNinjaEvent[] = [];
+
+    for (const query of queries) {
+      console.log(`Making API call for: "${query}"`);
+      try {
+        const events = await queryOpenWebNinjaEvents(query, 50);
+        console.log(
+          `✅ API call successful for "${query}"! Found ${events.length} events`
+        );
+        allEvents.push(...events);
+
+        // Add a small delay between API calls to be respectful
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      } catch (error) {
+        console.error(`❌ API call failed for "${query}":`, error);
+        // Continue with other queries even if one fails
+      }
+    }
+
+    // Remove duplicates based on external_id or title+date combination
+    const uniqueEvents = allEvents.filter(
+      (event, index, self) =>
+        index ===
+        self.findIndex((e) =>
+          e.external_id && event.external_id
+            ? e.external_id === event.external_id
+            : e.title === event.title && e.start_date === event.start_date
+        )
+    );
+
+    console.log(
+      `✅ Total unique events found: ${uniqueEvents.length} (from ${allEvents.length} total)`
+    );
+    const events = uniqueEvents;
 
     let totalEventsProcessed = 0;
     let totalEventsInserted = 0;

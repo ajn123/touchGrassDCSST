@@ -1,4 +1,8 @@
-import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
+import {
+  DynamoDBClient,
+  PutItemCommand,
+  ScanCommand,
+} from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
 import * as fs from "fs";
 import * as path from "path";
@@ -42,6 +46,25 @@ async function seedVenues() {
   console.log("  - Using SST table name:", tableName);
   console.log("  - Current working directory:", process.cwd());
 
+  console.log("🔍 Checking for existing venues to avoid duplicates...");
+
+  // Get existing venue IDs to avoid duplicates
+  const existingVenuesCommand = new ScanCommand({
+    TableName: tableName,
+    FilterExpression: "begins_with(pk, :venuePrefix)",
+    ExpressionAttributeValues: {
+      ":venuePrefix": { S: "VENUE#" },
+    },
+    ProjectionExpression: "pk",
+  });
+
+  const existingVenuesResult = await client.send(existingVenuesCommand);
+  const existingVenueIds = new Set(
+    existingVenuesResult.Items?.map((item) => item.pk?.S).filter(Boolean) || []
+  );
+
+  console.log(`📋 Found ${existingVenueIds.size} existing venues in database`);
+
   try {
     // Read the venues.json file
     const venuesPath = path.join(process.cwd(), "venues.json");
@@ -56,6 +79,14 @@ async function seedVenues() {
 
     // Process each venue
     for (const venue of venuesData) {
+      const venuePk = `VENUE#${venue.title}`;
+
+      // Skip if venue already exists
+      if (existingVenueIds.has(venuePk)) {
+        console.log(`⏭️  Skipping existing venue: ${venue.title}`);
+        continue;
+      }
+
       // Always create an INFO item for the venue
       const venueInfoItem = {
         pk: `VENUE#${venue.title}`,

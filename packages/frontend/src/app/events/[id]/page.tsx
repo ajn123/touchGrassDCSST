@@ -13,7 +13,7 @@ import { PrivateImage } from "@/components/PrivateImage";
 import { ReportWrongInfoButton } from "@/components/ReportWrongInfoButton";
 import { Schedule } from "@/components/Schedule";
 import { Socials } from "@/components/Socials";
-import { getEventByTitle } from "@/lib/dynamodb/dynamodb-events";
+import { getEvent } from "@/lib/dynamodb/dynamodb-events";
 import { resolveImageUrl } from "@/lib/image-utils";
 import { Suspense } from "react";
 
@@ -41,7 +41,7 @@ export default async function ItemPage({
   const WHITELIST: any = [];
 
   // This runs on the server during rendering
-  const item = await getEventByTitle(decodeURIComponent(awaitedParams.id));
+  const item = await getEvent(decodeURIComponent(awaitedParams.id));
 
   console.log(item);
   if (!item) {

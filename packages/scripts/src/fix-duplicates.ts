@@ -109,9 +109,11 @@ async function fixDuplicates() {
     console.log("📊 Fetching events...");
     const eventsCommand = new ScanCommand({
       TableName: Resource.Db.name,
-      FilterExpression: "begins_with(pk, :eventPrefix)",
+      FilterExpression:
+        "(begins_with(pk, :eventPrefixNew) OR begins_with(pk, :eventPrefixOld))",
       ExpressionAttributeValues: {
-        ":eventPrefix": { S: "EVENT#" },
+        ":eventPrefixNew": { S: "EVENT-" },
+        ":eventPrefixOld": { S: "EVENT#" },
       },
     });
     const eventsResult = await db.send(eventsCommand);

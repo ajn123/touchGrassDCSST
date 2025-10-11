@@ -511,7 +511,7 @@ class EventCrawler {
       try {
         if (!event.title) continue;
 
-        const eventId = `EVENT#${event.title
+        const eventId = `EVENT-${event.title
           .replace(/\s+/g, "-")
           .toLowerCase()}-${Date.now()}`;
         const timestamp = Date.now();

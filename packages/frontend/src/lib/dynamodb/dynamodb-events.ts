@@ -126,12 +126,14 @@ export async function getEventsByCategory(category: string) {
   try {
     const command = new ScanCommand({
       TableName: Resource.Db.name,
-      FilterExpression: "begins_with(#pk, :eventPrefix)",
+      FilterExpression:
+        "(begins_with(#pk, :eventPrefixNew) OR begins_with(#pk, :eventPrefixOld))",
       ExpressionAttributeNames: {
         "#pk": "pk",
       },
       ExpressionAttributeValues: {
-        ":eventPrefix": { S: "EVENT#" },
+        ":eventPrefixNew": { S: "EVENT-" },
+        ":eventPrefixOld": { S: "EVENT#" },
       },
     });
 
@@ -164,15 +166,44 @@ export async function getEventsByCategory(category: string) {
 
 export async function getEvent(id: string) {
   try {
-    const command = new GetItemCommand({
-      TableName: process.env.DB_NAME,
+    console.log("Getting event with id:", id);
+
+    // Try the exact ID first
+    let command = new GetItemCommand({
+      TableName: Resource.Db.name,
       Key: {
         pk: { S: id },
         sk: { S: id },
       },
     });
 
-    const result = await client.send(command);
+    let result = await client.send(command);
+
+    // If not found and ID doesn't have prefix, try with both prefixes
+    if (!result.Item && !id.startsWith("EVENT")) {
+      // Try with new prefix
+      command = new GetItemCommand({
+        TableName: Resource.Db.name,
+        Key: {
+          pk: { S: `EVENT-${id}` },
+          sk: { S: `EVENT-${id}` },
+        },
+      });
+      result = await client.send(command);
+
+      // If still not found, try with old prefix
+      if (!result.Item) {
+        command = new GetItemCommand({
+          TableName: Resource.Db.name,
+          Key: {
+            pk: { S: `EVENT#${id}` },
+            sk: { S: `EVENT#${id}` },
+          },
+        });
+        result = await client.send(command);
+      }
+    }
+
     // Use AWS SDK's built-in unmarshall utility
     const unmarshalledItem = result.Item ? unmarshall(result.Item) : null;
     console.log(
@@ -193,13 +224,15 @@ export async function getEventByTitle(title: string) {
 
     const command = new ScanCommand({
       TableName: Resource.Db.name,
-      FilterExpression: "#title = :title AND begins_with(#pk, :eventPrefix)",
+      FilterExpression:
+        "#title = :title AND (begins_with(#pk, :eventPrefixNew) OR begins_with(#pk, :eventPrefixOld))",
       ExpressionAttributeNames: {
         "#pk": "pk",
         "#title": "title",
       },
       ExpressionAttributeValues: {
-        ":eventPrefix": { S: "EVENT#" },
+        ":eventPrefixNew": { S: "EVENT-" },
+        ":eventPrefixOld": { S: "EVENT#" },
         ":title": { S: title },
       },
     });
@@ -247,16 +280,18 @@ export async function getEvents() {
       process.env.AWS_REGION || "us-east-1"
     );
 
+    // Handle both old EVENT# and new EVENT- prefixes during transition
     const command = new ScanCommand({
       TableName: Resource.Db.name,
       FilterExpression:
-        "begins_with(#pk, :eventPrefix) AND #isPublic = :isPublic",
+        "(begins_with(#pk, :eventPrefixNew) OR begins_with(#pk, :eventPrefixOld)) AND #isPublic = :isPublic",
       ExpressionAttributeNames: {
         "#pk": "pk",
         "#isPublic": "isPublic",
       },
       ExpressionAttributeValues: {
-        ":eventPrefix": { S: "EVENT#" },
+        ":eventPrefixNew": { S: "EVENT-" },
+        ":eventPrefixOld": { S: "EVENT#" },
         ":isPublic": { S: "true" },
       },
     });
@@ -264,9 +299,10 @@ export async function getEvents() {
     console.log("🔍 getEvents: Scan command prepared:", {
       TableName: Resource.Db.name,
       FilterExpression:
-        "begins_with(#pk, :eventPrefix) AND #isPublic = :isPublic",
+        "(begins_with(#pk, :eventPrefixNew) OR begins_with(#pk, :eventPrefixOld)) AND #isPublic = :isPublic",
       ExpressionAttributeValues: {
-        ":eventPrefix": "EVENT#",
+        ":eventPrefixNew": "EVENT-",
+        ":eventPrefixOld": "EVENT#",
         ":isPublic": "true",
       },
     });
@@ -441,12 +477,14 @@ async function searchEventsWithLimit(filters: any) {
     const scanParams: any = {
       TableName: Resource.Db.name,
       // Remove the limit to get all matching events
-      FilterExpression: "begins_with(#pk, :eventPrefix)",
+      FilterExpression:
+        "(begins_with(#pk, :eventPrefixNew) OR begins_with(#pk, :eventPrefixOld))",
       ExpressionAttributeNames: {
         "#pk": "pk",
       },
       ExpressionAttributeValues: {
-        ":eventPrefix": { S: "EVENT#" },
+        ":eventPrefixNew": { S: "EVENT-" },
+        ":eventPrefixOld": { S: "EVENT#" },
       },
     };
 
@@ -468,8 +506,10 @@ async function searchEventsWithLimit(filters: any) {
       });
     }
 
-    // Build the complete filter expression
-    let filterExpressions = ["begins_with(#pk, :eventPrefix)"];
+    // Build the complete filter expression - handle both old and new prefixes
+    let filterExpressions = [
+      "(begins_with(#pk, :eventPrefixNew) OR begins_with(#pk, :eventPrefixOld))",
+    ];
 
     // Add category filter if specified
     if (filters.categories && filters.categories.length > 0) {
@@ -642,7 +682,7 @@ async function searchEventsByTitle(filters: any) {
       IndexName: "eventTitleIndex",
       KeyConditionExpression: "begins_with(#title, :titlePrefix)",
       FilterExpression:
-        "begins_with(#pk, :eventPrefix) AND #isPublic = :isPublic",
+        "(begins_with(#pk, :eventPrefixNew) OR begins_with(#pk, :eventPrefixOld)) AND #isPublic = :isPublic",
       ExpressionAttributeNames: {
         "#title": "title",
         "#pk": "pk",
@@ -650,7 +690,8 @@ async function searchEventsByTitle(filters: any) {
       },
       ExpressionAttributeValues: {
         ":titlePrefix": { S: query },
-        ":eventPrefix": { S: "EVENT#" },
+        ":eventPrefixNew": { S: "EVENT-" },
+        ":eventPrefixOld": { S: "EVENT#" },
         ":isPublic": {
           S: (filters.isPublic !== undefined
             ? filters.isPublic
@@ -718,7 +759,7 @@ export async function createEvent(event: any) {
 
     if (!eventId) {
       // Generate a unique event ID if none provided
-      eventId = `EVENT#${Date.now()}`;
+      eventId = `EVENT-${Date.now()}`;
     }
 
     // Check if item exists
@@ -1381,12 +1422,14 @@ export async function migrateEventsWithTitlePrefix() {
   try {
     const command = new ScanCommand({
       TableName: Resource.Db.name,
-      FilterExpression: "begins_with(#pk, :eventPrefix)",
+      FilterExpression:
+        "(begins_with(#pk, :eventPrefixNew) OR begins_with(#pk, :eventPrefixOld))",
       ExpressionAttributeNames: {
         "#pk": "pk",
       },
       ExpressionAttributeValues: {
-        ":eventPrefix": { S: "EVENT#" },
+        ":eventPrefixNew": { S: "EVENT-" },
+        ":eventPrefixOld": { S: "EVENT#" },
       },
     });
 

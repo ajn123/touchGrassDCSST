@@ -76,27 +76,58 @@ function SearchPageContent() {
         if (filters.sortOrder)
           queryParams.append("sortOrder", filters.sortOrder);
 
-        // Add types parameter for OpenSearch - search both events and groups
-        queryParams.append("types", "event,group");
+        // Try OpenSearch first, fallback to DynamoDB if it fails
+        let data: any = { events: [], groups: [] };
 
-        const response = await fetch(
-          `/api/search-opensearch?${queryParams.toString()}`
-        );
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        try {
+          // Add types parameter for OpenSearch - search both events and groups
+          queryParams.append("types", "event,group");
+
+          const opensearchResponse = await fetch(
+            `/api/search-opensearch?${queryParams.toString()}`
+          );
+
+          if (opensearchResponse.ok) {
+            data = await opensearchResponse.json();
+            console.log(
+              "📦 Retrieved",
+              data.events?.length || 0,
+              "events and",
+              data.groups?.length || 0,
+              "groups from OpenSearch API"
+            );
+          } else {
+            throw new Error(
+              `OpenSearch failed with status: ${opensearchResponse.status}`
+            );
+          }
+        } catch (opensearchError) {
+          console.warn(
+            "⚠️ OpenSearch failed, falling back to DynamoDB:",
+            opensearchError
+          );
+
+          // Fallback to DynamoDB API for events
+          try {
+            const dynamoResponse = await fetch(
+              `/api/events?${queryParams.toString()}`
+            );
+
+            if (dynamoResponse.ok) {
+              const dynamoData = await dynamoResponse.json();
+              data.events = dynamoData.events || [];
+              console.log(
+                "📦 Retrieved",
+                data.events.length,
+                "events from DynamoDB API (fallback)"
+              );
+            }
+          } catch (dynamoError) {
+            console.error("❌ DynamoDB fallback also failed:", dynamoError);
+          }
         }
 
         trackSearch(queryParams);
-
-        const data = await response.json();
-        console.log(
-          "📦 Retrieved",
-          data.events?.length || 0,
-          "events and",
-          data.groups?.length || 0,
-          "groups from OpenSearch API"
-        );
-
         setEvents(data.events || []);
         setGroups(data.groups || []);
       } catch (error) {

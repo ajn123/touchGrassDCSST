@@ -1,5 +1,5 @@
 import Categories from "@/components/Categories";
-import FeaturedEvents from "@/components/FeaturedEvents";
+import CompactCalendar from "@/components/CompactCalendar";
 import FeaturedGroups from "@/components/FeaturedGroups";
 import HomepageAnalytics from "@/components/HomepageAnalytics";
 import HomepageMap from "@/components/HomepageMap";
@@ -62,8 +62,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Featured Events Section */}
-      <FeaturedEvents />
+      {/* Compact Calendar Section */}
+      <CompactCalendar />
 
       {/* Featured Groups Section */}
       <FeaturedGroups />

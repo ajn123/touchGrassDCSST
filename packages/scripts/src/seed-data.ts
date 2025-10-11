@@ -238,7 +238,7 @@ export async function main() {
       // Use a consistent eventId based on the event data
       const eventId =
         eventData.id ||
-        `EVENT#${eventData.title
+        `EVENT-${eventData.title
           ?.replace(/\s+/g, "-")
           .toLowerCase()}-${Date.now()}`;
       const timestamp = Date.now();

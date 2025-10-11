@@ -145,9 +145,11 @@ class OpenSearchMigrator {
   async fetchEvents(db: DynamoDBClient): Promise<any[]> {
     const command = new ScanCommand({
       TableName: Resource.Db.name,
-      FilterExpression: "begins_with(pk, :eventPrefix)",
+      FilterExpression:
+        "(begins_with(pk, :eventPrefixNew) OR begins_with(pk, :eventPrefixOld))",
       ExpressionAttributeValues: {
-        ":eventPrefix": { S: "EVENT#" },
+        ":eventPrefixNew": { S: "EVENT-" },
+        ":eventPrefixOld": { S: "EVENT#" },
       },
     });
     const result = await db.send(command);

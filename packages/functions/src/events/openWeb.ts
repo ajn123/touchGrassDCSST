@@ -150,8 +150,8 @@ async function insertEvent(event: any, tableName: string): Promise<void> {
     : event.category || "General";
 
   const item = {
-    pk: `EVENT#${eventId}`,
-    sk: `EVENT#${eventId}`,
+    pk: `EVENT-${eventId}`,
+    sk: `EVENT-${eventId}`,
     createdAt: now,
     title: event.title,
     category: categoryString,

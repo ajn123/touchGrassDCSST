@@ -92,7 +92,7 @@ export default function SearchBar() {
           onFocus={handleInputFocus}
           onBlur={handleInputBlur}
           placeholder="Search events and groups..."
-          className="w-full px-6 py-4 rounded-full text-black text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-lg"
+          className="w-full px-6 py-4 rounded-full text-black text-lg bg-white/95 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-lg border border-white/20"
         />
         <button
           type="submit"

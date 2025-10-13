@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTheme } from "../contexts/ThemeContext";
 import { useUser } from "../contexts/UserContext";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, loading } = useUser();
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark, toggleTheme, mounted } = useTheme();
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -18,20 +19,37 @@ export default function Header() {
     setIsMenuOpen(false);
   };
 
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        closeMenu();
+      }
+    };
+
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuOpen]);
+
   return (
-    <nav className="sticky top-0 z-50 bg-white dark:bg-black rounded-b-lg shadow-lg">
+    <nav
+      ref={menuRef}
+      className="sticky top-0 z-50 header-nav theme-transition rounded-b-lg"
+    >
       <div className="flex flex-row items-center justify-between px-4 py-2">
         {/* Logo/Brand */}
         <div className="flex items-center space-x-2">
-          <Link
-            href="/"
-            className="text-xl font-bold text-black dark:text-white"
-          >
+          <Link href="/" className="text-xl header-brand">
             DC Events
           </Link>
           {user && (
             <div className="flex items-center">
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+              <span className="admin-badge inline-flex items-center px-2 py-1 rounded-full text-xs font-medium">
                 <svg
                   className="w-3 h-3 mr-1"
                   fill="currentColor"
@@ -50,10 +68,10 @@ export default function Header() {
         </div>
 
         {/* Desktop Navigation */}
-        <div className="hidden lg:flex flex-row">
+        <div className="hidden xl:flex flex-row">
           <Link
             href="/search?sortBy=date&sortOrder=asc"
-            className="header-link flex items-center"
+            className="header-link px-10 py-2 flex items-center"
           >
             <svg
               className="w-4 h-4 mr-1"
@@ -70,7 +88,10 @@ export default function Header() {
             </svg>
             Search
           </Link>
-          <Link href="/groups" className="header-link flex items-center">
+          <Link
+            href="/groups"
+            className="header-link px-10 py-2 flex items-center"
+          >
             <svg
               className="w-4 h-4 mr-1"
               fill="none"
@@ -86,7 +107,10 @@ export default function Header() {
             </svg>
             Groups
           </Link>
-          <Link href="/calendar" className="header-link flex items-center">
+          <Link
+            href="/calendar"
+            className="header-link px-10 py-2 flex items-center"
+          >
             <svg
               className="w-4 h-4 mr-1"
               fill="none"
@@ -102,19 +126,20 @@ export default function Header() {
             </svg>
             Calendar
           </Link>
-          <Link href="/add-event" className="header-link">
+          <Link href="/add-event" className="header-link px-10 py-2">
             Add Event
           </Link>
-          <Link href="/signup-emails" className="header-link">
+          <Link href="/signup-emails" className="header-link px-10 py-2">
             Sign Up For Emails
           </Link>
-          <Link href="/about" className="header-link">
+          <Link href="/about" className="header-link px-10 py-2">
             Contact
           </Link>
           {user && (
             <Link
               href="/admin"
-              className="header-link text-red-600 font-semibold"
+              className="header-link px-10 py-2 font-semibold"
+              style={{ color: "var(--accent-primary)" }}
             >
               Admin
             </Link>
@@ -122,10 +147,18 @@ export default function Header() {
           {/* Theme Toggle Button */}
           <button
             onClick={toggleTheme}
-            className="header-link flex items-center"
-            title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            className="header-button px-10 py-2 flex items-center"
+            title={
+              mounted
+                ? isDark
+                  ? "Switch to light mode"
+                  : "Switch to dark mode"
+                : "Loading theme..."
+            }
           >
-            {!isDark ? (
+            {!mounted ? (
+              <div className="w-4 h-4 mr-1 animate-pulse bg-gray-400 rounded"></div>
+            ) : !isDark ? (
               <svg
                 className="w-4 h-4 mr-1"
                 fill="none"
@@ -158,10 +191,10 @@ export default function Header() {
         </div>
 
         {/* Mobile Menu Button */}
-        <div className="lg:hidden">
+        <div className="xl:hidden">
           <button
             onClick={toggleMenu}
-            className="text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none focus:text-gray-600 dark:focus:text-gray-300"
+            className="header-button"
             aria-label="Toggle menu"
           >
             <svg
@@ -193,10 +226,10 @@ export default function Header() {
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="lg:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-black border-t border-gray-200 dark:border-gray-700">
+          <div className="px-2 pt-2 pb-3 space-y-1 footer-border border-t">
             <Link
               href="/search?sortBy=date&sortOrder=asc"
-              className="block px-3 py-2 text-base font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md"
+              className="block px-3 py-2 font-medium header-link rounded-md"
               onClick={closeMenu}
             >
               <div className="flex items-center">
@@ -218,7 +251,7 @@ export default function Header() {
             </Link>
             <Link
               href="/groups"
-              className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+              className="block px-3 py-2 text-base font-medium header-link rounded-md"
               onClick={closeMenu}
             >
               <div className="flex items-center">
@@ -240,7 +273,7 @@ export default function Header() {
             </Link>
             <Link
               href="/calendar"
-              className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+              className="block px-3 py-2 text-base font-medium header-link rounded-md"
               onClick={closeMenu}
             >
               <div className="flex items-center">
@@ -262,21 +295,21 @@ export default function Header() {
             </Link>
             <Link
               href="/add-event"
-              className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+              className="block px-3 py-2 text-base font-medium header-link rounded-md"
               onClick={closeMenu}
             >
               Add Event
             </Link>
             <Link
               href="/signup-emails"
-              className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+              className="block px-3 py-2 text-base font-medium header-link rounded-md"
               onClick={closeMenu}
             >
               Sign Up For Emails
             </Link>
             <Link
               href="/about"
-              className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+              className="block px-3 py-2 text-base font-medium header-link rounded-md"
               onClick={closeMenu}
             >
               Contact
@@ -284,7 +317,8 @@ export default function Header() {
             {user && (
               <Link
                 href="/admin"
-                className="block px-3 py-2 text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md font-semibold"
+                className="block px-3 py-2 text-base font-medium header-link rounded-md font-semibold"
+                style={{ color: "var(--accent-primary)" }}
                 onClick={closeMenu}
               >
                 Admin
@@ -292,14 +326,13 @@ export default function Header() {
             )}
             {/* Theme Toggle Button - Mobile */}
             <button
-              onClick={() => {
-                toggleTheme();
-                closeMenu();
-              }}
-              className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+              onClick={toggleTheme}
+              className="block px-3 py-2 text-base font-medium header-link rounded-md w-full text-left"
             >
               <div className="flex items-center">
-                {isDark ? (
+                {!mounted ? (
+                  <div className="w-4 h-4 mr-2 animate-pulse bg-gray-400 rounded"></div>
+                ) : isDark ? (
                   <svg
                     className="w-4 h-4 mr-2"
                     fill="none"
@@ -328,7 +361,7 @@ export default function Header() {
                     />
                   </svg>
                 )}
-                {isDark ? "Light Mode" : "Dark Mode"}
+                {!mounted ? "Loading..." : isDark ? "Light Mode" : "Dark Mode"}
               </div>
             </button>
           </div>

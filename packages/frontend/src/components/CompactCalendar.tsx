@@ -149,10 +149,10 @@ export default function CompactCalendar() {
   return (
     <section className="max-w-7xl mx-auto px-4 py-16">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-4xl font-bold text-white">Event Calendar</h2>
+        <h2 className="text-4xl font-bold">Event Calendar</h2>
         <Link
           href="/calendar"
-          className="text-white hover:text-blue-300 transition-colors text-sm underline"
+          className=" hover:text-blue-300 transition-colors text-sm underline"
         >
           View Full Calendar
         </Link>
@@ -229,7 +229,7 @@ export default function CompactCalendar() {
               <div
                 className={`text-xs font-medium mb-1 ${
                   day.isToday
-                    ? "bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center"
+                    ? "bg-blue-600  rounded-full w-5 h-5 flex items-center justify-center"
                     : day.isCurrentMonth
                     ? "text-gray-900"
                     : "text-gray-400"

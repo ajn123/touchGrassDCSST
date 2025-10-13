@@ -19,10 +19,10 @@ export default async function FeaturedGroups() {
     return (
       <section className="max-w-7xl mx-auto px-4 py-16">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-4xl font-bold text-white">Featured Groups</h2>
+          <h2 className="text-4xl font-bold ">Featured Groups</h2>
           <Link
             href="/groups"
-            className="bg-white text-gray-900 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+            className="bg-white text-gray-900 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors border border-black"
           >
             Show All Groups
           </Link>

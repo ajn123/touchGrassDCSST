@@ -35,7 +35,7 @@ export default function Categories({
               disableLinks ? (
                 <span
                   key={index}
-                  className="px-3 bg-green-100 text-green-800 text-sm rounded-full font-medium"
+                  className="px-3 bg-green-100 text-green-800 text-sm rounded-full font-medium border border-black"
                 >
                   {cat}
                 </span>
@@ -46,7 +46,7 @@ export default function Categories({
                     cat
                   )}&sortBy=date&sortOrder=asc`}
                 >
-                  <span className="px-3 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer">
+                  <span className="px-3 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer border border-black">
                     {cat}
                   </span>
                 </Link>
@@ -56,7 +56,7 @@ export default function Categories({
               disableLinks ? (
                 <span
                   key={index}
-                  className="px-3 py-2 bg-green-100 text-green-800 text-sm rounded-full font-medium"
+                  className="px-3 py-2 bg-green-100 text-green-800 text-sm rounded-full font-medium border border-black"
                 >
                   {cat.trim()}
                 </span>
@@ -67,7 +67,7 @@ export default function Categories({
                     cat.trim()
                   )}&sortBy=date&sortOrder=asc`}
                 >
-                  <span className="px-3 py-2 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer">
+                  <span className="px-3 py-2 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer border border-black">
                     {cat.trim()}
                   </span>
                 </Link>
@@ -80,7 +80,7 @@ export default function Categories({
   // Selection mode for category selection (original functionality)
   return (
     <section className="max-w-7xl mx-auto px-4 py-16">
-      <h2 className="text-4xl font-bold mb-8 text-white">Browse by Category</h2>
+      <h2 className="text-4xl font-bold mb-8">Browse by Category</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {categories?.map((category: any) => (
           <div key={category.category}>
@@ -93,15 +93,15 @@ export default function Categories({
                     category.category
                   )
                     ? "#10b981"
-                    : "white",
+                    : "white border border-gray-200 dark:border-gray-700",
                   borderColor: selectedCategories.includes(category.category)
-                    ? "#10b981"
-                    : "#d1d5db",
+                    ? "#11b981"
+                    : "#d1d5db ",
                   color: selectedCategories.includes(category.category)
                     ? "white"
-                    : "#374151",
+                    : "#374151 border border-gray-200 dark:border-gray-700",
                 }}
-                className="w-full bg-white rounded-lg shadow-md p-6 text-center cursor-pointer hover:shadow-lg transition-shadow transform hover:scale-105 duration-300 slow-transition"
+                className="w-full bg-white rounded-lg shadow-md p-6 text-center cursor-pointer hover:shadow-lg transition-shadow transform hover:scale-105 duration-300 slow-transition border border-black"
               >
                 <h3 className="text-lg font-semibold">{category.category}</h3>
               </button>
@@ -124,7 +124,7 @@ export default function Categories({
                   );
                 }}
               >
-                <div className="bg-white rounded-lg shadow-md p-6 text-center cursor-pointer hover:shadow-lg transition-shadow transform hover:scale-105 duration-300 slow-transition">
+                <div className="bg-white rounded-lg shadow-md p-6 text-center cursor-pointer hover:shadow-lg transition-shadow transform hover:scale-105 duration-300 slow-transition border border-black">
                   <h3 className="text-lg font-semibold text-gray-800 hover:text-blue-500">
                     {category.category}
                   </h3>

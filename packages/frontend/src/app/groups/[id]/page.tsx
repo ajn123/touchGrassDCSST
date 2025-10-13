@@ -150,7 +150,7 @@ export default async function GroupPage({
                 className="w-full rounded-lg shadow-md"
               />
             ) : (
-              <div className="w-full h-64 bg-gray-200 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+              <div className="w-full h-64 rounded-lg flex items-center justify-center">
                 <span>No image available</span>
               </div>
             )}
@@ -170,7 +170,7 @@ export default async function GroupPage({
               {transformedSchedules.length > 0 ? (
                 <Schedule schedules={transformedSchedules} />
               ) : (
-                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                <div className="p-4 rounded-lg border">
                   <div className="text-sm">
                     No scheduled meetings available at this time.
                   </div>

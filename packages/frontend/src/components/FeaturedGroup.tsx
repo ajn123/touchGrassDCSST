@@ -92,7 +92,7 @@ export default function FeaturedGroup({ group }: { group: Group }) {
 
   return (
     <Link href={`/groups/${encodeURIComponent(groupTitle)}`}>
-      <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 hover:scale-105 transform h-full flex flex-col min-h-[400px]">
+      <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 hover:scale-105 transform h-full flex flex-col min-h-[400px] border border-black">
         <div className="relative h-48 flex-shrink-0">
           {group.image_url ? (
             <>

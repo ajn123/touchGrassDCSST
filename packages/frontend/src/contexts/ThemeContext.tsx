@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 interface ThemeContextType {
   isDark: boolean;
   toggleTheme: () => void;
+  mounted: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -27,15 +28,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Apply theme to document
+  // Apply theme to document (inverted behavior)
   useEffect(() => {
     if (!mounted) return; // Don't apply theme until mounted
 
     if (isDark) {
-      document.documentElement.classList.add("dark");
+      // When isDark is true, show light theme (remove dark class)
+      document.documentElement.classList.remove("dark");
       localStorage.setItem("theme", "dark");
     } else {
-      document.documentElement.classList.remove("dark");
+      // When isDark is false, show dark theme (add dark class)
+      document.documentElement.classList.add("dark");
       localStorage.setItem("theme", "light");
     }
   }, [isDark, mounted]);
@@ -45,7 +48,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
+    <ThemeContext.Provider value={{ isDark, toggleTheme, mounted }}>
       {children}
     </ThemeContext.Provider>
   );

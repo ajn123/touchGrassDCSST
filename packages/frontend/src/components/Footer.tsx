@@ -7,20 +7,20 @@ export default function Footer() {
   const { user } = useUser();
 
   return (
-    <footer className="">
-      <div className="max-w-7xl mx-auto px-4 py-8 ">
+    <footer className="footer-container theme-transition">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Brand Section */}
           <div className="col-span-1 md:col-span-2 lg:col-span-1">
-            <Link href="/" className="text-2xl font-bold transition-colors">
+            <Link href="/" className="text-2xl footer-brand">
               DC Events
             </Link>
-            <p className="mt-2 text-sm">
+            <p className="mt-2 text-sm footer-text">
               Discover the best events happening in Washington DC
             </p>
             {user && (
               <div className="mt-3">
-                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 border border-red-200">
+                <span className="admin-badge inline-flex items-center px-2 py-1 rounded-full text-xs font-medium">
                   <svg
                     className="w-3 h-3 mr-1"
                     fill="currentColor"
@@ -40,12 +40,14 @@ export default function Footer() {
 
           {/* Navigation Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Navigation</h3>
+            <h3 className="text-lg font-semibold mb-4 theme-text-primary">
+              Navigation
+            </h3>
             <ul className="space-y-2">
               <li>
                 <Link
                   href="/search?sortBy=date&sortOrder=asc"
-                  className="transition-colors flex items-center"
+                  className="footer-link flex items-center"
                 >
                   <svg
                     className="w-4 h-4 mr-2"
@@ -66,7 +68,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/calendar"
-                  className="transition-colors flex items-center"
+                  className="footer-link flex items-center"
                 >
                   <svg
                     className="w-4 h-4 mr-2"
@@ -85,17 +87,17 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/add-event" className="transition-colors">
+                <Link href="/add-event" className="footer-link">
                   Add Event
                 </Link>
               </li>
               <li>
-                <Link href="/signup-emails" className="transition-colors">
+                <Link href="/signup-emails" className="footer-link">
                   Sign up For Emails
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="transition-colors">
+                <Link href="/about" className="footer-link">
                   Contact
                 </Link>
               </li>
@@ -103,7 +105,8 @@ export default function Footer() {
                 <li>
                   <Link
                     href="/admin"
-                    className="transition-colors font-semibold"
+                    className="footer-link font-semibold"
+                    style={{ color: "var(--accent-primary)" }}
                   >
                     Admin
                   </Link>
@@ -114,8 +117,10 @@ export default function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Get in Touch</h3>
-            <div className="space-y-2 text-sm">
+            <h3 className="text-lg font-semibold mb-4 theme-text-primary">
+              Get in Touch
+            </h3>
+            <div className="space-y-2 text-sm footer-text">
               <p>Washington DC Events</p>
               <p>Discover what's happening in the capital</p>
               <div className="mt-4">
@@ -128,14 +133,14 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-300 dark:border-gray-700 mt-8 pt-6">
+        <div className="footer-border border-t mt-8 pt-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-sm">Built for the DC community</p>
+            <p className="text-sm footer-text">Built for the DC community</p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link href="/privacy" className="text-sm transition-colors">
+              <Link href="/privacy" className="text-sm footer-link">
                 Privacy Policy
               </Link>
-              <Link href="/terms" className="text-sm transition-colors">
+              <Link href="/terms" className="text-sm footer-link">
                 Terms of Service
               </Link>
             </div>

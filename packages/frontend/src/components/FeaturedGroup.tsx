@@ -188,7 +188,7 @@ export default function FeaturedGroup({ group }: { group: Group }) {
           <div className="mt-auto">
             <div className="flex items-center text-sm text-gray-600">
               <svg
-                className="w-4 h-4 mr-2 text-green-600"
+                className="w-4 h-4 mr-2"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

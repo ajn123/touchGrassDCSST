@@ -28,17 +28,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Apply theme to document (inverted behavior)
+  // Apply theme to document
   useEffect(() => {
     if (!mounted) return; // Don't apply theme until mounted
 
     if (isDark) {
-      // When isDark is true, show light theme (remove dark class)
-      document.documentElement.classList.remove("dark");
+      // When isDark is true, show dark theme (add dark class)
+      document.documentElement.classList.add("dark");
       localStorage.setItem("theme", "dark");
     } else {
-      // When isDark is false, show dark theme (add dark class)
-      document.documentElement.classList.add("dark");
+      // When isDark is false, show light theme (remove dark class)
+      document.documentElement.classList.remove("dark");
       localStorage.setItem("theme", "light");
     }
   }, [isDark, mounted]);

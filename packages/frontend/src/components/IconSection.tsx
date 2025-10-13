@@ -37,7 +37,7 @@ export function IconSection({
       <div className="flex flex-wrap items-center gap-2">
         <FontAwesomeIcon
           icon={icon}
-          className={`inline-flex ${getIconSizeClasses()} items-center justify-center ${iconClassName}`}
+          className={`inline-flex ${getIconSizeClasses()} items-center justify-center text-gray-800 ${iconClassName}`}
         />
         {children}
       </div>

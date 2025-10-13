@@ -1,8 +1,12 @@
 @import "tailwindcss";
 
+@theme {
+  --darkMode: class;
+}
+
 @layer components {
   .header-link {
-    @apply hover:bg-gray-300 px-10 py-2 transition-colors;
+    @apply text-black dark:text-white hover:bg-gray-300 dark:hover:bg-gray-700 px-10 py-2 transition-colors;
   }
 
   .button-blue {
@@ -17,21 +21,21 @@
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
   }
-  
+
   .line-clamp-2 {
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
   }
-  
+
   .line-clamp-3 {
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
   }
-  
+
   .animate-shimmer {
     animation: shimmer 2s infinite;
   }
@@ -48,7 +52,7 @@
 
 :root {
   --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
+  --background-start-rgb: 255, 255, 255;
   --background-end-rgb: 255, 255, 255;
 }
 
@@ -68,15 +72,21 @@
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
   font-family: Arial, Helvetica, sans-serif;
   color: black;
+  background: white;
+}
+
+/* Dark mode styles */
+.dark body {
+  color: white;
+  background: black;
+}
+
+/* Ensure main content inherits theme colors */
+main {
+  background: inherit;
+  color: inherit;
 }
 
 /* Form styles */
@@ -87,6 +97,11 @@ form {
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.dark form {
+  background: #1f2937;
+  box-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
 }
 
 form div {
@@ -100,6 +115,10 @@ form label {
   color: #333;
 }
 
+.dark form label {
+  color: #e5e7eb;
+}
+
 form input,
 form textarea {
   width: 100%;
@@ -107,6 +126,15 @@ form textarea {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 16px;
+  background: white;
+  color: #333;
+}
+
+.dark form input,
+.dark form textarea {
+  background: #374151;
+  border-color: #4b5563;
+  color: #e5e7eb;
 }
 
 form textarea {
@@ -150,9 +178,18 @@ li a {
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
+.dark li a {
+  background: #1f2937;
+  box-shadow: 0 2px 5px rgba(255, 255, 255, 0.1);
+}
+
 li a:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.dark li a:hover {
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.15);
 }
 
 /* Container styles */

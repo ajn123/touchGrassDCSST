@@ -181,7 +181,7 @@ export default function MonthlyCalendar() {
           </svg>
         </button>
 
-        <h2 className="text-2xl font-bold text-gray-900">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
           {formatDate(currentDate)}
         </h2>
 
@@ -206,13 +206,13 @@ export default function MonthlyCalendar() {
       </div>
 
       {/* Calendar Grid */}
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg overflow-hidden">
         {/* Day Headers */}
-        <div className="grid grid-cols-7 bg-gray-50 border-b">
+        <div className="grid grid-cols-7 bg-gray-50 dark:bg-gray-800 border-b dark:border-gray-700">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
             <div
               key={day}
-              className="p-3 text-center text-sm font-medium text-gray-700"
+              className="p-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               {day}
             </div>
@@ -224,14 +224,18 @@ export default function MonthlyCalendar() {
           {calendarDays.map((day, index) => (
             <div
               key={index}
-              className={`min-h-[200px] border-r border-b border-gray-200 p-2 ${
-                !day.isCurrentMonth ? "bg-gray-50 text-gray-400" : "bg-white"
+              className={`min-h-[200px] border-r border-b border-gray-200 dark:border-gray-700 p-2 ${
+                !day.isCurrentMonth
+                  ? "bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500"
+                  : "bg-white dark:bg-gray-900"
               }`}
             >
               {/* Day Number */}
               <div
                 className={`text-sm font-medium mb-2 ${
-                  day.isCurrentMonth ? "text-gray-900" : "text-gray-400"
+                  day.isCurrentMonth
+                    ? "text-gray-900 dark:text-white"
+                    : "text-gray-400 dark:text-gray-500"
                 }`}
               >
                 {day.dayNumber}
@@ -239,7 +243,7 @@ export default function MonthlyCalendar() {
 
               {/* Events */}
               <div className="space-y-1">
-                {day.events.slice(0, 3).map((event, eventIndex) => {
+                {day.events.map((event, eventIndex) => {
                   const eventId = event.pk.replace(/^(EVENT-|EVENT#)/, "");
                   return (
                     <div
@@ -266,12 +270,6 @@ export default function MonthlyCalendar() {
                     </div>
                   );
                 })}
-
-                {day.events.length > 3 && (
-                  <div className="text-xs text-gray-500 text-center">
-                    +{day.events.length - 3} more
-                  </div>
-                )}
               </div>
             </div>
           ))}
@@ -279,7 +277,7 @@ export default function MonthlyCalendar() {
       </div>
 
       {/* Event Details Modal (optional) */}
-      <div className="mt-6 text-sm text-gray-600">
+      <div className="mt-6 text-sm text-gray-600 dark:text-gray-400">
         <p>
           Click on events to view details. Navigate between months using the
           arrow buttons.

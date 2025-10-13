@@ -4,6 +4,7 @@ import Categories from "@/components/Categories";
 import { Cost } from "@/components/Cost";
 import { DateDisplay } from "@/components/Date";
 import { Description } from "@/components/Description";
+import DetailPageContainer from "@/components/DetailPageContainer";
 import EventMap from "@/components/EventMap";
 import { EventPageTracker } from "@/components/EventPageTracker";
 import { JsonEditor } from "@/components/JsonEditor";
@@ -13,7 +14,7 @@ import { PrivateImage } from "@/components/PrivateImage";
 import { ReportWrongInfoButton } from "@/components/ReportWrongInfoButton";
 import { Schedule } from "@/components/Schedule";
 import { Socials } from "@/components/Socials";
-import { getEvent } from "@/lib/dynamodb/dynamodb-events";
+import { getEvent, getEventByTitle } from "@/lib/dynamodb/dynamodb-events";
 import { resolveImageUrl } from "@/lib/image-utils";
 import { Suspense } from "react";
 
@@ -41,7 +42,14 @@ export default async function ItemPage({
   const WHITELIST: any = [];
 
   // This runs on the server during rendering
-  const item = await getEvent(decodeURIComponent(awaitedParams.id));
+  const rawId = awaitedParams.id;
+  const decodedId = decodeURIComponent(rawId);
+
+  // Try by primary key/id first; if not found, try by event title
+  let item = await getEvent(decodedId);
+  if (!item) {
+    item = await getEventByTitle(decodedId);
+  }
 
   console.log(item);
   if (!item) {
@@ -51,7 +59,10 @@ export default async function ItemPage({
   // Check if event is public - if not, only admins can see it
   if (!(item.is_public || item.isPublic) && !isAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div
+        className="min-h-screen flex items-center justify-center mb-10
+      "
+      >
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             Event Not Available
@@ -76,15 +87,7 @@ export default async function ItemPage({
     : 0;
 
   return (
-    <div
-      className="container"
-      style={{
-        marginTop: "2rem",
-        backgroundColor: "white",
-        padding: "2rem",
-        borderRadius: "1rem",
-      }}
-    >
+    <DetailPageContainer>
       {/* Client-side analytics tracking */}
       <EventPageTracker eventId={awaitedParams.id} />
       {artificialDelay > 0 && (
@@ -180,7 +183,7 @@ export default async function ItemPage({
       )}
 
       {/* Public View - Enhanced display */}
-      <div className="border-t pt-6">
+      <div className="border-t pt-6 mb-10">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold">{item.title}</h1>
           <ReportWrongInfoButton eventTitle={item.title} eventId={item.pk} />
@@ -277,6 +280,6 @@ export default async function ItemPage({
             </div>
           ))}
       </div>
-    </div>
+    </DetailPageContainer>
   );
 }

@@ -41,6 +41,7 @@ function SearchPageContent() {
       },
       sortBy: searchParams.get("sortBy") || "date",
       sortOrder: (searchParams.get("sortOrder") as "asc" | "desc") || "asc",
+      types: searchParams.get("types") || "event,group",
     }),
     [searchParams]
   );
@@ -75,13 +76,13 @@ function SearchPageContent() {
         if (filters.sortBy) queryParams.append("sortBy", filters.sortBy);
         if (filters.sortOrder)
           queryParams.append("sortOrder", filters.sortOrder);
+        if (filters.types) queryParams.append("types", filters.types);
 
         // Try OpenSearch first, fallback to DynamoDB if it fails
         let data: any = { events: [], groups: [] };
 
         try {
-          // Add types parameter for OpenSearch - search both events and groups
-          queryParams.append("types", "event,group");
+          // Use the types parameter from filters
 
           const opensearchResponse = await fetch(
             `/api/search-opensearch?${queryParams.toString()}`
@@ -169,15 +170,20 @@ function SearchPageContent() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 text-center">Search Events</h1>
+          <h1 className="text-4xl font-bold mb-2 text-center">
+            {filters.types === "group" ? "Search Groups" : "Search Events"}
+          </h1>
           {filters.query && (
             <p className="text-center text-gray-600">
               Showing results for "{filters.query}"
             </p>
+          )}
+          {filters.types === "group" && !filters.query && (
+            <p className="text-center text-gray-600">Browse all groups</p>
           )}
         </div>
 
@@ -216,12 +222,19 @@ function SearchPageContent() {
             ) : (
               <div>
                 <p className="text-center text-gray-600 mb-8">
-                  Found {events.length} event{events.length !== 1 ? "s" : ""}{" "}
-                  and {groups.length} group{groups.length !== 1 ? "s" : ""}
+                  {filters.types === "group"
+                    ? `Found ${groups.length} group${
+                        groups.length !== 1 ? "s" : ""
+                      }`
+                    : `Found ${events.length} event${
+                        events.length !== 1 ? "s" : ""
+                      } and ${groups.length} group${
+                        groups.length !== 1 ? "s" : ""
+                      }`}
                 </p>
 
                 {/* Events Section */}
-                {events.length > 0 && (
+                {filters.types !== "group" && events.length > 0 && (
                   <div className="mb-12">
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">
                       Events
@@ -236,7 +249,7 @@ function SearchPageContent() {
 
                 {/* Groups Section */}
                 {groups.length > 0 && (
-                  <div>
+                  <div id="groups-section">
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">
                       Groups
                     </h2>
@@ -318,11 +331,13 @@ function SearchPageContent() {
 // Loading fallback component
 function SearchPageLoading() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading search page...</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            Loading search page...
+          </p>
         </div>
       </div>
     </div>

@@ -2,7 +2,6 @@ import Categories from "@/components/Categories";
 import CompactCalendar from "@/components/CompactCalendar";
 import FeaturedGroups from "@/components/FeaturedGroups";
 import HomepageAnalytics from "@/components/HomepageAnalytics";
-import HomepageMap from "@/components/HomepageMap";
 import SearchBar from "@/components/SearchBar";
 import { createEvent, getCategories } from "@/lib/dynamodb/dynamodb-events";
 import { revalidatePath } from "next/cache";
@@ -37,7 +36,7 @@ export default async function Home() {
 
   console.log("categories", categories);
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen">
       {/* Hero Section */}
       <section className="relative h-[60vh] flex items-center justify-center">
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 to-black/30 z-10" />
@@ -68,10 +67,13 @@ export default async function Home() {
       {/* Featured Groups Section */}
       <FeaturedGroups />
 
-      {/* Homepage Map Section */}
+      {/* Homepage Map Section }
+      
       <section className="py-16 px-4 max-w-7xl mx-auto">
         <HomepageMap />
       </section>
+
+      */}
 
       <Categories categories={categories as Category[]} />
 

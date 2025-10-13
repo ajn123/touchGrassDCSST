@@ -206,9 +206,9 @@ export default function CompactCalendar() {
 
         {/* Day Headers */}
         <div className="grid grid-cols-7 bg-gray-50 border-b">
-          {["S", "M", "T", "W", "T", "F", "S"].map((day) => (
+          {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
             <div
-              key={day}
+              key={index}
               className="p-2 text-center text-xs font-medium text-gray-600"
             >
               {day}

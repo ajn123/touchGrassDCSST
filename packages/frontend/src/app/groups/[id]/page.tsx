@@ -2,6 +2,7 @@ import { auth } from "@/app/actions";
 import Categories from "@/components/Categories";
 import { Cost } from "@/components/Cost";
 import { Description } from "@/components/Description";
+import DetailPageContainer from "@/components/DetailPageContainer";
 import { LoadingImage } from "@/components/LoadingImage";
 import { Location } from "@/components/Location";
 import { Schedule } from "@/components/Schedule";
@@ -62,14 +63,10 @@ export default async function GroupPage({
 
   if (!group) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Group Not Found
-          </h1>
-          <p className="text-gray-600 mb-4">
-            The group you're looking for doesn't exist.
-          </p>
+          <h1 className="text-2xl font-bold mb-4">Group Not Found</h1>
+          <p className="mb-4">The group you're looking for doesn't exist.</p>
         </div>
       </div>
     );
@@ -78,16 +75,14 @@ export default async function GroupPage({
   // Check if group is public - if not, only admins can see it
   if (!group.isPublic && !isAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Group Not Available
-          </h1>
-          <p className="text-gray-600 mb-4">
+          <h1 className="text-2xl font-bold mb-4">Group Not Available</h1>
+          <p className="mb-4">
             This group is currently private and not available for public
             viewing.
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm">
             Please check back later or contact an administrator if you believe
             this is an error.
           </p>
@@ -97,19 +92,11 @@ export default async function GroupPage({
   }
 
   return (
-    <div
-      className="container"
-      style={{
-        marginTop: "2rem",
-        backgroundColor: "white",
-        padding: "2rem",
-        borderRadius: "1rem",
-      }}
-    >
+    <DetailPageContainer>
       {/* Admin Mode - Show all group details */}
       {isAdmin && (
         <div className="mb-8 p-4 bg-gray-50 rounded-lg border">
-          <h2 className="text-xl font-bold mb-4 text-gray-800">
+          <h2 className="text-xl font-bold mb-4">
             Admin View - Complete Group Details
           </h2>
           <div className="space-y-2 text-sm">
@@ -134,7 +121,7 @@ export default async function GroupPage({
                 <Schedule schedules={transformedSchedules} />
               ) : (
                 <div className="mt-2 p-3 bg-gray-100 rounded border">
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm">
                     No scheduled meetings available at this time.
                   </div>
                 </div>
@@ -163,8 +150,8 @@ export default async function GroupPage({
                 className="w-full rounded-lg shadow-md"
               />
             ) : (
-              <div className="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center">
-                <span className="text-gray-500">No image available</span>
+              <div className="w-full h-64 bg-gray-200 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                <span>No image available</span>
               </div>
             )}
           </Suspense>
@@ -183,8 +170,8 @@ export default async function GroupPage({
               {transformedSchedules.length > 0 ? (
                 <Schedule schedules={transformedSchedules} />
               ) : (
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="text-sm text-gray-600">
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <div className="text-sm">
                     No scheduled meetings available at this time.
                   </div>
                 </div>
@@ -201,6 +188,6 @@ export default async function GroupPage({
           </div>
         )}
       </div>
-    </div>
+    </DetailPageContainer>
   );
 }

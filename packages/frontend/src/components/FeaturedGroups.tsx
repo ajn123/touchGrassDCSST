@@ -1,4 +1,5 @@
 import { getPublicGroups } from "@/lib/dynamodb/dynamodb-groups";
+import Link from "next/link";
 import FeaturedGroup from "./FeaturedGroup";
 
 export default async function FeaturedGroups() {
@@ -17,9 +18,15 @@ export default async function FeaturedGroups() {
 
     return (
       <section className="max-w-7xl mx-auto px-4 py-16">
-        <h2 className="text-4xl font-bold mb-8 text-center text-white">
-          Featured Groups
-        </h2>
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-4xl font-bold text-white">Featured Groups</h2>
+          <Link
+            href="/groups"
+            className="bg-white text-gray-900 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+          >
+            Show All Groups
+          </Link>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
           {featuredGroups.length > 0 &&
             featuredGroups.map((group: any) => (

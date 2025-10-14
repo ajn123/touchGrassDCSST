@@ -1,4 +1,5 @@
 import {
+  faDiscord,
   faFacebook,
   faInstagram,
   faLinkedin,
@@ -17,6 +18,7 @@ interface SocialsData {
   youtube?: string;
   linkedin?: string;
   meetup?: string;
+  discord?: string;
   [key: string]: string | undefined;
 }
 
@@ -38,6 +40,7 @@ export function Socials({ socials, className = "" }: SocialsProps) {
     youtube: faYoutube,
     linkedin: faLinkedin,
     meetup: faLink, // Using generic link icon for meetup
+    discord: faDiscord,
   };
 
   const getSocialName = (key: string) => {
@@ -49,6 +52,7 @@ export function Socials({ socials, className = "" }: SocialsProps) {
       youtube: "YouTube",
       linkedin: "LinkedIn",
       meetup: "Meetup",
+      discord: "Discord",
     };
     return names[key] || key.charAt(0).toUpperCase() + key.slice(1);
   };

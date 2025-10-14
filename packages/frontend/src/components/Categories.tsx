@@ -2,7 +2,7 @@
 
 import { trackPageVisit } from "@/lib/analyticsTrack";
 import { faTags } from "@fortawesome/free-solid-svg-icons";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { IconSection } from "./IconSection";
 
 interface Category {
@@ -26,6 +26,7 @@ export default function Categories({
   eventCategories,
   disableLinks = false,
 }: CategoriesProps) {
+  const router = useRouter();
   // Display mode for showing event categories
   if (displayMode === "display" && eventCategories) {
     return (
@@ -40,16 +41,20 @@ export default function Categories({
                   {cat}
                 </span>
               ) : (
-                <Link
+                <button
                   key={index}
-                  href={`/search?categories=${encodeURIComponent(
-                    cat
-                  )}&sortBy=date&sortOrder=asc`}
+                  type="button"
+                  onClick={() =>
+                    router.push(
+                      `/search?categories=${encodeURIComponent(
+                        cat
+                      )}&sortBy=date&sortOrder=asc`
+                    )
+                  }
+                  className="px-3 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer border border-black"
                 >
-                  <span className="px-3 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer border border-black">
-                    {cat}
-                  </span>
-                </Link>
+                  {cat}
+                </button>
               )
             )
           : eventCategories.split(",").map((cat: string, index: number) =>
@@ -61,16 +66,20 @@ export default function Categories({
                   {cat.trim()}
                 </span>
               ) : (
-                <Link
+                <button
                   key={index}
-                  href={`/search?categories=${encodeURIComponent(
-                    cat.trim()
-                  )}&sortBy=date&sortOrder=asc`}
+                  type="button"
+                  onClick={() =>
+                    router.push(
+                      `/search?categories=${encodeURIComponent(
+                        cat.trim()
+                      )}&sortBy=date&sortOrder=asc`
+                    )
+                  }
+                  className="px-3 py-2 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer border border-black"
                 >
-                  <span className="px-3 py-2 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer border border-black">
-                    {cat.trim()}
-                  </span>
-                </Link>
+                  {cat.trim()}
+                </button>
               )
             )}
       </IconSection>

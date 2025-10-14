@@ -1,12 +1,7 @@
 import { auth } from "@/app/actions";
-import Categories from "@/components/Categories";
-import { Cost } from "@/components/Cost";
-import { Description } from "@/components/Description";
+import { AdminEntityPanel } from "@/components/AdminEntityPanel";
 import DetailPageContainer from "@/components/DetailPageContainer";
-import { LoadingImage } from "@/components/LoadingImage";
-import { Location } from "@/components/Location";
-import { Schedule } from "@/components/Schedule";
-import { Socials } from "@/components/Socials";
+import { EntityDetail } from "@/components/EntityDetail";
 import {
   getGroup,
   getGroupSchedules,
@@ -14,7 +9,6 @@ import {
   transformSchedulesForDisplay,
 } from "@/lib/dynamodb/dynamodb-groups";
 import { resolveImageUrl } from "@/lib/image-utils";
-import { Suspense } from "react";
 
 export default async function GroupPage({
   params,
@@ -95,99 +89,25 @@ export default async function GroupPage({
     <DetailPageContainer>
       {/* Admin Mode - Show all group details */}
       {isAdmin && (
-        <div className="mb-8 p-4 bg-gray-50 rounded-lg border">
-          <h2 className="text-xl font-bold mb-4">
-            Admin View - Complete Group Details
-          </h2>
-          <div className="space-y-2 text-sm">
-            <div>
-              <strong>Title:</strong> {group.title}
-            </div>
-            <div>
-              <strong>Public:</strong> {group.isPublic ? "Yes" : "No"}
-            </div>
-            <div>
-              <strong>Categories:</strong>
-              {group.category ? (
-                <Categories
-                  displayMode="display"
-                  eventCategories={group.category}
-                />
-              ) : (
-                "Uncategorized"
-              )}
-              <Socials socials={group.socials || {}} />
-              {transformedSchedules.length > 0 ? (
-                <Schedule schedules={transformedSchedules} />
-              ) : (
-                <div className="mt-2 p-3 bg-gray-100 rounded border">
-                  <div className="text-sm">
-                    No scheduled meetings available at this time.
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <AdminEntityPanel
+          kind="group"
+          id={group.pk || group.title}
+          title={group.title}
+          data={group}
+        />
       )}
 
       {/* Public View - Enhanced display */}
-      <div className="border-t pt-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">{group.title}</h1>
-        </div>
-
-        {/* Image and Details Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Image Section */}
-          <Suspense fallback={<LoadingImage size="lg" />}>
-            {group.image_url ? (
-              <img
-                src={
-                  resolveImageUrl(group.image_url) || "/images/placeholder.jpg"
-                }
-                alt={group.title}
-                className="w-full rounded-lg shadow-md"
-              />
-            ) : (
-              <div className="w-full h-64 rounded-lg flex items-center justify-center">
-                <span>No image available</span>
-              </div>
-            )}
-          </Suspense>
-
-          <div className="grid grid-cols-1">
-            <div className="space-y-4">
-              {group.cost && <Cost cost={group.cost} />}
-              {group.socials && <Socials socials={group.socials} />}
-              {group.location && <Location location={group.location} />}
-              {group.category && (
-                <Categories
-                  displayMode="display"
-                  eventCategories={group.category}
-                />
-              )}
-              {transformedSchedules.length > 0 ? (
-                <Schedule schedules={transformedSchedules} />
-              ) : (
-                <div className="p-4 rounded-lg border">
-                  <div className="text-sm">
-                    No scheduled meetings available at this time.
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <hr className="my-6 border-t border-gray-800" />
-
-        {group.description && (
-          <div className="mb-6">
-            <Description description={group.description} />
-          </div>
-        )}
-      </div>
+      <EntityDetail
+        title={group.title}
+        imageUrl={resolveImageUrl(group.image_url) || undefined}
+        cost={group.cost}
+        socials={group.socials}
+        location={group.location}
+        categories={group.category}
+        schedules={transformedSchedules}
+        description={group.description}
+      />
     </DetailPageContainer>
   );
 }

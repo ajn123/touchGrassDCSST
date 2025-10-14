@@ -52,7 +52,7 @@ export const Cost = ({
       iconClassName="text-black"
       className={className}
     >
-      <div className="inline-flex items-center gap-2 px-3 py-2 bg-purple-50 text-purple-700 rounded-lg border border-purple-200">
+      <div className="inline-flex items-center gap-2 px-3 py-2 bg-purple-50 text-purple-700 rounded-lg border">
         {getCostDisplay()}
       </div>
     </IconSection>

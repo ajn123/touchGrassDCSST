@@ -23,10 +23,8 @@ export function Description({
   return (
     <div className={`space-y-3 ${className}`}>
       <h2 className="text-xl font-semibold mb-3">Description</h2>
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-        <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
-          {displayText}
-        </p>
+      <div className="border rounded-lg rounded-lg p-4">
+        <p className="leading-relaxed whitespace-pre-wrap">{displayText}</p>
       </div>
     </div>
   );

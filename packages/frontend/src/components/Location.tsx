@@ -19,7 +19,7 @@ export function Location({ location, className = "" }: LocationProps) {
       iconClassName="text-red-600"
       className={`my-4 ${className}`}
     >
-      <p className="text-gray-700">{location}</p>
+      <p className="">{location}</p>
     </IconSection>
   );
 }

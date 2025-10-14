@@ -1,6 +1,5 @@
 "use client";
 
-import { trackEmailSent } from "@/lib/analyticsTrack";
 import { sendEmail } from "@/lib/email";
 
 import { useState } from "react";
@@ -99,7 +98,7 @@ export function ContactForm() {
         replyTo: formData.email,
       });
 
-      trackEmailSent(formData);
+      // Analytics handled centrally in middleware
 
       if (!result.success) {
         throw new Error("Failed to send message");

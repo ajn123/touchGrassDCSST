@@ -2,7 +2,6 @@
 
 import FeaturedEvent from "@/components/FeaturedEvent";
 import SearchFilters from "@/components/SearchFilters";
-import { trackSearch } from "@/lib/analyticsTrack";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
@@ -128,7 +127,7 @@ function SearchPageContent() {
           }
         }
 
-        trackSearch(queryParams);
+        // Analytics handled centrally in middleware
         setEvents(data.events || []);
         setGroups(data.groups || []);
       } catch (error) {

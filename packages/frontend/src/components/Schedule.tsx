@@ -91,7 +91,7 @@ export function Schedule({ schedules, className = "" }: ScheduleProps) {
       className={`my-4 ${className}`}
     >
       <div className="flex items-center gap-2 mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">Schedule</h3>
+        <h3 className="text-lg font-semibold">Schedule</h3>
       </div>
 
       <div className="ml-12 space-y-4">

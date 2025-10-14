@@ -43,7 +43,7 @@ export function trackPageVisit(
   };
 
   // Send to your analytics service
-  console.log("Page visit tracked:", visitData);
+  //console.log("Page visit tracked:", visitData);
 
   const body = {
     pk: `ANALYTICS#${action}`,

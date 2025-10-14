@@ -4,7 +4,6 @@ import { DateDisplay } from "@/components/Date";
 import DetailPageContainer from "@/components/DetailPageContainer";
 import { EntityDetail } from "@/components/EntityDetail";
 import EventMap from "@/components/EventMap";
-import { EventPageTracker } from "@/components/EventPageTracker";
 import { ReportWrongInfoButton } from "@/components/ReportWrongInfoButton";
 import { getEvent, getEventByTitle } from "@/lib/dynamodb/dynamodb-events";
 import { resolveImageUrl } from "@/lib/image-utils";
@@ -79,8 +78,7 @@ export default async function ItemPage({
 
   return (
     <DetailPageContainer>
-      {/* Client-side analytics tracking */}
-      <EventPageTracker eventId={awaitedParams.id} />
+      {/* Analytics handled centrally in middleware */}
       {artificialDelay > 0 && (
         <div
           style={{

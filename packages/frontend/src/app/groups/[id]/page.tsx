@@ -29,7 +29,7 @@ export default async function GroupPage({
       "admin@example.com",
     ].includes(user.properties.id.toLowerCase());
 
-  console.log("🔍 Group ID:", decodeURIComponent(awaitedParams.id));
+  //console.log("🔍 Group ID:", decodeURIComponent(awaitedParams.id));
   const groupTitle = decodeURIComponent(awaitedParams.id);
   const group = await getGroup(groupTitle);
 
@@ -51,9 +51,9 @@ export default async function GroupPage({
     transformedSchedules = group.schedules;
   }
 
-  console.log("🔍 Group:", group);
-  console.log("🔍 Schedules:", groupSchedules);
-  console.log("🔍 Transformed Schedules:", transformedSchedules);
+  // console.log("🔍 Group:", group);
+  // console.log("🔍 Schedules:", groupSchedules);
+  // console.log("🔍 Transformed Schedules:", transformedSchedules);
 
   if (!group) {
     return (

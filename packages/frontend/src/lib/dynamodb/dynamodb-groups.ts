@@ -62,12 +62,12 @@ export async function getGroups() {
   try {
     const command = new ScanCommand({
       TableName: Resource.Db.name,
-      FilterExpression: "#sk = :groupInfo",
+      FilterExpression: "#pk = :GROUP_PREFIX",
       ExpressionAttributeNames: {
-        "#sk": "sk",
+        "#pk": "pk",
       },
       ExpressionAttributeValues: {
-        ":groupInfo": { S: "GROUP_INFO" },
+        ":GROUP_PREFIX": { S: "GROUP#" },
       },
     });
 

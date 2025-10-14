@@ -5,9 +5,6 @@ import FeaturedGroup from "./FeaturedGroup";
 export default async function FeaturedGroups() {
   try {
     const allGroups = await getPublicGroups();
-
-    console.log("🔍 FeaturedGroups: All groups:", allGroups);
-
     // Get 5 random groups
     const shuffled = allGroups.sort(() => 0.5 - Math.random());
     const featuredGroups = shuffled.slice(0, 5);

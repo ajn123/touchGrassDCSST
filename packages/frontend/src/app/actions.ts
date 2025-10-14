@@ -10,9 +10,6 @@ export async function auth() {
   const accessToken = cookies.get("access_token");
   const refreshToken = cookies.get("refresh_token");
 
-  console.log("Auth check: accessToken exists:", !!accessToken);
-  console.log("Auth check: refreshToken exists:", !!refreshToken);
-
   if (!accessToken) {
     console.log("Auth check: No access token, returning false");
     return false;
@@ -22,20 +19,13 @@ export async function auth() {
     refresh: refreshToken?.value,
   });
 
-  console.log(
-    "Auth check: Verification result:",
-    verified.err ? "error" : "success"
-  );
-
   if (verified.err) {
-    console.log("Auth check: Verification failed, returning false");
     return false;
   }
   if (verified.tokens) {
     await setTokens(verified.tokens.access, verified.tokens.refresh);
   }
 
-  console.log("Auth check: Returning subject:", verified.subject);
   return verified.subject;
 }
 

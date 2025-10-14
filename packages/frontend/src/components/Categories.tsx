@@ -1,6 +1,5 @@
 "use client";
 
-import { trackPageVisit } from "@/lib/analyticsTrack";
 import { faTags } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -122,17 +121,7 @@ export default function Categories({
                   category.category
                 )}&sortBy=date&sortOrder=asc`}
                 className="hover:text-blue-500"
-                onClick={() => {
-                  trackPageVisit(
-                    {
-                      page: `/search?categories=${encodeURIComponent(
-                        category.category
-                      )}&sortBy=date&sortOrder=asc`,
-                      category: category.category,
-                    },
-                    "CATEGORY_SELECTION"
-                  );
-                }}
+                onClick={() => {}}
               >
                 <div className="bg-white rounded-lg shadow-md p-6 text-center cursor-pointer hover:shadow-lg transition-shadow transform hover:scale-105 duration-300 slow-transition border border-black">
                   <h3 className="text-lg font-semibold text-gray-800 hover:text-blue-500">

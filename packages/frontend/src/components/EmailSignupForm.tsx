@@ -1,6 +1,5 @@
 "use client";
 
-import { trackEmailSignup } from "@/lib/analyticsTrack";
 import { sendEmailSignup } from "@/lib/email";
 import { useState } from "react";
 
@@ -106,7 +105,7 @@ export function EmailSignupForm({ categories }: EmailSignupFormProps) {
 
       console.log("Sending email signup:", formData);
 
-      trackEmailSignup(formData);
+      // Analytics handled centrally in middleware
 
       if (response.success) {
         setSubmitStatus("success");

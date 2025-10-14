@@ -1,12 +1,10 @@
 import Categories from "@/components/Categories";
 import CompactCalendar from "@/components/CompactCalendar";
 import FeaturedGroups from "@/components/FeaturedGroups";
-import HomepageAnalytics from "@/components/HomepageAnalytics";
 import SearchBar from "@/components/SearchBar";
 import { createEvent, getCategories } from "@/lib/dynamodb/dynamodb-events";
 import { revalidatePath } from "next/cache";
 import Image from "next/image";
-import { Resource } from "sst";
 
 interface Category {
   category: string;
@@ -21,20 +19,14 @@ async function submitForm(formData: FormData) {
   console.log("Form submission with image key:", imageKey);
 
   const response = await createEvent(formData);
-  console.log(response);
   revalidatePath("/");
 }
 
 export default async function Home() {
-  console.log(Resource.MySearch.url);
-  console.log(Resource.MySearch.username);
-  console.log("password", Resource.MySearch.password);
-
   // This runs on the server during rendering (like useEffect but server-side)
 
   const categories = await getCategories();
 
-  console.log("categories", categories);
   return (
     <main className="min-h-screen">
       {/* Hero Section */}
@@ -77,8 +69,7 @@ export default async function Home() {
 
       <Categories categories={categories as Category[]} />
 
-      {/* Analytics Component */}
-      <HomepageAnalytics />
+      {/* Analytics handled centrally in middleware */}
 
       {/* <RecurringEvent /> */}
     </main>

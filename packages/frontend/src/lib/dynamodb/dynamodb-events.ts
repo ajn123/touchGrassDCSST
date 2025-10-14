@@ -114,7 +114,6 @@ export async function getCategories() {
       }
     });
 
-    console.log("Unique categories:", uniqueCategories);
     return Array.from(uniqueCategories).map((category) => ({ category }));
   } catch (error) {
     console.error("Error fetching categories:", error);

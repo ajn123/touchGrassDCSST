@@ -14,7 +14,6 @@ export default function DetailPageContainer({
       className={`container ${className}`}
       style={{
         marginTop: "2rem",
-        backgroundColor: "white",
         padding: "2rem",
         borderRadius: "1rem",
         marginBottom: "2rem",

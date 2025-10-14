@@ -2,6 +2,7 @@
 
 import { trackPageVisit } from "@/lib/analyticsTrack";
 import { faTags } from "@fortawesome/free-solid-svg-icons";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { IconSection } from "./IconSection";
 

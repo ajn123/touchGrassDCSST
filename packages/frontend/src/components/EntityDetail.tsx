@@ -37,7 +37,7 @@ export function EntityDetail({
   return (
     <div className="border-t pt-6 mb-10">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
+        <h1 className="text-3xl font-bold">{title}</h1>
         {rightActionNode}
       </div>
 

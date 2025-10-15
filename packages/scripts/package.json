@@ -8,11 +8,12 @@
     "@aws-sdk/credential-provider-node": "^3.0.0",
     "@aws-sdk/util-dynamodb": "^3.0.0",
     "@opensearch-project/opensearch": "^2.4.0",
+    "@types/puppeteer": "^5.4.7",
     "axios": "^1.6.0",
     "cheerio": "^1.0.0",
     "dotenv": "^17.0.1",
     "node-cron": "^3.0.0",
-    "puppeteer": "^21.0.0",
+    "puppeteer": "^21.11.0",
     "sst": "*"
   },
   "scripts": {
@@ -49,7 +50,8 @@
     "test:api-endpoint": "tsx src/test-api-endpoint.ts",
     "reindex:events": "tsx src/reindex-new-events.ts",
     "seed:venues": "tsx src/seed-venues.ts",
-    "full-sync": "tsx src/full-sync.ts"
+    "full-sync": "tsx src/full-sync.ts",
+    "crawl:washingtonian": "tsx src/test-washingtonian-crawler.ts"
   },
   "devDependencies": {
     "@types/node": "^22",

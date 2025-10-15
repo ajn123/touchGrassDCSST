@@ -283,7 +283,7 @@ export async function getEvents() {
     const command = new ScanCommand({
       TableName: Resource.Db.name,
       FilterExpression:
-        "(begins_with(#pk, :eventPrefixNew) OR begins_with(#pk, :eventPrefixOld)) AND #isPublic = :isPublic",
+        "(begins_with(#pk, :eventPrefixNew) OR begins_with(#pk, :eventPrefixOld) OR begins_with(#pk, :washingtonianPrefixNew) OR begins_with(#pk, :washingtonianPrefixOld)) AND #isPublic = :isPublic",
       ExpressionAttributeNames: {
         "#pk": "pk",
         "#isPublic": "isPublic",
@@ -291,6 +291,8 @@ export async function getEvents() {
       ExpressionAttributeValues: {
         ":eventPrefixNew": { S: "EVENT-" },
         ":eventPrefixOld": { S: "EVENT#" },
+        ":washingtonianPrefixNew": { S: "EVENT-WASHINGTONIAN-" },
+        ":washingtonianPrefixOld": { S: "EVENT#WASHINGTONIAN#" },
         ":isPublic": { S: "true" },
       },
     });
@@ -298,10 +300,12 @@ export async function getEvents() {
     console.log("🔍 getEvents: Scan command prepared:", {
       TableName: Resource.Db.name,
       FilterExpression:
-        "(begins_with(#pk, :eventPrefixNew) OR begins_with(#pk, :eventPrefixOld)) AND #isPublic = :isPublic",
+        "(begins_with(#pk, :eventPrefixNew) OR begins_with(#pk, :eventPrefixOld) OR begins_with(#pk, :washingtonianPrefixNew) OR begins_with(#pk, :washingtonianPrefixOld)) AND #isPublic = :isPublic",
       ExpressionAttributeValues: {
         ":eventPrefixNew": "EVENT-",
         ":eventPrefixOld": "EVENT#",
+        ":washingtonianPrefixNew": "EVENT-WASHINGTONIAN-",
+        ":washingtonianPrefixOld": "EVENT#WASHINGTONIAN#",
         ":isPublic": "true",
       },
     });

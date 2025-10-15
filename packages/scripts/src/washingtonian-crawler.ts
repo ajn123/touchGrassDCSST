@@ -4,7 +4,7 @@ import { Resource } from "sst";
 
 interface WashingtonianEvent {
   title: string;
-  date: string;
+  date?: string;
   time?: string;
   location?: string;
   description?: string;
@@ -22,7 +22,9 @@ class WashingtonianCrawler {
     });
   }
 
-  async crawlEvents(): Promise<WashingtonianEvent[]> {
+  async crawlEventsForDate(
+    startDateISO: string
+  ): Promise<WashingtonianEvent[]> {
     console.log("🕷️ Starting Washingtonian event crawl with Puppeteer...");
 
     let browser: Browser | null = null;
@@ -52,8 +54,10 @@ class WashingtonianCrawler {
       // Set viewport
       await page.setViewport({ width: 1920, height: 1080 });
 
-      const url =
-        "https://www.washingtonian.com/calendar-2/#/show?start=2025-10-15&distance=15";
+      const baseUrl = "https://www.washingtonian.com/calendar-2/#/show";
+      const url = `${baseUrl}?start=${encodeURIComponent(
+        startDateISO
+      )}&distance=15`;
 
       console.log(`🌐 Navigating to: ${url}`);
 
@@ -166,6 +170,21 @@ class WashingtonianCrawler {
                 ? distanceElement.textContent?.trim()
                 : "";
 
+              // Extract details URL (anchor within the event container)
+              let url: string | undefined = undefined;
+              // Prefer the wrapping anchor (the event card is often wrapped by <a ...>)
+              let anchor =
+                (element.closest("a[href]") as HTMLAnchorElement | null) ||
+                (element.querySelector("a[href]") as HTMLAnchorElement | null);
+              if (anchor) {
+                const href = anchor.getAttribute("href") || "";
+                try {
+                  url = new URL(href, window.location.href).toString();
+                } catch (_) {
+                  url = anchor.href || href || undefined;
+                }
+              }
+
               if (title) {
                 events.push({
                   title,
@@ -173,6 +192,7 @@ class WashingtonianCrawler {
                   location,
                   time,
                   distance,
+                  url,
                   fullLocation:
                     venue && location
                       ? `${venue}, ${location}`
@@ -227,13 +247,13 @@ class WashingtonianCrawler {
         for (const extractedEvent of extractedEvents) {
           const event: WashingtonianEvent = {
             title: extractedEvent.title,
-            date: undefined, // Date not available in this structure
+            date: startDateISO,
             time: extractedEvent.time || undefined,
             location: extractedEvent.fullLocation || undefined,
             description: extractedEvent.distance
               ? `Distance: ${extractedEvent.distance}`
               : undefined,
-            url: undefined, // Not available in this structure
+            url: extractedEvent.url || undefined,
             category: undefined, // Not available in this structure
             price: undefined, // Not available in this structure
           };
@@ -259,6 +279,8 @@ class WashingtonianCrawler {
             try {
               const event = this.parseEventHTML(eventHtml);
               if (event) {
+                // Ensure a date is set based on the crawled day
+                if (!event.date) event.date = startDateISO;
                 events.push(event);
                 console.log("✅ Parsed event from HTML:", event.title);
               }
@@ -285,7 +307,7 @@ class WashingtonianCrawler {
               if (title && title.length > 10) {
                 events.push({
                   title,
-                  date: undefined,
+                  date: startDateISO,
                   time: undefined,
                   location: undefined,
                   description: "Extracted from HTML fallback",
@@ -437,6 +459,9 @@ class WashingtonianCrawler {
         }
       }
 
+      // Final guard: backfill date if missing
+      events = events.map((e) => ({ ...e, date: e.date || startDateISO }));
+
       console.log(`🎉 Parsed ${events.length} events from Washingtonian`);
       return events;
     } catch (error) {
@@ -502,13 +527,17 @@ class WashingtonianCrawler {
         return null;
       }
 
+      // Extract URL from an anchor near the event block (if present)
+      const urlMatch = eventHtml.match(/<a[^>]*href="([^"]+)"[^>]*>/i);
+      const url = urlMatch ? urlMatch[1] : undefined;
+
       const event: WashingtonianEvent = {
         title,
         date: undefined, // Date not visible in this HTML structure
         time: time || undefined,
         location: fullLocation || undefined,
         description: description || undefined,
-        url: undefined, // Not available in this HTML structure
+        url,
         category: undefined, // Not available in this HTML structure
         price: undefined, // Not available in this HTML structure
       };
@@ -779,25 +808,31 @@ class WashingtonianCrawler {
 
     for (const event of events) {
       try {
+        const item: Record<string, any> = {
+          pk: { S: `EVENT#WASHINGTONIAN#${Date.now()}` },
+          sk: { S: "EVENT_INFO" },
+          title: { S: event.title },
+          source: { S: "washingtonian" },
+          createdAt: { N: Date.now().toString() },
+          isPublic: { S: "true" },
+        };
+        if (event.date) {
+          item.eventDate = { S: event.date };
+          item.start_date = { S: event.date }; // for calendar compatibility
+        }
+        if (event.time) {
+          item.time = { S: event.time };
+          item.start_time = { S: event.time }; // for calendar compatibility
+        }
+        if (event.location) item.location = { S: event.location };
+        if (event.description) item.description = { S: event.description };
+        if (event.url) item.url = { S: event.url };
+        if (event.category) item.category = { S: event.category };
+        if (event.price) item.cost = { S: event.price };
+
         const command = new PutItemCommand({
           TableName: Resource.Db.name,
-          Item: {
-            pk: { S: `EVENT#WASHINGTONIAN#${Date.now()}` },
-            sk: { S: "EVENT_INFO" },
-            title: { S: event.title },
-            eventDate: { S: event.date },
-            time: event.time ? { S: event.time } : undefined,
-            location: event.location ? { S: event.location } : undefined,
-            description: event.description
-              ? { S: event.description }
-              : undefined,
-            url: event.url ? { S: event.url } : undefined,
-            category: event.category ? { S: event.category } : undefined,
-            cost: event.price ? { S: event.price } : undefined,
-            source: { S: "washingtonian" },
-            createdAt: { N: Date.now().toString() },
-            isPublic: { BOOL: true },
-          },
+          Item: item,
         });
 
         await this.client.send(command);
@@ -808,11 +843,88 @@ class WashingtonianCrawler {
     }
   }
 
+  private buildDedupKey(event: WashingtonianEvent): string {
+    // Prefer URL; fallback to title+date
+    const base = event.url || `${event.title}::${event.date || "unknown"}`;
+    return base.trim().toLowerCase();
+  }
+
+  async saveEventsDedup(events: WashingtonianEvent[]): Promise<void> {
+    console.log(`💾 Saving ${events.length} events with de-duplication...`);
+
+    for (const event of events) {
+      try {
+        const dedupKey = this.buildDedupKey(event);
+        const pk = `EVENT#WASHINGTONIAN#${dedupKey}`;
+
+        const item: Record<string, any> = {
+          pk: { S: pk },
+          sk: { S: "EVENT_INFO" },
+          title: { S: event.title },
+          source: { S: "washingtonian" },
+          createdAt: { N: Date.now().toString() },
+          isPublic: { S: "true" },
+        };
+        if (event.date) {
+          item.eventDate = { S: event.date };
+          item.start_date = { S: event.date }; // for calendar compatibility
+        }
+        if (event.time) {
+          item.time = { S: event.time };
+          item.start_time = { S: event.time }; // for calendar compatibility
+        }
+        if (event.location) item.location = { S: event.location };
+        if (event.description) item.description = { S: event.description };
+        if (event.url) item.url = { S: event.url };
+        if (event.category) item.category = { S: event.category };
+        if (event.price) item.cost = { S: event.price };
+
+        const command = new PutItemCommand({
+          TableName: Resource.Db.name,
+          Item: item,
+          ConditionExpression: "attribute_not_exists(pk)",
+        });
+
+        await this.client.send(command);
+        console.log(`✅ Saved event: ${event.title}`);
+      } catch (error: any) {
+        // ConditionalCheckFailedException indicates duplicate
+        if (error?.name === "ConditionalCheckFailedException") {
+          console.log(`↩️ Skipped duplicate: ${event.title}`);
+        } else {
+          console.error(`❌ Error saving event ${event.title}:`, error);
+        }
+      }
+    }
+  }
+
   async run(): Promise<void> {
     try {
-      const events = await this.crawlEvents();
-      console.log(`🎯 Found ${events.length} events from Washingtonian`);
-      console.log("📋 Events found:", JSON.stringify(events, null, 2));
+      // Loop next 7 days starting today
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const allEvents: WashingtonianEvent[] = [];
+
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() + i);
+        const startISO = d.toISOString().split("T")[0];
+        console.log(`\n📅 Crawling date: ${startISO}`);
+
+        const dayEvents = await this.crawlEventsForDate(startISO);
+        // Take first 5 events for the day
+        const firstFive = dayEvents.slice(0, 5);
+        console.log(
+          `🧮 Keeping first ${firstFive.length} events for ${startISO}`
+        );
+        allEvents.push(...firstFive);
+      }
+
+      console.log(`\n🎯 Found ${allEvents.length} events across next 7 days`);
+      console.log("📋 Sample:", JSON.stringify(allEvents.slice(0, 3), null, 2));
+
+      // Save with de-duplication
+      await this.saveEventsDedup(allEvents);
       console.log("🎯 Washingtonian crawler completed successfully!");
     } catch (error) {
       console.error("💥 Washingtonian crawler failed:", error);

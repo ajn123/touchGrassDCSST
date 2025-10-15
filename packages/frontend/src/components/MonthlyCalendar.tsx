@@ -144,7 +144,19 @@ export default function MonthlyCalendar() {
   };
 
   const handleEventClick = (event: Event) => {
-    // Extract the event ID from the pk (remove EVENT- or EVENT# prefix)
+    // If this is a Washingtonian-sourced event, open the external URL instead
+    if (
+      typeof event.pk === "string" &&
+      (event.pk.startsWith("EVENT#WASHINGTONIAN#") ||
+        event.pk.startsWith("EVENT-WASHINGTONIAN-")) &&
+      event.url
+    ) {
+      // Open external details page in a new tab
+      window.open(event.url, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    // Otherwise navigate to internal event route
     const eventId = event.pk.replace(/^(EVENT-|EVENT#)/, "");
     router.push(`/events/${eventId}`);
   };

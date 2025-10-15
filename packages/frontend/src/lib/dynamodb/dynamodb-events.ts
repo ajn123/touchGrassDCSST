@@ -318,13 +318,49 @@ export async function getEvents() {
     );
     console.log("🔍 getEvents: Raw DynamoDB result:", result);
 
-    const events =
+    let events =
       result.Items?.map((item) => {
         // Use AWS SDK's unmarshall utility to convert DynamoDB format to regular object
         const unmarshalledItem = unmarshall(item);
         console.log("🔍 getEvents: Unmarshalled item:", unmarshalledItem);
         return unmarshalledItem;
       }) || [];
+
+    // For Washingtonian events, derive start_date (and start_time) from url or pk when missing
+    events = events.map((ev: any) => {
+      const pk: string | undefined = ev?.pk;
+      const url: string | undefined = ev?.url;
+      const isWash =
+        typeof pk === "string" &&
+        (pk.startsWith("EVENT#WASHINGTONIAN#") ||
+          pk.startsWith("EVENT-WASHINGTONIAN-"));
+
+      if (isWash) {
+        const source = (url || pk) as string;
+        // Derive date from YYYY-MM-DD in source
+        if (!ev.start_date) {
+          const dateMatch = source.match(/\d{4}-\d{2}-\d{2}/i);
+          if (dateMatch) {
+            ev.start_date = dateMatch[0];
+          }
+        }
+        // Derive time from trailing Txx in source (e.g., 2025-10-17T08)
+        if (!ev.start_time) {
+          const timeMatch = source.match(/\d{4}-\d{2}-\d{2}[tT](\d{2})/);
+          if (timeMatch) {
+            const hh = timeMatch[1];
+            const minutes = ev?.time?.match(/:(\d{2})/)?.[1] || "00";
+            const hourNum = parseInt(hh, 10);
+            const ampm = hourNum >= 12 ? "PM" : "AM";
+            const displayHour = hourNum % 12 || 12;
+            ev.start_time = `${displayHour}:${minutes} ${ampm}`;
+          } else if (ev?.time) {
+            ev.start_time = ev.time;
+          }
+        }
+      }
+      return ev;
+    });
 
     console.log("🔍 getEvents: Final events array length:", events.length);
     return events;

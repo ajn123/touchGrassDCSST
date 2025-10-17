@@ -19,7 +19,7 @@ export default async function FeaturedGroups() {
           <h2 className="text-4xl font-bold ">Featured Groups</h2>
           <Link
             href="/groups"
-            className="bg-white text-gray-900 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors border border-black"
+            className="bg-white text-gray-900 px-6 py-3 rounded-lg font-semibold theme-hover-light transition-colors border border-black"
           >
             Show All Groups
           </Link>

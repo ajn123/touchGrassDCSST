@@ -295,27 +295,23 @@ export function AddEventForm() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="max-w-2xl mx-auto p-6 rounded-lg theme-form">
       {/* Admin Status Indicator */}
       {user && (
         <div
-          className={`mb-6 p-3 rounded-md ${
-            isAdmin
-              ? "bg-blue-50 border border-blue-200"
-              : "bg-gray-50 border border-gray-200"
+          className={`mb-6 p-3 rounded-md theme-bg-secondary theme-border-primary border ${
+            isAdmin ? "" : ""
           }`}
         >
           <div className="flex items-center">
             <span
-              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                isAdmin
-                  ? "bg-blue-100 text-blue-800"
-                  : "bg-gray-100 text-gray-800"
+              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium theme-bg-tertiary theme-text-primary ${
+                isAdmin ? "" : ""
               }`}
             >
               {isAdmin ? "👑 Admin" : "👤 User"}
             </span>
-            <span className="ml-2 text-sm text-gray-600">
+            <span className="ml-2 text-sm theme-text-secondary">
               {isAdmin
                 ? "You can create public events visible to all users"
                 : "This event will need to be approved first"}
@@ -329,7 +325,7 @@ export function AddEventForm() {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium mb-2 theme-form-label"
             >
               Your Email *
             </label>
@@ -339,8 +335,8 @@ export function AddEventForm() {
               name="email"
               value={formData.email}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                errors.email ? "border-red-500" : "border-gray-300"
+              className={`w-full px-3 py-2 rounded-md theme-form-input focus:outline-none focus:ring-2 ${
+                errors.email ? "border-red-500" : ""
               }`}
               placeholder="your.email@example.com"
             />
@@ -350,10 +346,7 @@ export function AddEventForm() {
           </div>
 
           <div>
-            <label
-              htmlFor="title"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
+            <label htmlFor="title" className="block text-sm font-medium mb-2">
               Event Title *
             </label>
             <input
@@ -362,8 +355,8 @@ export function AddEventForm() {
               name="title"
               value={formData.title}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                errors.title ? "border-red-500" : "border-gray-300"
+              className={`w-full px-3 py-2 rounded-md theme-form-input focus:outline-none focus:ring-2 ${
+                errors.title ? "border-red-500" : ""
               }`}
               placeholder="Event Title"
             />
@@ -375,10 +368,7 @@ export function AddEventForm() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
-            <label
-              htmlFor="website"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
+            <label htmlFor="website" className="block text-sm font-medium mb-2">
               Website
             </label>
             <input
@@ -387,8 +377,8 @@ export function AddEventForm() {
               name="website"
               value={formData.website}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                errors.website ? "border-red-500" : "border-gray-300"
+              className={`w-full px-3 py-2 rounded-md theme-form-input focus:outline-none focus:ring-2 ${
+                errors.website ? "border-red-500" : ""
               }`}
               placeholder="https://example.com"
             />
@@ -400,7 +390,7 @@ export function AddEventForm() {
           <div>
             <label
               htmlFor="instagram"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium mb-2 theme-form-label"
             >
               Instagram
             </label>
@@ -410,8 +400,8 @@ export function AddEventForm() {
               name="instagram"
               value={formData.instagram}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                errors.instagram ? "border-red-500" : "border-gray-300"
+              className={`w-full px-3 py-2 rounded-md theme-form-input focus:outline-none focus:ring-2 ${
+                errors.instagram ? "border-red-500" : ""
               }`}
               placeholder="@username or URL"
             />
@@ -423,7 +413,7 @@ export function AddEventForm() {
           <div>
             <label
               htmlFor="facebook"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium mb-2 theme-form-label"
             >
               Facebook
             </label>
@@ -433,8 +423,8 @@ export function AddEventForm() {
               name="facebook"
               value={formData.facebook}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                errors.facebook ? "border-red-500" : "border-gray-300"
+              className={`w-full px-3 py-2 rounded-md theme-form-input focus:outline-none focus:ring-2 ${
+                errors.facebook ? "border-red-500" : ""
               }`}
               placeholder="Page name or URL"
             />
@@ -447,7 +437,7 @@ export function AddEventForm() {
         <div>
           <label
             htmlFor="description"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-sm font-medium mb-2"
           >
             Event Description *
           </label>
@@ -457,8 +447,8 @@ export function AddEventForm() {
             value={formData.description}
             onChange={handleInputChange}
             rows={4}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-              errors.description ? "border-red-500" : "border-gray-300"
+            className={`w-full px-3 py-2 rounded-md theme-form-input focus:outline-none focus:ring-2 ${
+              errors.description ? "border-red-500" : ""
             }`}
             placeholder="Describe your event..."
           />
@@ -468,10 +458,7 @@ export function AddEventForm() {
         </div>
 
         <div>
-          <label
-            htmlFor="eventDate"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
+          <label htmlFor="eventDate" className="block text-sm font-medium mb-2">
             Event Date (Optional)
           </label>
           <input
@@ -480,12 +467,12 @@ export function AddEventForm() {
             name="eventDate"
             value={formData.eventDate}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 rounded-md theme-form-input focus:outline-none focus:ring-2"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">
+          <label className="block text-sm font-medium mb-3 theme-form-label">
             Categories
           </label>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -494,25 +481,10 @@ export function AddEventForm() {
                 key={cat.category}
                 type="button"
                 onClick={() => handleCategoryChange(cat.category)}
-                style={{
-                  backgroundColor: formData.selectedCategories.includes(
-                    cat.category
-                  )
-                    ? "#10b981"
-                    : "white",
-                  borderColor: formData.selectedCategories.includes(
-                    cat.category
-                  )
-                    ? "#10b981"
-                    : "#d1d5db",
-                  color: formData.selectedCategories.includes(cat.category)
-                    ? "white"
-                    : "#374151",
-                }}
-                className={`px-4 py-3 rounded-lg border-2 text-sm font-medium transition-all duration-200 hover:shadow-md ${
+                className={`px-4 py-3 rounded-lg border-2 text-sm font-medium transition-all duration-200 hover:shadow-md theme-button-secondary ${
                   formData.selectedCategories.includes(cat.category)
-                    ? "hover:bg-emerald-600 hover:border-emerald-600"
-                    : "hover:bg-gray-50 hover:border-gray-400"
+                    ? "theme-accent"
+                    : ""
                 }`}
               >
                 {cat.category}
@@ -535,7 +507,7 @@ export function AddEventForm() {
                 }
                 className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium theme-text-primary">
                 Make this event public (visible to all users)
               </span>
             </label>
@@ -545,7 +517,7 @@ export function AddEventForm() {
         <div>
           <label
             htmlFor="location"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-sm font-medium mb-2 theme-form-label"
           >
             Event Location (Address) *
           </label>
@@ -555,8 +527,8 @@ export function AddEventForm() {
             name="location"
             value={formData.location}
             onChange={handleInputChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-              errors.location ? "border-red-500" : "border-gray-300"
+            className={`w-full px-3 py-2 rounded-md theme-form-input focus:outline-none focus:ring-2 ${
+              errors.location ? "border-red-500" : ""
             }`}
             placeholder="e.g., 123 Main St, Washington, DC"
           />
@@ -566,9 +538,7 @@ export function AddEventForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Event Image
-          </label>
+          <label className="block text-sm font-medium mb-2">Event Image</label>
           <ImageUploadWithState
             folder="events"
             onImageUploaded={handleImageUploaded}
@@ -576,8 +546,8 @@ export function AddEventForm() {
             className="mb-4"
           />
           {uploadedImageUrl && (
-            <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded">
-              <p className="text-sm text-green-700">
+            <div className="mt-2 p-2 theme-bg-secondary theme-border-primary border rounded">
+              <p className="text-sm theme-text-primary">
                 ✅ Image uploaded and attached to event!
               </p>
             </div>
@@ -586,10 +556,7 @@ export function AddEventForm() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
-            <label
-              htmlFor="cost"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
+            <label htmlFor="cost" className="block text-sm font-medium mb-2">
               Cost
             </label>
             <input
@@ -598,17 +565,17 @@ export function AddEventForm() {
               name="cost"
               value={formData.cost}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 rounded-md theme-form-input focus:outline-none focus:ring-2"
               placeholder="e.g., Free, $10, etc."
             />
           </div>
         </div>
 
         {submitStatus === "success" && (
-          <div className="p-4 bg-green-50 border border-green-200 rounded-md">
+          <div className="p-4 theme-bg-secondary theme-border-primary border rounded-md">
             <div className="flex">
               <svg
-                className="w-5 h-5 text-green-400 mr-3"
+                className="w-5 h-5 mr-3 theme-text-primary"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -618,7 +585,7 @@ export function AddEventForm() {
                   clipRule="evenodd"
                 />
               </svg>
-              <p className="text-green-800">
+              <p className="theme-text-primary">
                 Event created successfully! It will appear in the events list
                 shortly.
               </p>
@@ -627,10 +594,10 @@ export function AddEventForm() {
         )}
 
         {submitStatus === "error" && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+          <div className="p-4 theme-bg-secondary theme-border-primary border rounded-md">
             <div className="flex">
               <svg
-                className="w-5 h-5 text-red-400 mr-3"
+                className="w-5 h-5 mr-3 theme-text-primary"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -640,7 +607,7 @@ export function AddEventForm() {
                   clipRule="evenodd"
                 />
               </svg>
-              <p className="text-red-800">
+              <p className="theme-text-primary">
                 Sorry, there was an error creating the event. Please try again.
               </p>
             </div>
@@ -651,16 +618,14 @@ export function AddEventForm() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`px-6 py-3 text-white font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-              isSubmitting
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
+            className={`px-6 py-3 font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 theme-button-primary ${
+              isSubmitting ? "cursor-not-allowed opacity-50" : ""
             }`}
           >
             {isSubmitting ? (
               <div className="flex items-center">
                 <svg
-                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  className="animate-spin -ml-1 mr-3 h-5 w-5"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"

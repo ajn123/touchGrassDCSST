@@ -303,7 +303,7 @@ export default function SearchFilters({
                   className={`px-2 py-1 text-xs rounded-full border transition-colors ${
                     filters.costRange.type === type
                       ? "bg-blue-100 border-blue-300 text-blue-700"
-                      : "bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200"
+                      : "bg-gray-100 border-gray-300 text-gray-700 theme-hover-medium"
                   }`}
                 >
                   {type.charAt(0).toUpperCase() + type.slice(1)}

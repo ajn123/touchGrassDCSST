@@ -184,7 +184,7 @@ export default function GroupsClient({ groups }: { groups: Group[] }) {
                         className="w-full h-48 object-cover hover:opacity-90 transition-opacity"
                       />
                     ) : (
-                      <div className="w-full h-48 bg-gray-200 flex items-center justify-center hover:bg-gray-300 transition-colors">
+                      <div className="w-full h-48 bg-gray-200 flex items-center justify-center theme-hover-medium transition-colors">
                         <span>No image</span>
                       </div>
                     )}

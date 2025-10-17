@@ -123,10 +123,7 @@ export function ContactForm() {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid md:grid-cols-2 gap-6">
         <div>
-          <label
-            htmlFor="name"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
+          <label htmlFor="name" className="block text-sm font-medium mb-2">
             Name
           </label>
           <input
@@ -146,10 +143,7 @@ export function ContactForm() {
         </div>
 
         <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
+          <label htmlFor="email" className="block text-sm font-medium mb-2">
             Email *
           </label>
           <input
@@ -170,10 +164,7 @@ export function ContactForm() {
       </div>
 
       <div>
-        <label
-          htmlFor="subject"
-          className="block text-sm font-medium text-gray-700 mb-2"
-        >
+        <label htmlFor="subject" className="block text-sm font-medium mb-2">
           Subject *
         </label>
         <select
@@ -199,10 +190,7 @@ export function ContactForm() {
       </div>
 
       <div>
-        <label
-          htmlFor="message"
-          className="block text-sm font-medium text-gray-700 mb-2"
-        >
+        <label htmlFor="message" className="block text-sm font-medium mb-2">
           Message *
         </label>
         <textarea

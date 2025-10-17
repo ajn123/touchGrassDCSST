@@ -6,6 +6,7 @@ interface ThemeContextType {
   isDark: boolean;
   toggleTheme: () => void;
   mounted: boolean;
+  hoverClass: string;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -47,8 +48,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setIsDark(!isDark);
   };
 
+  // Theme-aware hover class that automatically adapts
+  const hoverClass = isDark ? "theme-hover-dark" : "theme-hover-light";
+
   return (
-    <ThemeContext.Provider value={{ isDark, toggleTheme, mounted }}>
+    <ThemeContext.Provider value={{ isDark, toggleTheme, mounted, hoverClass }}>
       {children}
     </ThemeContext.Provider>
   );

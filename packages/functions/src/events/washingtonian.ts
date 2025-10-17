@@ -1,6 +1,6 @@
 import { WashingtonianCrawler } from "../../../scripts/src/washingtonian-crawler";
 
-export async function handler(event: any = {}) {
+async function handler(event: any = {}) {
   try {
     console.log("🚀 Washingtonian crawl Lambda invoked", {
       source: event?.source,
@@ -32,3 +32,6 @@ export async function handler(event: any = {}) {
     };
   }
 }
+
+export { handler };
+export default handler;

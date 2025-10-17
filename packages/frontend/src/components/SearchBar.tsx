@@ -144,7 +144,7 @@ export default function SearchBar() {
                       <div
                         key={`event-${index}`}
                         onClick={() => handleResultClick(event, "event")}
-                        className="flex items-center p-2 hover:bg-gray-50 rounded-md cursor-pointer transition-colors"
+                        className="flex items-center p-2 theme-hover-light rounded-md cursor-pointer transition-colors"
                       >
                         <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
                           <span className="text-blue-600 text-sm">📅</span>
@@ -196,7 +196,7 @@ export default function SearchBar() {
                       <div
                         key={`group-${index}`}
                         onClick={() => handleResultClick(group, "group")}
-                        className="flex items-center p-2 hover:bg-gray-50 rounded-md cursor-pointer transition-colors"
+                        className="flex items-center p-2 theme-hover-light rounded-md cursor-pointer transition-colors"
                       >
                         <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
                           <span className="text-green-600 text-sm">👥</span>

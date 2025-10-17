@@ -176,7 +176,7 @@ export default function MonthlyCalendar() {
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={goToPreviousMonth}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 theme-hover-light rounded-lg transition-colors"
         >
           <svg
             className="w-5 h-5"
@@ -199,7 +199,7 @@ export default function MonthlyCalendar() {
 
         <button
           onClick={goToNextMonth}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 theme-hover-light rounded-lg transition-colors"
         >
           <svg
             className="w-5 h-5"

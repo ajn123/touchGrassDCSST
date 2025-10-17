@@ -4,10 +4,10 @@ export default function ContactPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       {/* Contact Section */}
-      <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+      <div className=" rounded-lg shadow-lg p-8 mb-8">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Contact Us</h1>
-          <p className="text-lg text-gray-600 bg-green-50 rounded-lg p-6">
+          <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
+          <p className="text-lg rounded-lg p-6">
             Have questions about our events or need assistance? We'd love to
             hear from you!
           </p>
@@ -20,9 +20,7 @@ export default function ContactPage() {
 
       {/* About Section */}
       <div className="bg-white rounded-lg shadow-lg p-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-6">
-          About Touchgrassdc.com
-        </h2>
+        <h2 className="text-3xl font-bold mb-6">About Touchgrassdc.com</h2>
 
         <div className="prose prose-lg max-w-none">
           <p className="text-xl text-gray-700 leading-relaxed mb-6">

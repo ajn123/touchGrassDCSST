@@ -18,6 +18,10 @@
   --accent-primary: #3182ce;
   --accent-hover: #2c5aa0;
   --accent-light: #ebf8ff;
+  /* Button hover grays for light theme */
+  --hover-gray-light: #f7fafc;
+  --hover-gray-medium: #edf2f7;
+  --hover-gray-dark: #e2e8f0;
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
     0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -38,6 +42,10 @@
   --accent-primary: #63b3ed;
   --accent-hover: #4299e1;
   --accent-light: #2a4365;
+  /* Button hover grays for dark theme */
+  --hover-gray-light: #4a5568;
+  --hover-gray-medium: #2d3748;
+  --hover-gray-dark: #1a202c;
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4),
     0 2px 4px -1px rgba(0, 0, 0, 0.3);
@@ -220,6 +228,31 @@ body {
 
 .theme-button-secondary:hover {
   background-color: var(--bg-secondary);
+}
+
+/* Theme-aware button hover classes */
+.theme-hover-light {
+  transition: background-color 0.2s ease;
+}
+
+.theme-hover-light:hover {
+  background-color: var(--hover-gray-light);
+}
+
+.theme-hover-medium {
+  transition: background-color 0.2s ease;
+}
+
+.theme-hover-medium:hover {
+  background-color: var(--hover-gray-medium);
+}
+
+.theme-hover-dark {
+  transition: background-color 0.2s ease;
+}
+
+.theme-hover-dark:hover {
+  background-color: var(--hover-gray-dark);
 }
 
 /* Card styles */

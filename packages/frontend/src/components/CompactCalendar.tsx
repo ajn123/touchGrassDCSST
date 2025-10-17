@@ -163,7 +163,7 @@ export default function CompactCalendar() {
         <div className="flex items-center justify-between p-4 bg-gray-50 border-b">
           <button
             onClick={goToPreviousMonth}
-            className="p-1 hover:bg-gray-200 rounded transition-colors"
+            className="p-1 theme-hover-medium rounded transition-colors"
           >
             <svg
               className="w-4 h-4"
@@ -186,7 +186,7 @@ export default function CompactCalendar() {
 
           <button
             onClick={goToNextMonth}
-            className="p-1 hover:bg-gray-200 rounded transition-colors"
+            className="p-1 theme-hover-medium rounded transition-colors"
           >
             <svg
               className="w-4 h-4"

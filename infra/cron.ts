@@ -4,6 +4,7 @@ const cron = new sst.aws.Cron("cron", {
 });
 
 const washingtonianCron = new sst.aws.Cron("washingtonianCron", {
-  handler: "packages/functions/src/events/washingtonian.handler",
-  schedule: "rate(1 week)",
+  function: "packages/functions/src/events/washingtonian.handler",
+  // Runs every Wednesday at 2:00 AM UTC
+  schedule: "rate(7 days)",
 });

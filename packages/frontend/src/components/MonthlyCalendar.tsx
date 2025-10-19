@@ -193,9 +193,7 @@ export default function MonthlyCalendar() {
           </svg>
         </button>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-          {formatDate(currentDate)}
-        </h2>
+        <h2 className="text-2xl font-bold">{formatDate(currentDate)}</h2>
 
         <button
           onClick={goToNextMonth}
@@ -222,10 +220,7 @@ export default function MonthlyCalendar() {
         {/* Day Headers */}
         <div className="grid grid-cols-7 bg-gray-50 dark:bg-gray-800 border-b dark:border-gray-700">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-            <div
-              key={day}
-              className="p-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
+            <div key={day} className="p-3 text-center text-sm font-medium">
               {day}
             </div>
           ))}
@@ -237,17 +232,13 @@ export default function MonthlyCalendar() {
             <div
               key={index}
               className={`min-h-[200px] border-r border-b border-gray-200 dark:border-gray-700 p-2 ${
-                !day.isCurrentMonth
-                  ? "bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500"
-                  : "bg-white dark:bg-gray-900"
+                !day.isCurrentMonth ? "bg-gray-50 " : "bg-white "
               }`}
             >
               {/* Day Number */}
               <div
                 className={`text-sm font-medium mb-2 ${
-                  day.isCurrentMonth
-                    ? "text-gray-900 dark:text-white"
-                    : "text-gray-400 dark:text-gray-500"
+                  day.isCurrentMonth ? "text-gray-900" : "text-gray-400"
                 }`}
               >
                 {day.dayNumber}

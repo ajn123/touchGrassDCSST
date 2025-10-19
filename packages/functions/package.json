@@ -7,9 +7,11 @@
     "@aws-sdk/lib-dynamodb": "^3.0.0",
     "@opensearch-project/opensearch": "^2.4.0",
     "axios": "^1.6.0",
+    "playwright": "^1.40.0",
     "sst": "*"
   },
   "devDependencies": {
+    "@sparticuz/chromium": "^141.0.0",
     "@types/aws-lambda": "^8"
   }
 }

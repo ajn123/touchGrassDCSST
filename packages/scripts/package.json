@@ -8,12 +8,14 @@
     "@aws-sdk/credential-provider-node": "^3.0.0",
     "@aws-sdk/util-dynamodb": "^3.0.0",
     "@opensearch-project/opensearch": "^2.4.0",
-    "@types/puppeteer": "^5.4.7",
     "axios": "^1.6.0",
     "cheerio": "^1.0.0",
     "dotenv": "^17.0.1",
     "node-cron": "^3.0.0",
+    "playwright": "^1.40.0",
     "puppeteer": "^21.11.0",
+    "selenium-webdriver": "^4.15.0",
+    "@sparticuz/chromium": "^141.0.0",
     "sst": "*"
   },
   "scripts": {
@@ -51,11 +53,16 @@
     "reindex:events": "tsx src/reindex-new-events.ts",
     "seed:venues": "tsx src/seed-venues.ts",
     "full-sync": "tsx src/full-sync.ts",
-    "crawl:washingtonian": "tsx src/test-washingtonian-crawler.ts"
+    "crawl:washingtonian": "tsx src/washingtonian-selenium.ts",
+    "crawl:washingtonian:selenium": "tsx src/washingtonian-selenium.ts",
+    "crawl:washingtonian:lambda": "tsx src/washingtonian-lambda.ts",
+    "crawl:washingtonian:playwright": "tsx src/washingtonian-playwright.ts",
+    "test:washingtonian:selenium": "tsx src/test-selenium-crawler.ts"
   },
   "devDependencies": {
     "@types/node": "^22",
     "@types/node-cron": "^3.0.0",
+    "@types/selenium-webdriver": "^4.35.1",
     "tsx": "^4"
   }
 }

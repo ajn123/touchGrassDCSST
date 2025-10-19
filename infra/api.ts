@@ -23,3 +23,19 @@ api.route(
 api.route("GET /events/sync", {
   handler: "packages/functions/src/events/openWeb.handler",
 });
+
+api.route("GET /events/washingtonian", {
+  handler: "packages/functions/src/events/washingtonian.handler",
+});
+
+api.route("POST /crawler/washingtonian", {
+  nodejs: {
+    install: [
+      "playwright",
+      "selenium-webdriver",
+      "selenium-webdriver/chrome.js",
+    ],
+  },
+  handler: "packages/functions/src/events/washingtonian.handler",
+  timeout: "5 minutes",
+});

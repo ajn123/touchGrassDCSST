@@ -1,10 +1,9 @@
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
-import chromium from "@sparticuz/chromium";
 import { Builder, By, until, WebDriver, WebElement } from "selenium-webdriver";
-import { Options as ChromeOptions } from "selenium-webdriver/chrome.js";
+import { Options as FirefoxOptions } from "selenium-webdriver/firefox.js";
 import { Resource } from "sst";
 
-interface WashingtonianEvent {
+class WashingtonianEvent {
   title: string;
   date: string;
   time?: string;
@@ -15,6 +14,30 @@ interface WashingtonianEvent {
   price?: string;
   venue?: string;
   distance?: string;
+
+  constructor(
+    title: string,
+    date: string,
+    time?: string,
+    location?: string,
+    description?: string,
+    url?: string,
+    category?: string,
+    price?: string,
+    venue?: string,
+    distance?: string
+  ) {
+    this.title = title;
+    this.date = date;
+    this.time = time;
+    this.location = location;
+    this.description = description;
+    this.url = url;
+    this.category = category;
+    this.price = price;
+    this.venue = venue;
+    this.distance = distance;
+  }
 }
 
 class WashingtonianSeleniumCrawler {
@@ -28,28 +51,25 @@ class WashingtonianSeleniumCrawler {
   }
 
   async createDriver(): Promise<WebDriver> {
-    console.log(
-      "🚀 Creating Selenium WebDriver with Lambda-optimized Chromium..."
-    );
+    console.log("🚀 Creating Selenium WebDriver for Docker with Firefox...");
 
-    const options = new ChromeOptions();
+    const options = new FirefoxOptions();
 
-    // Use Lambda-optimized Chromium arguments
-    options.addArguments(...chromium.args);
-
-    // Set the executable path to Lambda-optimized Chromium
-    options.setChromeBinaryPath(await chromium.executablePath());
+    // Docker-specific Firefox configuration
+    options.addArguments("--headless");
+    options.addArguments("--width=1920");
+    options.addArguments("--height=1080");
 
     const driver = await new Builder()
-      .forBrowser("chrome")
-      .setChromeOptions(options)
+      .forBrowser("firefox")
+      .setFirefoxOptions(options)
       .build();
 
-    // Set timeouts optimized for Lambda
+    // Set timeouts for Docker environment
     driver.manage().setTimeouts({
-      implicit: 5000,
-      pageLoad: 20000,
-      script: 15000,
+      implicit: 10000,
+      pageLoad: 60000,
+      script: 30000,
     });
 
     return driver;
@@ -58,7 +78,7 @@ class WashingtonianSeleniumCrawler {
   async crawlEvents(): Promise<WashingtonianEvent[]> {
     console.log("🕷️ Starting Washingtonian event crawl with Selenium...");
 
-    const maxRetries = 2; // Reduced retries for Lambda
+    const maxRetries = 2; // Retry limit for Docker environment
     let lastError: Error | null = null;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -76,15 +96,15 @@ class WashingtonianSeleniumCrawler {
 
         // Wait for the page to be ready and JavaScript to execute
         console.log("⏳ Waiting for page to be ready...");
-        await this.driver.wait(until.titleContains("Washingtonian"), 10000);
+        await this.driver.wait(until.titleContains("Washingtonian"), 30000);
 
         // Additional wait for JavaScript to fully execute
         console.log("⏳ Waiting for JavaScript to execute...");
-        await this.driver.sleep(3000); // Give JS time to run
+        await this.driver.sleep(10000); // Give JS more time to run
 
         // Wait for any network activity to settle
         console.log("⏳ Waiting for network activity to settle...");
-        await this.driver.sleep(2000);
+        await this.driver.sleep(5000);
 
         // Test JavaScript execution
         await this.testJavaScriptExecution();
@@ -136,9 +156,9 @@ class WashingtonianSeleniumCrawler {
           }
         }
 
-        // Wait before retrying (shorter for Lambda)
+        // Wait before retrying
         if (attempt < maxRetries) {
-          const waitTime = 1000; // 1 second for Lambda
+          const waitTime = 2000; // 2 seconds for Docker
           console.log(`⏳ Waiting ${waitTime}ms before retry...`);
           await new Promise((resolve) => setTimeout(resolve, waitTime));
         }
@@ -151,6 +171,11 @@ class WashingtonianSeleniumCrawler {
   }
 
   private async testJavaScriptExecution(): Promise<void> {
+    if (!this.driver) {
+      console.log("Driver not available for JavaScript testing");
+      return;
+    }
+
     try {
       console.log("🧪 Testing JavaScript execution...");
 
@@ -188,6 +213,11 @@ class WashingtonianSeleniumCrawler {
   }
 
   private async debugPageStructure(): Promise<void> {
+    if (!this.driver) {
+      console.log("Driver not available for debugging");
+      return;
+    }
+
     try {
       console.log("🔍 Debugging page structure...");
 
@@ -245,64 +275,113 @@ class WashingtonianSeleniumCrawler {
     const events: WashingtonianEvent[] = [];
 
     try {
-      // First try to find event links with detailed structure
-      console.log("🔍 Looking for event links with detailed structure...");
-      const eventLinks = await this.driver.findElements(
-        By.css('a[href*="#/details/"]')
+      // Look for .csEventInfo elements on the main page
+      console.log("🔍 Looking for .csEventInfo elements...");
+
+      // Wait for .csEventInfo elements to be present
+      await this.driver.wait(
+        until.elementsLocated(By.css(".csEventInfo")),
+        10000
       );
 
-      console.log(`Found ${eventLinks.length} event links`);
+      const eventInfoElements = await this.driver.findElements(
+        By.css(".csEventInfo")
+      );
 
-      for (let i = 0; i < eventLinks.length; i++) {
+      console.log(`Found ${eventInfoElements.length} .csEventInfo elements`);
+
+      for (let i = 0; i < eventInfoElements.length; i++) {
         try {
-          const link = eventLinks[i];
-          const eventData = await this.extractEventFromLink(link);
+          const element = eventInfoElements[i];
 
-          if (eventData && eventData.title) {
-            events.push(eventData);
-            console.log(`✅ Extracted event: ${eventData.title}`);
+          // Get the href from the parent link element
+          const parentLink = await element.findElement(
+            By.xpath("./ancestor::a[@href]")
+          );
+          const href = await parentLink.getAttribute("href");
+          console.log(`🔗 Processing event ${i + 1}: ${href}`);
+
+          if (!href) {
+            console.log(`⚠️ No href found for event element ${i + 1}`);
+            continue;
           }
-        } catch (error) {
-          console.log(`Error extracting event ${i}:`, error);
-        }
-      }
 
-      // If still no events, try alternative approaches
-      if (events.length === 0) {
-        console.log(
-          "🔄 No events found with primary selectors, trying alternatives..."
-        );
+          // Extract event ID from href
+          const eventId = href.split("#/details/")[1];
+          if (!eventId) {
+            console.log(`⚠️ Could not extract event ID from: ${href}`);
+            continue;
+          }
 
-        const eventInfoElements = await this.driver.findElements(
-          By.css(".csEventInfo")
-        );
-        console.log(`Found ${eventInfoElements.length} csEventInfo elements`);
-
-        for (let i = 0; i < eventInfoElements.length; i++) {
+          // Extract title from .csOneLine span
+          let title = `Event ${eventId}`;
           try {
-            const element = eventInfoElements[i];
-            const eventData = await this.extractEventFromElement(element);
-
-            if (eventData && eventData.title) {
-              events.push(eventData);
-              console.log(`✅ Extracted basic event: ${eventData.title}`);
-            }
-          } catch (error) {
-            console.log(`Error extracting basic event ${i}:`, error);
+            const titleElement = await element.findElement(
+              By.css(".csOneLine span")
+            );
+            title = await titleElement.getText();
+            console.log(`📝 Event title: ${title}`);
+          } catch {
+            console.log(`⚠️ Could not find title for event ${i + 1}`);
           }
+
+          // Extract venue from .cityVenue
+          let venue = "TBD";
+          try {
+            const venueElement = await element.findElement(
+              By.css(".cityVenue")
+            );
+            venue = await venueElement.getText();
+            console.log(`📍 Venue: ${venue}`);
+          } catch {
+            console.log(`⚠️ Could not find venue for event ${i + 1}`);
+          }
+
+          // Extract time from the clock icon span
+          let time = "TBD";
+          try {
+            const timeElement = await element.findElement(
+              By.css(".csIconRow .csStaticSize span")
+            );
+            time = await timeElement.getText();
+            console.log(`🕐 Time: ${time}`);
+          } catch {
+            console.log(`⚠️ Could not find time for event ${i + 1}`);
+          }
+
+          // Extract date from parent element's data-date attribute
+          let date = new Date().toISOString().split("T")[0];
+          try {
+            const parentDiv = await element.findElement(
+              By.xpath("./ancestor::div[@data-date]")
+            );
+            const dateAttr = await parentDiv.getAttribute("data-date");
+            if (dateAttr) {
+              const eventDate = new Date(dateAttr);
+              date = eventDate.toISOString().split("T")[0];
+              console.log(`📅 Date: ${date}`);
+            }
+          } catch {
+            console.log(`⚠️ Could not find date for event ${i + 1}`);
+          }
+
+          // Create event object with extracted data
+          const event = new WashingtonianEvent(title, date, time);
+
+          events.push(event);
+          console.log(
+            `✅ Added event: ${event.title} on ${event.date} at ${event.time}`
+          );
+        } catch (error) {
+          console.log(`❌ Error processing event ${i + 1}:`, error);
         }
       }
 
-      // If still no events found, debug the page structure
-      if (events.length === 0) {
-        console.log("🔍 No events found, debugging page structure...");
-        await this.debugPageStructure();
-      }
+      return events;
     } catch (error) {
-      console.log("Error extracting events from page:", error);
+      console.error("❌ Error extracting events:", error);
+      return [];
     }
-
-    return events;
   }
 
   private async extractEventFromLink(
@@ -513,6 +592,14 @@ class WashingtonianSeleniumCrawler {
         } catch (error) {
           console.log("⚠️ Error closing WebDriver:", error);
         }
+      }
+
+      // Clean up temporary Chrome directories
+      try {
+        const { execSync } = require("child_process");
+        execSync("rm -rf /tmp/chrome-*", { stdio: "ignore" });
+      } catch (error) {
+        // Ignore cleanup errors
       }
     }
   }

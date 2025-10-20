@@ -13,7 +13,7 @@
     "dotenv": "^17.0.1",
     "node-cron": "^3.0.0",
     "playwright": "^1.40.0",
-    "puppeteer": "^21.11.0",
+    "puppeteer": "^24.15.0",
     "selenium-webdriver": "^4.15.0",
     "@sparticuz/chromium": "^141.0.0",
     "sst": "*"
@@ -55,8 +55,6 @@
     "full-sync": "tsx src/full-sync.ts",
     "crawl:washingtonian": "tsx src/washingtonian-selenium.ts",
     "crawl:washingtonian:selenium": "tsx src/washingtonian-selenium.ts",
-    "crawl:washingtonian:lambda": "tsx src/washingtonian-lambda.ts",
-    "crawl:washingtonian:playwright": "tsx src/washingtonian-playwright.ts",
     "test:washingtonian:selenium": "tsx src/test-selenium-crawler.ts"
   },
   "devDependencies": {

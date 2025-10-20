@@ -25,17 +25,14 @@ api.route("GET /events/sync", {
 });
 
 api.route("GET /events/washingtonian", {
-  handler: "packages/functions/src/events/washingtonian.handler",
+  handler: "packages/tasks/crawlers/washingtonian.handler",
 });
 
 api.route("POST /crawler/washingtonian", {
   nodejs: {
-    install: [
-      "playwright",
-      "selenium-webdriver",
-      "selenium-webdriver/chrome.js",
-    ],
+    install: ["selenium-webdriver", "@sparticuz/chromium"],
   },
-  handler: "packages/functions/src/events/washingtonian.handler",
+  memory: "1024 MB",
+  handler: "packages/tasks/crawlers/washingtonian.handler",
   timeout: "5 minutes",
 });

@@ -5,12 +5,23 @@ import { email } from "./email";
 import { search } from "./opensearch";
 import { queue } from "./queue";
 import { bucket } from "./storage";
+import { washingtonianTask } from "./tasks";
 
 const googleMapsApiKey = new sst.Secret("GOOGLE_MAPS_API_KEY");
 
 export const web = new sst.aws.Nextjs("Web", {
   path: "packages/frontend",
-  link: [db, api, bucket, email, googleMapsApiKey, auth, queue, search],
+  link: [
+    db,
+    api,
+    bucket,
+    email,
+    googleMapsApiKey,
+    auth,
+    queue,
+    search,
+    washingtonianTask,
+  ],
 
   domain: {
     name: "touchgrassdc.com",

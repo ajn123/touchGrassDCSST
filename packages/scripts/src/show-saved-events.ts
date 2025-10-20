@@ -69,7 +69,8 @@ class EventQueryService {
       const result = await this.client.send(command);
       console.log(`✅ Found ${result.Items?.length || 0} events`);
 
-      const events = result.Items?.map((item) => unmarshall(item) as SavedEvent) || [];
+      const events =
+        result.Items?.map((item) => unmarshall(item) as SavedEvent) || [];
       return events.sort((a, b) => b.createdAt - a.createdAt); // Sort by newest first
     } catch (error) {
       console.error("❌ Error fetching events:", error);
@@ -101,9 +102,12 @@ class EventQueryService {
       });
 
       const result = await this.client.send(command);
-      console.log(`✅ Found ${result.Items?.length || 0} events from ${source}`);
+      console.log(
+        `✅ Found ${result.Items?.length || 0} events from ${source}`
+      );
 
-      const events = result.Items?.map((item) => unmarshall(item) as SavedEvent) || [];
+      const events =
+        result.Items?.map((item) => unmarshall(item) as SavedEvent) || [];
       return events.sort((a, b) => b.createdAt - a.createdAt);
     } catch (error) {
       console.error(`❌ Error fetching events from ${source}:`, error);
@@ -113,33 +117,41 @@ class EventQueryService {
 
   displayEventDetails(event: SavedEvent, index: number): void {
     console.log(`\n📅 Event #${index + 1}`);
-    console.log("=" .repeat(50));
+    console.log("=".repeat(50));
     console.log(`🆔 ID: ${event.pk}`);
     console.log(`📝 Title: ${event.title}`);
-    console.log(`📅 Date: ${event.start_date || event.eventDate || event.date || "Not specified"}`);
-    console.log(`⏰ Time: ${event.start_time || event.time || "Not specified"}`);
+    console.log(
+      `📅 Date: ${event.start_date || event.eventDate || "Not specified"}`
+    );
+    console.log(
+      `⏰ Time: ${event.start_time || event.time || "Not specified"}`
+    );
     console.log(`📍 Location: ${event.location || "Not specified"}`);
     console.log(`🏷️  Category: ${event.category || "Not specified"}`);
     console.log(`💰 Cost: ${event.cost || "Not specified"}`);
     console.log(`🌐 Source: ${event.source || "Not specified"}`);
     console.log(`📅 Created: ${new Date(event.createdAt).toLocaleString()}`);
-    
+
     if (event.description) {
-      console.log(`📄 Description: ${event.description.substring(0, 100)}${event.description.length > 100 ? "..." : ""}`);
+      console.log(
+        `📄 Description: ${event.description.substring(0, 100)}${
+          event.description.length > 100 ? "..." : ""
+        }`
+      );
     }
-    
+
     if (event.image_url) {
       console.log(`🖼️  Image: ${event.image_url}`);
     }
-    
+
     if (event.socials) {
       console.log(`🔗 Socials: ${JSON.stringify(event.socials)}`);
     }
-    
+
     if (event.ticket_links) {
       console.log(`🎫 Ticket Links: ${JSON.stringify(event.ticket_links)}`);
     }
-    
+
     console.log(`👁️  Public: ${event.isPublic}`);
     console.log(`🆔 External ID: ${event.external_id || "Not specified"}`);
     console.log(`📰 Publisher: ${event.publisher || "Not specified"}`);
@@ -148,80 +160,83 @@ class EventQueryService {
 
   displaySummary(events: SavedEvent[]): void {
     console.log("\n📊 EVENT SUMMARY");
-    console.log("=" .repeat(50));
+    console.log("=".repeat(50));
     console.log(`📈 Total Events: ${events.length}`);
-    
+
     // Group by source
     const bySource = events.reduce((acc, event) => {
       const source = event.source || "Unknown";
       acc[source] = (acc[source] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    
+
     console.log("\n📊 Events by Source:");
     Object.entries(bySource).forEach(([source, count]) => {
       console.log(`  ${source}: ${count} events`);
     });
-    
+
     // Group by category
     const byCategory = events.reduce((acc, event) => {
       const category = event.category || "Uncategorized";
       acc[category] = (acc[category] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    
+
     console.log("\n🏷️  Events by Category:");
     Object.entries(byCategory).forEach(([category, count]) => {
       console.log(`  ${category}: ${count} events`);
     });
-    
+
     // Recent events
     const recentEvents = events.slice(0, 5);
     console.log("\n🕒 Most Recent Events:");
     recentEvents.forEach((event, index) => {
-      console.log(`  ${index + 1}. ${event.title} (${event.source || "Unknown"}) - ${new Date(event.createdAt).toLocaleDateString()}`);
+      console.log(
+        `  ${index + 1}. ${event.title} (${
+          event.source || "Unknown"
+        }) - ${new Date(event.createdAt).toLocaleDateString()}`
+      );
     });
   }
 }
 
 async function main() {
   console.log("🔍 Event Query Service");
-  console.log("=" .repeat(50));
-  
+  console.log("=".repeat(50));
+
   const queryService = new EventQueryService();
-  
+
   // Get command line arguments
   const args = process.argv.slice(2);
   const command = args[0];
   const source = args[1];
-  
+
   try {
     let events: SavedEvent[] = [];
-    
+
     if (command === "source" && source) {
       events = await queryService.getEventsBySource(source);
     } else {
       events = await queryService.getAllEvents();
     }
-    
+
     if (events.length === 0) {
       console.log("❌ No events found in the database");
       return;
     }
-    
+
     // Display summary
     queryService.displaySummary(events);
-    
+
     // Display detailed information for each event
     console.log("\n📋 DETAILED EVENT INFORMATION");
-    console.log("=" .repeat(50));
-    
+    console.log("=".repeat(50));
+
     events.forEach((event, index) => {
       queryService.displayEventDetails(event, index);
     });
-    
+
     console.log("\n✅ Event query completed successfully!");
-    
   } catch (error) {
     console.error("❌ Error in main:", error);
     process.exit(1);

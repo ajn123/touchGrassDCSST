@@ -40,6 +40,9 @@ declare module "sst" {
       "type": "sst.aws.Function"
       "url": string
     }
+    "Vpc": {
+      "type": "sst.aws.Vpc"
+    }
     "Web": {
       "type": "sst.aws.Nextjs"
       "url": string

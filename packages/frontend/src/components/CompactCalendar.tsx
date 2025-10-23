@@ -73,7 +73,8 @@ export default function CompactCalendar() {
         const dayEvents = events.filter((event) => {
           if (!event.start_date) return false;
 
-          const eventDate = new Date(event.start_date);
+          // Parse date as local date to avoid timezone issues
+          const eventDate = new Date(event.start_date + "T00:00:00");
           return eventDate.toDateString() === current.toDateString();
         });
 

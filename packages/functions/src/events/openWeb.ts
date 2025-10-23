@@ -1,10 +1,5 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import {
-  DynamoDBDocumentClient,
-  PutCommand,
-  QueryCommand,
-  ScanCommand,
-} from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { Client } from "@opensearch-project/opensearch";
 import axios from "axios";
 import { Resource } from "sst";
@@ -59,143 +54,6 @@ interface OpenWebNinjaResponse {
     date: string;
   };
   data: OpenWebNinjaEvent[];
-}
-
-// Transform OpenWebNinja event to our internal format
-function transformOpenWebNinjaEvent(event: OpenWebNinjaEvent) {
-  const startDate = event.start_time ? event.start_time.split(" ")[0] : "";
-  const startTime = event.start_time
-    ? event.start_time.split(" ")[1] || ""
-    : "";
-  const endDate = event.end_time ? event.end_time.split(" ")[0] : null;
-  const endTime = event.end_time ? event.end_time.split(" ")[1] || "" : null;
-
-  return {
-    title: event.name,
-    description: event.description,
-    location: event.venue?.name || "Washington, DC",
-    start_date: startDate,
-    end_date: endDate,
-    start_time: startTime,
-    end_time: endTime,
-    category: ["General"], // Default category since not provided by API
-    image_url: event.thumbnail || null,
-    socials: {
-      website: event.link,
-    },
-    isPublic: true,
-    cost: {
-      type: "unknown",
-      currency: "USD",
-      amount: 0,
-    },
-    source: "openwebninja",
-    external_id: event.event_id,
-    publisher: event.publisher,
-    is_virtual: event.is_virtual,
-    ticket_links: event.ticket_links || [],
-  };
-}
-
-// Generate a unique ID for the event based on external_id, title, date, and location
-function generateEventId(event: any): string {
-  // Use external_id if available (from OpenWebNinja API)
-  if (event.external_id) {
-    return event.external_id;
-  }
-
-  // Fallback to title, date, and location
-  const title = event.title.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const date = event.start_date || "";
-  const location = event.location.toLowerCase().replace(/[^a-z0-9]/g, "");
-  return `${title}_${date}_${location}`.substring(0, 100);
-}
-
-// Check if event already exists in DynamoDB
-async function eventExists(
-  eventId: string,
-  tableName: string
-): Promise<boolean> {
-  try {
-    const command = new QueryCommand({
-      TableName: tableName,
-      KeyConditionExpression: "pk = :pk",
-      ExpressionAttributeValues: {
-        ":pk": `EVENT#${eventId}`,
-      },
-      Limit: 1,
-    });
-
-    const result = await docClient.send(command);
-    return result.Items && result.Items.length > 0;
-  } catch (error) {
-    console.error("Error checking if event exists:", error);
-    return false;
-  }
-}
-
-// Insert event into DynamoDB
-async function insertEvent(event: any, tableName: string): Promise<void> {
-  const eventId = generateEventId(event);
-
-  // Check if event already exists
-  if (await eventExists(eventId, tableName)) {
-    console.log(`Event already exists, skipping: ${event.title}`);
-    return;
-  }
-
-  const now = Date.now();
-  const categoryString = Array.isArray(event.category)
-    ? event.category.join(",")
-    : event.category || "General";
-
-  const item = {
-    pk: `EVENT-${eventId}`,
-    sk: `EVENT-${eventId}`,
-    createdAt: now,
-    title: event.title,
-    category: categoryString,
-    isPublic: "true",
-
-    // Store all event fields at the same level
-    description: event.description,
-    location: event.location,
-    start_date: event.start_date,
-    end_date: event.end_date,
-    start_time: event.start_time,
-    end_time: event.end_time,
-    image_url: event.image_url,
-    socials: event.socials,
-    cost: event.cost,
-    source: event.source,
-    external_id: event.external_id,
-    publisher: event.publisher,
-    is_virtual: event.is_virtual,
-    ticket_links: event.ticket_links,
-    id: eventId,
-    created_at: new Date(now).toISOString(),
-    updated_at: new Date(now).toISOString(),
-  };
-
-  try {
-    const command = new PutCommand({
-      TableName: tableName,
-      Item: item,
-      ConditionExpression: "attribute_not_exists(pk)", // Ensure idempotency
-    });
-
-    await docClient.send(command);
-    console.log(`Successfully inserted event: ${event.title}`);
-  } catch (error: any) {
-    if (error.name === "ConditionalCheckFailedException") {
-      console.log(
-        `Event already exists (conditional check failed): ${event.title}`
-      );
-    } else {
-      console.error("Error inserting event:", error);
-      throw error;
-    }
-  }
 }
 
 // Query OpenWebNinja API for events
@@ -408,22 +266,38 @@ export const handler = async (event: any) => {
     );
     const events = uniqueEvents;
 
-    let totalEventsProcessed = 0;
+    let totalEventsProcessed = events.length;
     let totalEventsInserted = 0;
 
-    // Process each event
-    for (const rawEvent of events) {
-      totalEventsProcessed++;
+    // Use Lambda normalization for batch processing
+    console.log(
+      `🚀 Using Lambda normalization for ${events.length} OpenWebNinja events`
+    );
 
-      try {
-        const transformedEvent = transformOpenWebNinjaEvent(rawEvent);
-        await insertEvent(transformedEvent, tableName);
-        totalEventsInserted++;
-        console.log(`✅ Inserted event: ${transformedEvent.title}`);
-      } catch (error) {
-        console.error(`❌ Error processing event: ${rawEvent.name}`, error);
-      }
+    const response = await fetch(`${Resource.Api.url}/events/normalize`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        events,
+        source: "openwebninja",
+        eventType: "openwebninja",
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
     }
+
+    const result = await response.json();
+    totalEventsInserted = result.savedCount;
+
+    console.log(`✅ Lambda normalization completed:`);
+    console.log(`   📊 Processed: ${totalEventsProcessed} events`);
+    console.log(`   💾 Inserted: ${totalEventsInserted} events`);
+    console.log(`   ⏱️ Execution time: ${result.executionTime}ms`);
 
     console.log(
       `OpenWebNinja handler completed. Processed: ${totalEventsProcessed}, Inserted: ${totalEventsInserted}`

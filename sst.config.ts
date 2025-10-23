@@ -12,9 +12,9 @@ export default $config({
   console: {
     autodeploy: {
       async workflow({ $, event }) {
-        // Perform deployment workflow actions here
-        await $`cd packages/scripts && npm install`;
-        await $`cd packages/scripts && npm run migrate:opensearch`;
+        //   Perform deployment workflow actions here
+        //   await $`cd packages/scripts && npm install`;
+        //   await $`cd packages/scripts && npm run migrate:opensearch`;
       },
     },
   },
@@ -29,7 +29,7 @@ export default $config({
     const { queue } = await import("./infra/queue");
     const { search } = await import("./infra/opensearch");
     const { cron, washingtonianCron } = await import("./infra/cron");
-    const { washingtonianTask } = await import("./infra/tasks");
+    const { WashingtonianTask } = await import("./infra/tasks");
     return {
       Db: db,
       Cron: cron,
@@ -41,7 +41,7 @@ export default $config({
       Auth: auth,
       Queue: queue,
       Search: search,
-      WashingtonianTask: washingtonianTask,
+      WashingtonianTask: WashingtonianTask,
     };
   },
 });

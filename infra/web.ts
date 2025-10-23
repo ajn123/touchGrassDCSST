@@ -4,10 +4,9 @@ import { db } from "./db";
 import { email } from "./email";
 import { search } from "./opensearch";
 import { queue } from "./queue";
+import { GOOGLE_MAPS_API_KEY } from "./secrets";
 import { bucket } from "./storage";
-import { washingtonianTask } from "./tasks";
-
-const googleMapsApiKey = new sst.Secret("GOOGLE_MAPS_API_KEY");
+import { WashingtonianTask } from "./tasks";
 
 export const web = new sst.aws.Nextjs("Web", {
   path: "packages/frontend",
@@ -16,11 +15,11 @@ export const web = new sst.aws.Nextjs("Web", {
     api,
     bucket,
     email,
-    googleMapsApiKey,
+    GOOGLE_MAPS_API_KEY,
     auth,
     queue,
     search,
-    washingtonianTask,
+    WashingtonianTask,
   ],
 
   domain: {
@@ -31,7 +30,7 @@ export const web = new sst.aws.Nextjs("Web", {
   environment: {
     DB_NAME: db.name,
     API_URL: api.url,
-    NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: googleMapsApiKey.value,
+    NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: GOOGLE_MAPS_API_KEY.value,
     NEXT_PUBLIC_WEBSITE_URL: "https://touchgrassdc.com",
   },
 });

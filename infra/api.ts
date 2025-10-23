@@ -1,8 +1,6 @@
 import { db } from "./db";
 import { search } from "./opensearch";
-
-const OPENWEBNINJA_API_KEY = new sst.Secret("OPENWEBNINJA_API_KEY");
-
+import { OPENWEBNINJA_API_KEY } from "./secrets";
 export const api = new sst.aws.ApiGatewayV2("Api", {
   link: [db, search, OPENWEBNINJA_API_KEY],
 });
@@ -20,19 +18,11 @@ api.route(
   "packages/functions/src/events/api.deleteEvent"
 );
 
-api.route("GET /events/sync", {
+api.route("POST /crawler/openwebninja", {
+  link: [api],
   handler: "packages/functions/src/events/openWeb.handler",
 });
 
-api.route("GET /events/washingtonian", {
-  handler: "packages/tasks/crawlers/washingtonian.handler",
-});
-
-api.route("POST /crawler/washingtonian", {
-  nodejs: {
-    install: ["selenium-webdriver", "@sparticuz/chromium"],
-  },
-  memory: "1024 MB",
-  handler: "packages/tasks/crawlers/washingtonian.handler",
-  timeout: "5 minutes",
+api.route("POST /events/normalize", {
+  handler: "packages/functions/src/events/normalizeEvents.handler",
 });

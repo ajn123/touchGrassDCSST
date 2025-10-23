@@ -9,8 +9,10 @@ interface Event {
   title: string;
   start_date?: string;
   end_date?: string;
+  date?: string; // For Washingtonian events
   start_time?: string;
   end_time?: string;
+  time?: string; // For Washingtonian events
   location?: string;
   category?: string;
   cost?: {
@@ -20,6 +22,9 @@ interface Event {
   };
   image_url?: string;
   description?: string;
+  url?: string; // For Washingtonian events
+  venue?: string; // For Washingtonian events
+  source?: string; // For Washingtonian events
   [key: string]: any; // Allow additional properties from DynamoDB
 }
 
@@ -78,9 +83,12 @@ export default function MonthlyCalendar() {
 
       while (current <= endDate) {
         const dayEvents = events.filter((event) => {
-          if (!event.start_date) return false;
+          // Check for both start_date (internal events) and date (Washingtonian events)
+          const eventDateStr = event.start_date || event.date;
+          if (!eventDateStr) return false;
 
-          const eventDate = new Date(event.start_date);
+          // Parse date as local date to avoid timezone issues
+          const eventDate = new Date(eventDateStr + "T00:00:00");
           return eventDate.toDateString() === current.toDateString();
         });
 
@@ -253,21 +261,25 @@ export default function MonthlyCalendar() {
                       key={event.pk}
                       className="text-xs bg-blue-50 border border-blue-200 rounded p-1 hover:bg-blue-100 transition-colors cursor-pointer"
                       title={`${event.title} - ${
-                        event.start_time ? formatTime(event.start_time) : ""
-                      } - ${event.location || "Location TBD"}`}
+                        event.start_time
+                          ? formatTime(event.start_time)
+                          : event.time
+                          ? formatTime(event.time)
+                          : ""
+                      } - ${event.location || event.venue || "Location TBD"}`}
                       onClick={() => handleEventClick(event)}
                     >
                       <div className="font-medium text-blue-800 truncate">
                         {event.title}
                       </div>
-                      {event.start_time && (
+                      {(event.start_time || event.time) && (
                         <div className="text-blue-600">
-                          {formatTime(event.start_time)}
+                          {formatTime((event.start_time || event.time)!)}
                         </div>
                       )}
-                      {event.location && (
+                      {(event.location || event.venue) && (
                         <div className="text-blue-500 truncate">
-                          {event.location}
+                          {event.location || event.venue}
                         </div>
                       )}
                     </div>

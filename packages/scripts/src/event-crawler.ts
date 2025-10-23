@@ -505,7 +505,50 @@ class EventCrawler {
   }
 
   async saveEventsToDynamo(events: EventData[]): Promise<void> {
-    console.log(`💾 Saving ${events.length} events to DynamoDB...`);
+    console.log(
+      `💾 Saving ${events.length} events using Lambda normalization...`
+    );
+
+    try {
+      // Call the Lambda normalization API directly
+      const response = await fetch(`${Resource.Api.url}/events/normalize`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          events,
+          source: "event-crawler",
+          eventType: "crawler",
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log(
+        `✅ Successfully normalized and saved ${result.savedCount} events`
+      );
+      console.log(`⏱️ Execution time: ${result.executionTime}ms`);
+    } catch (error) {
+      console.error(`❌ Error saving events via Lambda:`, error);
+
+      // Fallback to direct DynamoDB save if Lambda fails
+      console.log(`🔄 Falling back to direct DynamoDB save...`);
+      await this.saveEventsDirect(events);
+    }
+  }
+
+  /**
+   * Fallback method for direct DynamoDB saves
+   */
+  private async saveEventsDirect(events: EventData[]): Promise<void> {
+    console.log(
+      `💾 Fallback: Saving ${events.length} events directly to DynamoDB...`
+    );
 
     for (const event of events) {
       try {
@@ -541,33 +584,16 @@ class EventCrawler {
         await this.dynamoClient.send(command);
         console.log(`✅ Saved event: ${event.title}`);
 
-        // Print the saved event details
-        console.log("💾 Event saved to DynamoDB:");
-        console.log(`   Title: ${event.title}`);
-        console.log(`   Date: ${event.date || event.start_date || "No date"}`);
-        console.log(`   Location: ${event.location || "No location"}`);
-        console.log(
-          `   Category: ${
-            Array.isArray(event.category)
-              ? event.category.join(", ")
-              : event.category || "No category"
-          }`
-        );
-        console.log(
-          `   Cost: ${
-            event.cost
-              ? `${event.cost.type} - ${event.cost.amount}`
-              : "Not specified"
-          }`
-        );
-        console.log(""); // Empty line for readability
-
         // Add delay between saves to avoid throttling
         await this.delay(100);
       } catch (error) {
         console.error(`❌ Error saving event ${event.title}:`, error);
       }
     }
+
+    console.log(
+      `🎉 Successfully saved ${events.length} events to DynamoDB (fallback)`
+    );
   }
 }
 

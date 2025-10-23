@@ -1,4 +1,5 @@
 import { searchEventsOptimized } from "@/lib/dynamodb/dynamodb-events";
+import { EventNormalizer, NormalizedEvent } from "@/lib/event-normalizer";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -86,6 +87,76 @@ export async function GET(request: NextRequest) {
     console.error(`❌ Error fetching events after ${totalTime}ms:`, error);
     return NextResponse.json(
       { error: "Failed to fetch events", executionTime: totalTime },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+
+  try {
+    const body = await request.json();
+    const { events, source, eventType, action } = body;
+
+    // Handle normalization requests
+    if (action === "normalize" || eventType) {
+      if (!events || !Array.isArray(events)) {
+        return NextResponse.json(
+          { error: "Events array is required" },
+          { status: 400 }
+        );
+      }
+
+      const normalizer = new EventNormalizer();
+      const normalizedEvents: NormalizedEvent[] = [];
+
+      // Transform events based on type
+      for (const event of events) {
+        let normalizedEvent: NormalizedEvent;
+
+        switch (eventType) {
+          case "openwebninja":
+            normalizedEvent = normalizer.transformOpenWebNinjaEvent(event);
+            break;
+          case "washingtonian":
+            normalizedEvent = normalizer.transformWashingtonianEvent(event);
+            break;
+          case "crawler":
+            normalizedEvent = normalizer.transformCrawlerEvent(event);
+            break;
+          default:
+            // Assume it's already in normalized format
+            normalizedEvent = event;
+        }
+
+        normalizedEvents.push(normalizedEvent);
+      }
+
+      // Save all events
+      const eventIds = await normalizer.saveEvents(normalizedEvents, source);
+
+      const totalTime = Date.now() - startTime;
+      return NextResponse.json({
+        success: true,
+        savedCount: eventIds.length,
+        eventIds,
+        message: `Successfully normalized and saved ${eventIds.length} events`,
+        executionTime: totalTime,
+      });
+    }
+
+    // Handle direct event creation (existing functionality)
+    // This would be for creating single events from forms, etc.
+    return NextResponse.json(
+      { error: "Invalid action. Use action: 'normalize' for batch processing" },
+      { status: 400 }
+    );
+  } catch (error) {
+    const totalTime = Date.now() - startTime;
+    console.error(`❌ Error in events POST after ${totalTime}ms:`, error);
+    return NextResponse.json(
+      { error: "Failed to process events", executionTime: totalTime },
       { status: 500 }
     );
   }

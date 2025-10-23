@@ -280,10 +280,11 @@ export async function getEvents() {
     );
 
     // Handle both old EVENT# and new EVENT- prefixes during transition
+    // For Washingtonian events, don't require isPublic field since they don't have it
     const command = new ScanCommand({
       TableName: Resource.Db.name,
       FilterExpression:
-        "(begins_with(#pk, :eventPrefixNew) OR begins_with(#pk, :eventPrefixOld) OR begins_with(#pk, :washingtonianPrefixNew) OR begins_with(#pk, :washingtonianPrefixOld)) AND #isPublic = :isPublic",
+        "(begins_with(#pk, :eventPrefixNew) OR begins_with(#pk, :eventPrefixOld) OR begins_with(#pk, :washingtonianPrefixNew) OR begins_with(#pk, :washingtonianPrefixOld)) AND (#isPublic = :isPublic OR begins_with(#pk, :washingtonianPrefixNew) OR begins_with(#pk, :washingtonianPrefixOld))",
       ExpressionAttributeNames: {
         "#pk": "pk",
         "#isPublic": "isPublic",
@@ -300,7 +301,7 @@ export async function getEvents() {
     console.log("🔍 getEvents: Scan command prepared:", {
       TableName: Resource.Db.name,
       FilterExpression:
-        "(begins_with(#pk, :eventPrefixNew) OR begins_with(#pk, :eventPrefixOld) OR begins_with(#pk, :washingtonianPrefixNew) OR begins_with(#pk, :washingtonianPrefixOld)) AND #isPublic = :isPublic",
+        "(begins_with(#pk, :eventPrefixNew) OR begins_with(#pk, :eventPrefixOld) OR begins_with(#pk, :washingtonianPrefixNew) OR begins_with(#pk, :washingtonianPrefixOld)) AND (#isPublic = :isPublic OR begins_with(#pk, :washingtonianPrefixNew) OR begins_with(#pk, :washingtonianPrefixOld))",
       ExpressionAttributeValues: {
         ":eventPrefixNew": "EVENT-",
         ":eventPrefixOld": "EVENT#",

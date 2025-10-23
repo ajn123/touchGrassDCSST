@@ -25,6 +25,7 @@
     "@aws-sdk/util-dynamodb": "^3.835.0",
     "@openauthjs/openauth": "^0.4.3",
     "aws-cdk-lib": "^2.204.0",
+    "crawlee": "^3.15.1",
     "hono": "^4.8.10",
     "pulumi": "^0.0.1",
     "sst": "^3",

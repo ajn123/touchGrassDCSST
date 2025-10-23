@@ -41,6 +41,7 @@ declare module "sst" {
       "url": string
     }
     "Vpc": {
+      "bastion": string
       "type": "sst.aws.Vpc"
     }
     "Web": {
@@ -55,6 +56,15 @@ declare module "sst" {
     "user_analytics": {
       "type": "sst.aws.Queue"
       "url": string
+    }
+    "washingtonianTask": {
+      "assignPublicIp": boolean
+      "cluster": string
+      "containers": any
+      "securityGroups": any
+      "subnets": any
+      "taskDefinition": string
+      "type": "sst.aws.Task"
     }
   }
 }

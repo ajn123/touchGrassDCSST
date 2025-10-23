@@ -1,24 +1,18 @@
+import { db } from "./db";
 import { search } from "./opensearch";
+import { OPENWEBNINJA_API_KEY } from "./secrets";
+import { WashingtonianTask } from "./tasks";
 
 const cron = new sst.aws.Cron("cron", {
   function: {
     handler: "packages/functions/src/events/openWeb.handler",
-    link: [search],
+    link: [search, db, OPENWEBNINJA_API_KEY],
   },
   schedule: "rate(1 day)",
 });
 
 const washingtonianCron = new sst.aws.Cron("washingtonianCron", {
-  function: {
-    handler: "packages/tasks/crawlers/washingtonian.handler",
-    link: [search],
-    timeout: "5 minutes",
-    memory: "1024 MB",
-    nodejs: {
-      install: ["selenium-webdriver", "@sparticuz/chromium"],
-    },
-  },
-  // Runs every Wednesday at 2:00 AM UTC
+  task: WashingtonianTask,
   schedule: "rate(7 days)",
 });
 

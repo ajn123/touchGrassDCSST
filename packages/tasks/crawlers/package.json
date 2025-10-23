@@ -1,0 +1,25 @@
+{
+  "name": "washingtonian-crawler",
+  "version": "1.0.0",
+  "description": "Washingtonian events crawler using Puppeteer",
+  "main": "washingtonian-selenium.ts",
+  "type": "module",
+  "scripts": {
+    "start": "tsx washingtonian-selenium.ts",
+    "dev": "tsx --watch washingtonian-selenium.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "crawlee": "^3.0.0",
+    "playwright": "*",
+    "sst": "^3.0.0",
+    "tsx": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

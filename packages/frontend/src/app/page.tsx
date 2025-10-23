@@ -1,6 +1,6 @@
 import Categories from "@/components/Categories";
-import CompactCalendar from "@/components/CompactCalendar";
 import FeaturedGroups from "@/components/FeaturedGroups";
+import MonthlyCalendar from "@/components/MonthlyCalendar";
 import SearchBar from "@/components/SearchBar";
 import { createEvent, getCategories } from "@/lib/dynamodb/dynamodb-events";
 import { revalidatePath } from "next/cache";
@@ -54,7 +54,7 @@ export default async function Home() {
       </section>
 
       {/* Compact Calendar Section */}
-      <CompactCalendar />
+      <MonthlyCalendar variant="compact" />
 
       {/* Featured Groups Section */}
       <FeaturedGroups />

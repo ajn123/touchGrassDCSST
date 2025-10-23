@@ -173,11 +173,13 @@ class WashingtonianPlaywrightCrawler {
               const eventElements = document.querySelectorAll(".csEventInfo");
 
               console.log(
-                `Found ${eventElements.length} event elements, limiting to first 5`
+                `Found ${eventElements.length} event elements, getting 5 random elements`
               );
 
-              // Limit to first 5 events per day
-              const limitedElements = Array.from(eventElements).slice(0, 5);
+              // Get 5 random elements
+              const limitedElements = Array.from(eventElements)
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 5);
 
               limitedElements.forEach((element) => {
                 try {

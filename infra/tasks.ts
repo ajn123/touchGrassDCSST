@@ -2,10 +2,7 @@ import { api } from "./api";
 import { db } from "./db";
 import { search } from "./opensearch";
 
-const vpc = new sst.aws.Vpc("Vpc", {
-  nat: "managed",
-  bastion: true,
-});
+const vpc = new sst.aws.Vpc("Vpc");
 const cluster = new sst.aws.Cluster("Cluster", { vpc });
 
 const WashingtonianTask = new sst.aws.Task("washingtonianTask", {
@@ -16,7 +13,6 @@ const WashingtonianTask = new sst.aws.Task("washingtonianTask", {
     dockerfile: "./packages/tasks/crawlers/Dockerfile",
   },
   dev: false,
-  publicIp: true,
 });
 
 export { WashingtonianTask };

@@ -41,7 +41,6 @@ declare module "sst" {
       "url": string
     }
     "Vpc": {
-      "bastion": string
       "type": "sst.aws.Vpc"
     }
     "Web": {

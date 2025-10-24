@@ -1,6 +1,5 @@
 "use client";
 
-import { getEvents } from "@/lib/dynamodb/dynamodb-events";
 import {
   faChevronLeft,
   faChevronRight,
@@ -61,13 +60,14 @@ export default function MonthlyCalendar({
 
   const isCompact = variant === "compact";
 
-  // Get events from DynamoDB
+  // Get events from API
   useEffect(() => {
     async function fetchEvents() {
       try {
         setLoading(true);
-        const fetchedEvents = await getEvents();
-        setEvents(fetchedEvents as Event[]);
+        const response = await fetch("/api/events/simple");
+        const data = await response.json();
+        setEvents(data.events as Event[]);
       } catch (error) {
         console.error("Error fetching events:", error);
       } finally {

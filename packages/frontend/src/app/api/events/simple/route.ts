@@ -4,20 +4,17 @@ import { Resource } from "sst";
 
 export async function GET() {
   try {
-    // Create DynamoDB client instance
     const db = new TouchGrassDynamoDB(Resource.Db.name);
-
-    const categories = await db.getCategories();
-    console.log("📋 Retrieved categories:", categories);
+    const events = await db.getEvents();
 
     return NextResponse.json({
-      categories,
-      count: categories.length,
+      events,
+      count: events.length,
     });
   } catch (error) {
-    console.error("❌ Error fetching categories:", error);
+    console.error("Error fetching events:", error);
     return NextResponse.json(
-      { error: "Failed to fetch categories" },
+      { error: "Failed to fetch events" },
       { status: 500 }
     );
   }

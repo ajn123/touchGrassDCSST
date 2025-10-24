@@ -1,6 +1,5 @@
 "use client";
 
-import { approveEvent, deleteEvent } from "@/lib/dynamodb/dynamodb-events";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -21,13 +20,21 @@ export function AdminEventActions({ event }: AdminEventActionsProps) {
   const handleApprove = async () => {
     try {
       setActionLoading(true);
-      const result = await approveEvent(event.pk);
-      if (result.includes("successfully")) {
+      const response = await fetch("/api/events/approve", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ eventId: event.pk }),
+      });
+      const result = await response.json();
+
+      if (result.success && result.message.includes("successfully")) {
         alert("Event approved successfully!");
         // Refresh the page to show updated status
         router.refresh();
       } else {
-        throw new Error(result);
+        throw new Error(result.message || "Failed to approve event");
       }
     } catch (err) {
       alert(
@@ -51,13 +58,21 @@ export function AdminEventActions({ event }: AdminEventActionsProps) {
 
     try {
       setActionLoading(true);
-      const result = await deleteEvent(event.pk);
-      if (result.includes("successfully")) {
+      const response = await fetch("/api/events/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ eventId: event.pk }),
+      });
+      const result = await response.json();
+
+      if (result.success && result.message.includes("successfully")) {
         alert("Event deleted successfully!");
         // Redirect to admin dashboard
         router.push("/admin?tab=approve-events");
       } else {
-        throw new Error(result);
+        throw new Error(result.message || "Failed to delete event");
       }
     } catch (err) {
       alert(

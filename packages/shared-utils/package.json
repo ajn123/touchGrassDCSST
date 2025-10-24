@@ -1,0 +1,28 @@
+{
+  "name": "@touchgrass/shared-utils",
+  "version": "1.0.0",
+  "description": "Shared utility functions for TouchGrass DC event processing",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "events",
+    "date-parsing",
+    "normalization",
+    "utilities"
+  ],
+  "author": "TouchGrass DC",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  },
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ]
+}

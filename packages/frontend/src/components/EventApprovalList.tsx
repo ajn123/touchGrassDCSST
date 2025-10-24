@@ -1,6 +1,5 @@
 "use client";
 
-import { approveEvent, deleteEvent } from "@/lib/dynamodb/dynamodb-events";
 import { useEffect, useState } from "react";
 
 interface Event {
@@ -49,15 +48,23 @@ export function EventApprovalList({ onEventAction }: EventApprovalListProps) {
 
   const handleApprove = async (eventId: string) => {
     try {
-      const result = await approveEvent(eventId);
-      if (result.includes("successfully")) {
+      const response = await fetch("/api/events/approve", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ eventId }),
+      });
+      const result = await response.json();
+
+      if (result.success && result.message.includes("successfully")) {
         // Remove the approved event from the list
         setEvents((prev) => prev.filter((event) => event.pk !== eventId));
         // Show success message
         alert("Event approved successfully!");
         onEventAction(); // Call the prop to refresh the count
       } else {
-        throw new Error(result);
+        throw new Error(result.message || "Failed to approve event");
       }
     } catch (err) {
       alert(
@@ -78,14 +85,22 @@ export function EventApprovalList({ onEventAction }: EventApprovalListProps) {
     }
 
     try {
-      const result = await deleteEvent(eventId);
-      if (result.includes("successfully")) {
+      const response = await fetch("/api/events/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ eventId }),
+      });
+      const result = await response.json();
+
+      if (result.success && result.message.includes("successfully")) {
         // Remove the deleted event from the list
         setEvents((prev) => prev.filter((event) => event.pk !== eventId));
         alert("Event deleted successfully!");
         onEventAction(); // Call the prop to refresh the count
       } else {
-        throw new Error(result);
+        throw new Error(result.message || "Failed to delete event");
       }
     } catch (err) {
       alert(

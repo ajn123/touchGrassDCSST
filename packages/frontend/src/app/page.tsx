@@ -2,9 +2,10 @@ import Categories from "@/components/Categories";
 import FeaturedGroups from "@/components/FeaturedGroups";
 import MonthlyCalendar from "@/components/MonthlyCalendar";
 import SearchBar from "@/components/SearchBar";
-import { createEvent, getCategories } from "@/lib/dynamodb/dynamodb-events";
+import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
 import { revalidatePath } from "next/cache";
 import Image from "next/image";
+import { Resource } from "sst";
 
 interface Category {
   category: string;
@@ -18,14 +19,15 @@ async function submitForm(formData: FormData) {
 
   console.log("Form submission with image key:", imageKey);
 
-  const response = await createEvent(formData);
+  const db = new TouchGrassDynamoDB(Resource.Db.name);
+  const response = await db.createEvent(formData);
   revalidatePath("/");
 }
 
 export default async function Home() {
   // This runs on the server during rendering (like useEffect but server-side)
-
-  const categories = await getCategories();
+  const db = new TouchGrassDynamoDB(Resource.Db.name);
+  const categories = await db.getCategories();
 
   return (
     <main className="min-h-screen">

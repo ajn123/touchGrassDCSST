@@ -1,6 +1,5 @@
 "use client";
 
-import { deleteEvent } from "@/lib/dynamodb/dynamodb-events";
 import { deleteGroup } from "@/lib/dynamodb/dynamodb-groups";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -25,13 +24,36 @@ export function AdminEntityPanel({
     if (!confirm(`Delete this ${kind}? This action cannot be undone.`)) return;
     try {
       setLoading(true);
-      const result =
-        kind === "event" ? await deleteEvent(id) : await deleteGroup(title);
-      if (typeof result === "string" && result.includes("successfully")) {
-        alert(`${kind === "event" ? "Event" : "Group"} deleted successfully!`);
-        router.push("/admin");
+      if (kind === "event") {
+        const response = await fetch("/api/events/delete", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ eventId: id }),
+        });
+        const result = await response.json();
+
+        if (result.success && result.message.includes("successfully")) {
+          alert(
+            `${kind === "event" ? "Event" : "Group"} deleted successfully!`
+          );
+          router.push("/admin");
+        } else {
+          throw new Error(result.message || "Failed to delete event");
+        }
       } else {
-        throw new Error(typeof result === "string" ? result : "Unknown error");
+        const result = await deleteGroup(title);
+        if (typeof result === "string" && result.includes("successfully")) {
+          alert(
+            `${kind === "event" ? "Event" : "Group"} deleted successfully!`
+          );
+          router.push("/admin");
+        } else {
+          throw new Error(
+            typeof result === "string" ? result : "Unknown error"
+          );
+        }
       }
     } catch (err) {
       alert(

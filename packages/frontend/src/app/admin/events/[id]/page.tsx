@@ -1,7 +1,6 @@
 "use client";
 
 import { useUser } from "@/contexts/UserContext";
-import { approveEvent, deleteEvent } from "@/lib/dynamodb/dynamodb-events";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -78,12 +77,20 @@ export default function AdminEventDetailPage() {
 
     try {
       setActionLoading(true);
-      const result = await approveEvent(event.pk);
-      if (result.includes("successfully")) {
+      const response = await fetch("/api/events/approve", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ eventId: event.pk }),
+      });
+      const result = await response.json();
+
+      if (result.success && result.message.includes("successfully")) {
         alert("Event approved successfully!");
         router.push("/admin?tab=approve-events");
       } else {
-        throw new Error(result);
+        throw new Error(result.message || "Failed to approve event");
       }
     } catch (err) {
       alert(
@@ -109,12 +116,20 @@ export default function AdminEventDetailPage() {
 
     try {
       setActionLoading(true);
-      const result = await deleteEvent(event.pk);
-      if (result.includes("successfully")) {
+      const response = await fetch("/api/events/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ eventId: event.pk }),
+      });
+      const result = await response.json();
+
+      if (result.success && result.message.includes("successfully")) {
         alert("Event deleted successfully!");
         router.push("/admin?tab=approve-events");
       } else {
-        throw new Error(result);
+        throw new Error(result.message || "Failed to delete event");
       }
     } catch (err) {
       alert(

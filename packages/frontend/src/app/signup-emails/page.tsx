@@ -1,8 +1,10 @@
 import { EmailSignupForm } from "@/components/EmailSignupForm";
-import { getCategories } from "@/lib/dynamodb/dynamodb-events";
+import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
+import { Resource } from "sst";
 
 export default async function EmailSignupPage() {
-  const categories = await getCategories();
+  const db = new TouchGrassDynamoDB(Resource.Db.name);
+  const categories = await db.getCategories();
 
   return (
     <div className="min-h-screen py-8">

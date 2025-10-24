@@ -1,5 +1,6 @@
-import { getEvent } from "@/lib/dynamodb/dynamodb-events";
+import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
 import { NextRequest, NextResponse } from "next/server";
+import { Resource } from "sst";
 
 export async function GET(
   request: NextRequest,
@@ -16,7 +17,10 @@ export async function GET(
     }
 
     console.log(`🔍 Fetching event: ${eventId}`);
-    const event = await getEvent(eventId);
+
+    // Create DynamoDB client instance
+    const db = new TouchGrassDynamoDB(Resource.Db.name);
+    const event = await db.getEvent(eventId);
 
     if (!event) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 });

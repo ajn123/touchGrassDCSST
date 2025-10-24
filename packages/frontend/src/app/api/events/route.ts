@@ -1,6 +1,7 @@
-import { searchEventsOptimized } from "@/lib/dynamodb/dynamodb-events";
+import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
 import { EventNormalizer, NormalizedEvent } from "@/lib/event-normalizer";
 import { NextRequest, NextResponse } from "next/server";
+import { Resource } from "sst";
 
 export async function GET(request: NextRequest) {
   const startTime = Date.now();
@@ -65,21 +66,20 @@ export async function GET(request: NextRequest) {
 
     console.log("🔍 Using searchEventsOptimized with filters:", filters);
 
-    // Use the optimized search function with timeout handling
-    const result = await searchEventsOptimized(filters);
+    // Create DynamoDB client instance
+    const db = new TouchGrassDynamoDB(Resource.Db.name);
 
-    // Handle both array and object return types
-    const events = Array.isArray(result) ? result : result.events;
-    const count = Array.isArray(result) ? result.length : result.total;
+    // Use the optimized search function with timeout handling
+    const events = await db.searchEventsOptimized(filters);
 
     const totalTime = Date.now() - startTime;
     console.log(
-      `⏱️ API route completed in ${totalTime}ms, retrieved ${count} events`
+      `⏱️ API route completed in ${totalTime}ms, retrieved ${events.length} events`
     );
 
     return NextResponse.json({
       events,
-      count,
+      count: events.length,
       executionTime: totalTime,
     });
   } catch (error) {

@@ -5,8 +5,9 @@ import DetailPageContainer from "@/components/DetailPageContainer";
 import { EntityDetail } from "@/components/EntityDetail";
 import EventMap from "@/components/EventMap";
 import { ReportWrongInfoButton } from "@/components/ReportWrongInfoButton";
-import { getEvent, getEventByTitle } from "@/lib/dynamodb/dynamodb-events";
+import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
 import { resolveImageUrl } from "@/lib/image-utils";
+import { Resource } from "sst";
 
 export default async function ItemPage({
   params,
@@ -35,10 +36,11 @@ export default async function ItemPage({
   const rawId = awaitedParams.id;
   const decodedId = decodeURIComponent(rawId);
 
+  const db = new TouchGrassDynamoDB(Resource.Db.name);
   // Try by primary key/id first; if not found, try by event title
-  let item = await getEvent(decodedId);
+  let item = await db.getEvent(decodedId);
   if (!item) {
-    item = await getEventByTitle(decodedId);
+    item = await db.getEventByTitle(decodedId);
   }
 
   console.log(item);
@@ -47,7 +49,7 @@ export default async function ItemPage({
   }
 
   // Check if event is public - if not, only admins can see it
-  if (!(item.is_public || item.isPublic) && !isAdmin) {
+  if (!item.isPublic && !isAdmin) {
     return (
       <div
         className="min-h-screen flex items-center justify-center mb-10
@@ -110,12 +112,17 @@ export default async function ItemPage({
           <ReportWrongInfoButton eventTitle={item.title} eventId={item.pk} />
         }
         imageUrl={resolveImageUrl(item.image_url) || undefined}
-        cost={item.cost}
+        cost={
+          item.cost
+            ? typeof item.cost === "object"
+              ? `${item.cost.type} - ${item.cost.amount} ${item.cost.currency}`
+              : item.cost
+            : undefined
+        }
         socials={item.socials}
-        date={item.eventDate as any}
+        date={item.start_date as any}
         location={item.location}
         categories={item.category}
-        schedules={item.schedules}
         description={item.description}
       />
 

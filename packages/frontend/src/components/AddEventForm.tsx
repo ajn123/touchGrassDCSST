@@ -1,7 +1,6 @@
 "use client";
 
 import { useUser } from "@/contexts/UserContext";
-import { createEvent, getCategories } from "@/lib/dynamodb/dynamodb-events";
 import { useEffect, useState } from "react";
 import { ImageUploadWithState } from "./ImageUploadWithState";
 
@@ -106,8 +105,9 @@ export function AddEventForm() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const fetchedCategories = await getCategories();
-        setCategories(fetchedCategories as Array<{ category: string }>);
+        const response = await fetch("/api/categories/simple");
+        const data = await response.json();
+        setCategories(data.categories as Array<{ category: string }>);
       } catch (error) {
         console.error("Error fetching categories:", error);
       } finally {
@@ -255,9 +255,13 @@ export function AddEventForm() {
         } -> finalIsPublic: ${finalIsPublic} -> string: "${finalIsPublic.toString()}"`
       );
 
-      const result = await createEvent(formDataObj);
+      const response = await fetch("/api/events/create", {
+        method: "POST",
+        body: formDataObj,
+      });
+      const result = await response.json();
 
-      if (result && result.includes("successfully")) {
+      if (result.success && result.message.includes("successfully")) {
         setSubmitStatus("success");
         setFormData({
           email: "",

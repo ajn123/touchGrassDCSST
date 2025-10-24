@@ -1,10 +1,12 @@
-import { getEvents } from "@/lib/dynamodb/dynamodb-events";
+import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
+import { Resource } from "sst";
 import FeaturedEvent from "./FeaturedEvent";
 
 export default async function FeaturedEvents() {
   try {
     console.log("🔄 FeaturedEvents: Starting to fetch events...");
-    const allEvents = await getEvents();
+    const db = new TouchGrassDynamoDB(Resource.Db.name);
+    const allEvents = await db.getEvents();
     console.log("📊 FeaturedEvents: Fetched events:", allEvents.length);
 
     if (allEvents.length === 0) {

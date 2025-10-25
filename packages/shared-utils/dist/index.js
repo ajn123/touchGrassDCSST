@@ -5,19 +5,174 @@
  * that are used across different parts of the application.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.generateEventId = generateEventId;
+exports.normalizeDate = normalizeDate;
+exports.normalizeTime = normalizeTime;
+exports.normalizeCategory = normalizeCategory;
+exports.normalizeCost = normalizeCost;
+exports.normalizeCoordinates = normalizeCoordinates;
 exports.parseDate = parseDate;
 exports.parseDateTime = parseDateTime;
 exports.parseComplexDate = parseComplexDate;
 exports.parseCostAmount = parseCostAmount;
 exports.parseCategories = parseCategories;
-exports.generateEventId = generateEventId;
 exports.transformEventForOpenSearch = transformEventForOpenSearch;
 exports.transformOpenWebNinjaEvent = transformOpenWebNinjaEvent;
 exports.validateEvent = validateEvent;
 exports.sanitizeEvent = sanitizeEvent;
-// ============================================================================
-// DATE PARSING UTILITIES
-// ============================================================================
+/**
+ * Generate a consistent event ID
+ */
+function generateEventId(event, source) {
+    const timestamp = Date.now();
+    // Handle undefined or invalid title
+    const title = event.title || "untitled-event";
+    const titleSlug = title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    const sourcePrefix = source ? `${source.toUpperCase()}-` : "";
+    return `EVENT-${sourcePrefix}${titleSlug}-${timestamp}`;
+}
+/**
+ * Normalize date strings to consistent format
+ */
+function normalizeDate(dateStr) {
+    if (!dateStr)
+        return undefined;
+    try {
+        // Handle various date formats
+        let date;
+        if (dateStr.includes("T")) {
+            // Already has time component
+            date = new Date(dateStr);
+        }
+        else if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            // YYYY-MM-DD format
+            date = new Date(dateStr + "T00:00:00");
+        }
+        else {
+            // Try to parse as-is
+            date = new Date(dateStr);
+        }
+        if (isNaN(date.getTime()))
+            return undefined;
+        return date.toISOString().split("T")[0]; // Return YYYY-MM-DD
+    }
+    catch {
+        return undefined;
+    }
+}
+/**
+ * Normalize time strings to consistent format
+ */
+function normalizeTime(timeStr) {
+    if (!timeStr)
+        return undefined;
+    try {
+        // Handle various time formats
+        const time = timeStr.trim();
+        // If it's already in HH:MM format
+        if (time.match(/^\d{1,2}:\d{2}$/)) {
+            return time;
+        }
+        // If it has AM/PM
+        if (time.match(/\d{1,2}:\d{2}\s*(AM|PM)/i)) {
+            return time;
+        }
+        // Try to parse and format
+        const date = new Date(`2000-01-01T${time}`);
+        if (!isNaN(date.getTime())) {
+            return date.toTimeString().split(" ")[0].substring(0, 5);
+        }
+        return time;
+    }
+    catch {
+        return timeStr;
+    }
+}
+/**
+ * Normalize category to consistent format
+ */
+function normalizeCategory(category) {
+    if (!category)
+        return "General";
+    const categories = Array.isArray(category) ? category : [category];
+    const normalizedCategories = categories.map((cat) => {
+        const normalized = cat.toLowerCase().trim();
+        // Map common variations to standard categories
+        const categoryMap = {
+            music: "Music",
+            concert: "Music",
+            jazz: "Music",
+            festival: "Festival",
+            parade: "Festival",
+            sports: "Sports",
+            soccer: "Sports",
+            museum: "Museum",
+            art: "Arts & Culture",
+            culture: "Arts & Culture",
+            food: "Food & Drink",
+            drink: "Food & Drink",
+            networking: "Networking",
+            business: "Networking",
+            education: "Education",
+            workshop: "Education",
+            community: "Community",
+            volunteer: "Community",
+            general: "General",
+        };
+        return categoryMap[normalized] || cat;
+    });
+    return normalizedCategories.join(",");
+}
+/**
+ * Normalize cost information
+ */
+function normalizeCost(cost) {
+    if (!cost)
+        return undefined;
+    if (typeof cost === "string") {
+        const costStr = cost.toLowerCase();
+        if (costStr.includes("free")) {
+            return { type: "free", currency: "USD", amount: 0 };
+        }
+        // Try to extract amount from string
+        const amountMatch = costStr.match(/\$?(\d+(?:\.\d{2})?)/);
+        if (amountMatch) {
+            return {
+                type: "fixed",
+                currency: "USD",
+                amount: parseFloat(amountMatch[1]),
+            };
+        }
+    }
+    if (typeof cost === "object") {
+        return {
+            type: cost.type || "fixed",
+            currency: cost.currency || "USD",
+            amount: cost.amount || 0,
+        };
+    }
+    return undefined;
+}
+/**
+ * Normalize coordinates
+ */
+function normalizeCoordinates(coordinates) {
+    if (!coordinates)
+        return undefined;
+    if (typeof coordinates === "string") {
+        return coordinates;
+    }
+    if (Array.isArray(coordinates) && coordinates.length >= 2) {
+        return `${coordinates[0]},${coordinates[1]}`;
+    }
+    if (coordinates.latitude && coordinates.longitude) {
+        return `${coordinates.latitude},${coordinates.longitude}`;
+    }
+    return undefined;
+}
 /**
  * Parse various date formats into a consistent YYYY-MM-DD string format
  * Handles multiple input formats including ISO strings, date objects, and various text formats
@@ -210,18 +365,6 @@ function parseCategories(category) {
     }
     return [];
 }
-/**
- * Generate a consistent event ID
- */
-function generateEventId(event, source) {
-    const timestamp = Date.now();
-    const titleSlug = event.title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "");
-    const sourcePrefix = source ? `${source.toUpperCase()}-` : "";
-    return `EVENT-${sourcePrefix}${titleSlug}-${timestamp}`;
-}
 // ============================================================================
 // TRANSFORMATION UTILITIES
 // ============================================================================
@@ -316,7 +459,10 @@ function sanitizeEvent(event) {
     return {
         ...event,
         title: event.title?.trim() || "",
-        description: event.description?.trim()?.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "") || "",
+        description: event.description
+            ?.trim()
+            ?.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "") ||
+            "",
         location: event.location?.trim() || "",
         venue: event.venue?.trim() || "",
     };

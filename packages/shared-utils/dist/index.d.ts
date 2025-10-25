@@ -3,6 +3,63 @@
  * This package provides consistent date parsing, event normalization, and other utilities
  * that are used across different parts of the application.
  */
+export interface NormalizedEvent {
+    title: string;
+    description?: string;
+    start_date?: string;
+    end_date?: string;
+    start_time?: string;
+    end_time?: string;
+    location?: string;
+    venue?: string;
+    coordinates?: string;
+    category?: string | string[];
+    image_url?: string;
+    url?: string;
+    socials?: {
+        website?: string;
+        facebook?: string;
+        instagram?: string;
+        twitter?: string;
+    };
+    cost?: {
+        type: "free" | "fixed" | "variable";
+        currency: string;
+        amount: string | number;
+    };
+    source?: string;
+    external_id?: string;
+    is_public?: boolean;
+    is_virtual?: boolean;
+    publisher?: string;
+    ticket_links?: string[];
+    confidence?: number;
+    extractionMethod?: string;
+}
+/**
+ * Generate a consistent event ID
+ */
+export declare function generateEventId(event: NormalizedEvent, source?: string): string;
+/**
+ * Normalize date strings to consistent format
+ */
+export declare function normalizeDate(dateStr?: string): string | undefined;
+/**
+ * Normalize time strings to consistent format
+ */
+export declare function normalizeTime(timeStr?: string): string | undefined;
+/**
+ * Normalize category to consistent format
+ */
+export declare function normalizeCategory(category?: string | string[]): string;
+/**
+ * Normalize cost information
+ */
+export declare function normalizeCost(cost?: any): NormalizedEvent["cost"];
+/**
+ * Normalize coordinates
+ */
+export declare function normalizeCoordinates(coordinates?: any): string | undefined;
 /**
  * Parse various date formats into a consistent YYYY-MM-DD string format
  * Handles multiple input formats including ISO strings, date objects, and various text formats
@@ -62,10 +119,6 @@ export declare function parseCostAmount(amount: any): number;
  * Parse categories from various formats (string, array, etc.)
  */
 export declare function parseCategories(category: any): string[];
-/**
- * Generate a consistent event ID
- */
-export declare function generateEventId(event: NormalizedEvent, source?: string): string;
 /**
  * Transform DynamoDB event to OpenSearch format
  */

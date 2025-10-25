@@ -4,6 +4,7 @@ import {
   parseCostAmount,
   parseDate,
 } from "@touchgrass/shared-utils";
+
 import { Handler } from "aws-lambda";
 import { Resource } from "sst";
 
@@ -69,7 +70,8 @@ async function indexEventToOpenSearch(event: any): Promise<void> {
   }
 }
 
-export const handler: Handler = async (event) => {
+export const handler: Handler = async (event: NormalizedEvent[]) => {
+  console.log("Reindexing events", event);
   transformEventForOpenSearch(event).then((parsedEvent) =>
     indexEventToOpenSearch(parsedEvent)
   );

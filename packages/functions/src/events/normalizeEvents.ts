@@ -114,12 +114,22 @@ export const handler: Handler = async (event) => {
 
   try {
     console.log("🚀 Lambda normalizeEvents handler started");
-    console.log("📦 Event body:", JSON.stringify(event.body, null, 2));
+    console.log("📦 Event body:", JSON.stringify(event));
 
-    // Parse the request body
-    const body =
-      typeof event.body === "string" ? JSON.parse(event.body) : event.body;
-    const { events, source, eventType } = body;
+    // Parse the request body - handle both API Gateway and Step Functions formats
+    let body;
+    if (event.body) {
+      // API Gateway format
+      body =
+        typeof event.body === "string" ? JSON.parse(event.body) : event.body;
+    } else {
+      // Step Functions format - data is passed directly in the event
+      body = event;
+    }
+
+    console.log("📦 Parsed body:", JSON.stringify(body));
+
+    const { events, source, eventType, testMode } = body;
 
     // Validate input
     if (!events || !Array.isArray(events)) {

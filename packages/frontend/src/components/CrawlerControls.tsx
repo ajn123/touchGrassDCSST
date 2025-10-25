@@ -1,6 +1,6 @@
 "use client";
 
-import { testNormalizeEvents } from "@/app/actions/normalize-test";
+import testStepFunctionsNormalization from "@/app/actions/test-step-functions";
 import { useState } from "react";
 interface CrawlerStatus {
   isRunning: boolean;
@@ -107,7 +107,7 @@ export function CrawlerControls() {
     setNormalizeStatus({ isRunning: true, status: "running" });
 
     try {
-      const result = await testNormalizeEvents();
+      const result = await testStepFunctionsNormalization();
 
       if (result.success) {
         setNormalizeStatus({
@@ -243,7 +243,7 @@ export function CrawlerControls() {
                     Event Normalization Test
                   </h4>
                   <p className="text-sm text-gray-500">
-                    Test the Lambda normalization handler with sample events
+                    Test the AWS Step Functions workflow for event normalization
                   </p>
                 </div>
               </div>
@@ -382,11 +382,16 @@ export function CrawlerControls() {
                 formats (Washingtonian, OpenWebNinja, Crawler)
               </p>
               <p>
-                <strong>Purpose:</strong> Verify Lambda normalization handler
-                works correctly
+                <strong>Purpose:</strong> Test AWS Step Functions workflow for
+                event normalization
               </p>
               <p>
-                <strong>Endpoint:</strong> POST /api/events/normalize
+                <strong>Method:</strong> Server Action → Direct Step Functions
+                Call
+              </p>
+              <p>
+                <strong>Workflow:</strong> Server Action → Step Functions →
+                Lambda normalization → DynamoDB
               </p>
             </div>
           </div>

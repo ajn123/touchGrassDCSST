@@ -31,11 +31,20 @@ const reindexEvents = sst.aws.StepFunctions.lambdaInvoke({
   function: reindexEventsFunction,
 });
 
+const passThrough = sst.aws.StepFunctions.pass({ name: "Pass Through" });
+
 const eventInsertionSuccess = sst.aws.StepFunctions.succeed({ name: "Dane" });
 
 const normalizeEventStepFunction = new sst.aws.StepFunctions(
   "normaizeEventStepFunction",
+
   {
+    logging: {
+      retention: "1 month",
+      level: "all",
+      includeData: true,
+    },
+    type: "express",
     definition: normalize
       .next(dbInsert)
       .next(reindexEvents)

@@ -23,11 +23,7 @@ api.route("POST /crawler/openwebninja", {
   handler: "packages/functions/src/events/openWeb.handler",
 });
 
-api.route("POST /events/normalize", {
-  link: [api],
-  handler: "packages/functions/src/events/normalizeEvents.handler",
-});
-
-api.route("POST /events/reindex", {
-  handler: "packages/functions/src/events/reindexEvents.handler",
-});
+// api.route("POST /events/normalize", {
+//   link: [api],
+//   handler: "packages/functions/src/events/normalizeEvents.handler",
+// });

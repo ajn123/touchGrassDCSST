@@ -1,5 +1,6 @@
 import { Client } from "@opensearch-project/opensearch";
 import {
+  NormalizedEvent,
   parseCategories,
   parseCostAmount,
   parseDate,

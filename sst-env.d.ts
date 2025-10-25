@@ -47,10 +47,26 @@ declare module "sst" {
       "type": "sst.aws.Nextjs"
       "url": string
     }
+    "addEventToDBFunction": {
+      "name": string
+      "type": "sst.aws.Function"
+    }
     "hi": {
       "configSet": string
       "sender": string
       "type": "sst.aws.Email"
+    }
+    "normaizeEventStepFunction": {
+      "arn": string
+      "type": "sst.aws.StepFunctions"
+    }
+    "normalizeEventFunction": {
+      "name": string
+      "type": "sst.aws.Function"
+    }
+    "reindexEventsFunction": {
+      "name": string
+      "type": "sst.aws.Function"
     }
     "user_analytics": {
       "type": "sst.aws.Queue"

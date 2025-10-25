@@ -1,3 +1,4 @@
+import { api } from "./api";
 import { db } from "./db";
 import { search } from "./opensearch";
 import { OPENWEBNINJA_API_KEY } from "./secrets";
@@ -6,7 +7,7 @@ import { WashingtonianTask } from "./tasks";
 const cron = new sst.aws.Cron("cron", {
   function: {
     handler: "packages/functions/src/events/openWeb.handler",
-    link: [search, db, OPENWEBNINJA_API_KEY],
+    link: [search, db, OPENWEBNINJA_API_KEY, api],
   },
   schedule: "rate(1 day)",
 });

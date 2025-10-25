@@ -30,6 +30,9 @@ export default $config({
     const { search } = await import("./infra/opensearch");
     const { cron, washingtonianCron } = await import("./infra/cron");
     const { WashingtonianTask } = await import("./infra/tasks");
+    const { normalizeEventStepFunction } = await import(
+      "./infra/step_functions"
+    );
     return {
       Db: db,
       Cron: cron,
@@ -42,6 +45,7 @@ export default $config({
       Queue: queue,
       Search: search,
       WashingtonianTask: WashingtonianTask,
+      NormalizeEventStepFunction: normalizeEventStepFunction,
     };
   },
 });

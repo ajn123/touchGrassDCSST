@@ -35,19 +35,16 @@ export function AdminEntityPanel({
         const result = await response.json();
 
         if (result.success && result.message.includes("successfully")) {
-          alert(
-            `${kind === "event" ? "Event" : "Group"} deleted successfully!`
-          );
+          alert("Event deleted successfully!");
           router.push("/admin");
         } else {
           throw new Error(result.message || "Failed to delete event");
         }
       } else {
+        // At this point, kind can only be "group"
         const result = await deleteGroup(title);
         if (typeof result === "string" && result.includes("successfully")) {
-          alert(
-            `${kind === "event" ? "Event" : "Group"} deleted successfully!`
-          );
+          alert("Group deleted successfully!");
           router.push("/admin");
         } else {
           throw new Error(
@@ -77,7 +74,9 @@ export function AdminEntityPanel({
         >
           {loading
             ? "Deleting..."
-            : `Delete ${kind === "event" ? "Event" : "Group"}`}
+            : kind === "event"
+            ? "Delete Event"
+            : "Delete Group"}
         </button>
       </div>
 

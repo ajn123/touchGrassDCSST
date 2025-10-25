@@ -24,5 +24,10 @@ api.route("POST /crawler/openwebninja", {
 });
 
 api.route("POST /events/normalize", {
+  link: [api],
   handler: "packages/functions/src/events/normalizeEvents.handler",
+});
+
+api.route("POST /events/reindex", {
+  handler: "packages/functions/src/events/reindexEvents.handler",
 });

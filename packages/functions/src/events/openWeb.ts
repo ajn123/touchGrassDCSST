@@ -175,19 +175,12 @@ export const handler = async (event: any) => {
       `OpenWebNinja handler completed. Processed: ${totalEventsProcessed}, Inserted: ${totalEventsInserted}`
     );
 
-    // Trigger OpenSearch reindexing for new events
-    if (totalEventsInserted > 0) {
-      console.log("🔄 Triggering OpenSearch reindexing for new events...");
-      await reindexNewEvents(tableName);
-    }
-
     return {
       statusCode: 200,
       body: JSON.stringify({
         message: "OpenWebNinja events processed successfully",
         processed: totalEventsProcessed,
         inserted: totalEventsInserted,
-        reindexed: totalEventsInserted > 0,
       }),
     };
   } catch (error) {

@@ -2,36 +2,38 @@ import { api } from "./api";
 import { db } from "./db";
 import { search } from "./opensearch";
 
-const normalizeEventFunction = new sst.aws.Function("normalizeEventFunction", {
-  handler: "packages/functions/src/events/normalizeEvents.handler",
-  link: [api],
-});
 const normalize = sst.aws.StepFunctions.lambdaInvoke({
   name: "Normalize",
-  function: normalizeEventFunction,
-});
-
-const addEventToDBFunction = new sst.aws.Function("addEventToDBFunction", {
-  handler: "packages/functions/src/events/addEventToDB.handler",
-  link: [db],
+  payload: {
+    body: "{% $states.input %}",
+  },
+  function: new sst.aws.Function("normalizeEventFunction", {
+    handler: "packages/functions/src/events/normalizeEvents.handler",
+    link: [api],
+  }),
 });
 
 const dbInsert = sst.aws.StepFunctions.lambdaInvoke({
   name: "Add Event to DB",
-  function: addEventToDBFunction,
-});
-
-const reindexEventsFunction = new sst.aws.Function("reindexEventsFunction", {
-  handler: "packages/functions/src/events/reindexEvents.handler",
-  link: [search],
+  payload: {
+    body: "{% $states.input %}",
+  },
+  function: new sst.aws.Function("addEventToDBFunction", {
+    handler: "packages/functions/src/events/addEventToDB.handler",
+    link: [db],
+  }),
 });
 
 const reindexEvents = sst.aws.StepFunctions.lambdaInvoke({
   name: "Reindex Events",
-  function: reindexEventsFunction,
+  payload: {
+    body: "{% $states.input %}",
+  },
+  function: new sst.aws.Function("reindexEventsFunction", {
+    handler: "packages/functions/src/events/reindexEvents.handler",
+    link: [search],
+  }),
 });
-
-const passThrough = sst.aws.StepFunctions.pass({ name: "Pass Through" });
 
 const eventInsertionSuccess = sst.aws.StepFunctions.succeed({ name: "Dane" });
 
@@ -44,7 +46,7 @@ const normalizeEventStepFunction = new sst.aws.StepFunctions(
       level: "all",
       includeData: true,
     },
-    type: "express",
+    type: "standard",
     definition: normalize
       .next(dbInsert)
       .next(reindexEvents)

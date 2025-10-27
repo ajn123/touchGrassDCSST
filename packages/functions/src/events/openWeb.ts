@@ -1,4 +1,5 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { SFNClient, StartExecutionCommand } from "@aws-sdk/client-sfn";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { Client } from "@opensearch-project/opensearch";
 import axios from "axios";
@@ -87,7 +88,7 @@ async function queryOpenWebNinjaEvents(
 // These functions are now imported from @touchgrass/shared-utils
 // Removed duplicate implementations of parseCategories, parseCostAmount, and parseDate
 
-export const handler = async (event: any) => {
+export const handler = async (event: any, context: any, callback: any) => {
   console.log("OpenWebNinja handler started");
 
   try {
@@ -146,30 +147,32 @@ export const handler = async (event: any) => {
       `🚀 Using Lambda normalization for ${events.length} OpenWebNinja events`
     );
 
-    const response = await fetch(`${Resource.Api.url}/events/normalize`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        events,
+    const config = {}; // type is SFNClientConfig
+    const client = new SFNClient(config);
+
+    // Generate unique execution name with timestamp
+    const executionName = `washingtonian-crawler-${Date.now()}-${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+
+    const inputObject = {
+      // StartExecutionInput
+      stateMachineArn: Resource.normaizeEventStepFunction.arn, // corrected resource name
+      input: JSON.stringify({
+        events: events,
         source: "openwebninja",
         eventType: "openwebninja",
       }),
-    });
+    };
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP ${response.status}: ${errorText}`);
-    }
+    const command = new StartExecutionCommand(inputObject);
+    const response = await client.send(command);
 
-    const result = await response.json();
-    totalEventsInserted = result.savedCount;
+    console.log("🚀 Step Functions test successful:", response);
+    console.log(`✅ Successfully started normalization workflow`);
 
     console.log(`✅ Lambda normalization completed:`);
     console.log(`   📊 Processed: ${totalEventsProcessed} events`);
-    console.log(`   💾 Inserted: ${totalEventsInserted} events`);
-    console.log(`   ⏱️ Execution time: ${result.executionTime}ms`);
 
     console.log(
       `OpenWebNinja handler completed. Processed: ${totalEventsProcessed}, Inserted: ${totalEventsInserted}`

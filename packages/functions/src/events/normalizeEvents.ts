@@ -1,4 +1,12 @@
-import { NormalizedEvent } from "@touchgrass/shared-utils";
+import {
+  NormalizedEvent,
+  generateEventId,
+  normalizeCategory,
+  normalizeCoordinates,
+  normalizeCost,
+  normalizeDate,
+  normalizeTime,
+} from "@touchgrass/shared-utils";
 import { Handler } from "aws-lambda";
 import { Resource } from "sst";
 
@@ -109,11 +117,12 @@ export const callReindexEvents = async (events: NormalizedEvent[]) => {
 };
 
 // Lambda handler for event normalization
-export const handler: Handler = async (event) => {
+export const handler: Handler = async (event, context, callback) => {
   const startTime = Date.now();
 
   try {
     console.log("🚀 Lambda normalizeEvents handler started");
+
     console.log("📦 Event body:", JSON.stringify(event));
 
     // Parse the request body - handle both API Gateway and Step Functions formats
@@ -184,19 +193,12 @@ export const handler: Handler = async (event) => {
 
     console.log(`✅ Successfully normalized ${normalizedEvents.length} events`);
 
-    return {
-      statusCode: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
-      body: JSON.stringify({
-        success: true,
-        events: normalizedEvents,
-        source: source || "unknown",
-        eventType: eventType || "unknown",
-      }),
-    };
+    return JSON.stringify({
+      success: true,
+      events: normalizedEvents,
+      source: source || "unknown",
+      eventType: eventType || "unknown",
+    });
   } catch (error) {
     const totalTime = Date.now() - startTime;
     console.error(

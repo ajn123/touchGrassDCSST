@@ -1,3 +1,4 @@
+import { SFNClient, StartExecutionCommand } from "@aws-sdk/client-sfn";
 import { PlaywrightCrawler, RequestList } from "crawlee";
 import { Resource } from "sst";
 
@@ -362,34 +363,29 @@ class WashingtonianPlaywrightCrawler {
     );
 
     try {
-      // Call the Lambda normalization API directly
-      const response = await fetch(`${Resource.Api.url}/events/normalize`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          events,
+      const config = {}; // type is SFNClientConfig
+      const client = new SFNClient(config);
+
+      // Generate unique execution name with timestamp
+      const executionName = `washingtonian-crawler-${Date.now()}-${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
+
+      const inputObject = {
+        // StartExecutionInput
+        stateMachineArn: Resource.normaizeEventStepFunction.arn, // corrected resource name
+        input: JSON.stringify({
+          events: events,
           source: "washingtonian",
           eventType: "washingtonian",
         }),
-      });
+      };
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
-      }
+      const command = new StartExecutionCommand(inputObject);
+      const response = await client.send(command);
 
-      const result = await response.json();
-      console.log(
-        `✅ Successfully normalized and saved ${result.savedCount} events`
-      );
-      console.log(`⏱️ Execution time: ${result.executionTime}ms`);
-      console.log(
-        `📊 Event IDs: ${result.eventIds.slice(0, 3).join(", ")}${
-          result.eventIds.length > 3 ? "..." : ""
-        }`
-      );
+      console.log("🚀 Step Functions test successful:", response);
+      console.log(`✅ Successfully started normalization workflow`);
     } catch (error) {
       console.error(`❌ Error saving events via Lambda:`, error);
       throw error;
@@ -409,7 +405,7 @@ class WashingtonianPlaywrightCrawler {
         console.log("⚠️ No events found to save");
       }
     } catch (error) {
-      console.error("❌ Washingtonian crawler failed:", error);
+      console.error("❌ ashingtonian crawler failed:", error);
       throw error;
     }
   }

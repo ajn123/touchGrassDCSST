@@ -1,6 +1,5 @@
 import { Client } from "@opensearch-project/opensearch";
 import {
-  NormalizedEvent,
   parseCategories,
   parseCostAmount,
   parseDate,
@@ -71,9 +70,23 @@ async function indexEventToOpenSearch(event: any): Promise<void> {
   }
 }
 
-export const handler: Handler = async (event: NormalizedEvent[]) => {
-  console.log("Reindexing events", event);
-  transformEventForOpenSearch(event).then((parsedEvent) =>
-    indexEventToOpenSearch(parsedEvent)
-  );
+export const handler: Handler = async (event: any) => {
+  let payload =
+    typeof event.body.Payload === "object"
+      ? JSON.parse(event.body.Payload.body)
+      : event.body.Payload;
+
+  const { eventIds, savedEvents } = payload;
+
+  console.log("Events in reindexEvents:", savedEvents);
+  for (const event of savedEvents) {
+    transformEventForOpenSearch(event).then((parsedEvent) =>
+      indexEventToOpenSearch(parsedEvent)
+    );
+  }
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ message: "Events reindexed successfully" }),
+  };
 };

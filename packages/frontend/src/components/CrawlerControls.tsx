@@ -114,10 +114,7 @@ export function CrawlerControls() {
           isRunning: false,
           status: "success",
           message: result.message,
-          eventsAdded: result.eventsAdded,
-          eventsFound: result.eventsFound,
           lastRun: result.timestamp,
-          savedEvents: result.savedEvents,
         });
       } else {
         setNormalizeStatus({

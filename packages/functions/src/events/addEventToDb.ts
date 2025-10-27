@@ -145,9 +145,21 @@ export async function saveEvents(
   return { eventIds, savedEvents };
 }
 
-export const handler: Handler = async (event: NormalizedEvent[]) => {
-  console.log("Adding events to DB", event);
-  const { eventIds, savedEvents } = await saveEvents(event, "openwebninja");
+export const handler: Handler = async (
+  event: { body: any },
+  context: any,
+  callback: any
+) => {
+  let events =
+    typeof event.body === "string"
+      ? JSON.parse(event.body)
+      : JSON.parse(event.body.Payload);
+
+  if (events.events) {
+    events = events.events;
+  }
+
+  const { eventIds, savedEvents } = await saveEvents(events, "openwebninja");
 
   return {
     statusCode: 200,

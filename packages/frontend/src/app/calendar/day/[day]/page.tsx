@@ -1,6 +1,7 @@
 "use client";
 
 import { Socials } from "@/components/Socials";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -69,6 +70,12 @@ export default function DayPage() {
 
   return (
     <div className="mx-auto max-w-4xl p-4">
+      <div className="mb-4 flex justify-end p-4 theme-bg-primary rounded-lg m-4">
+        <Link href="/calendar" className="">
+          Back to Calendar
+        </Link>
+      </div>
+
       <h1 className="mb-4 text-2xl font-semibold">
         Events on{" "}
         {normalizedDay ? new Date(normalizedDay).toLocaleDateString() : ""}

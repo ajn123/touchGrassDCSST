@@ -24,7 +24,6 @@ exports.sanitizeEvent = sanitizeEvent;
  * Generate a consistent event ID
  */
 function generateEventId(event, source) {
-    const timestamp = Date.now();
     // Handle undefined or invalid title
     const title = event.title || "untitled-event";
     const titleSlug = title
@@ -32,7 +31,8 @@ function generateEventId(event, source) {
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, "");
     const sourcePrefix = source ? `${source.toUpperCase()}-` : "";
-    return `EVENT-${sourcePrefix}${titleSlug}-${timestamp}`;
+    // Deterministic ID based on source and title only (no timestamp)
+    return `EVENT-${sourcePrefix}${titleSlug}`;
 }
 /**
  * Normalize date strings to consistent format

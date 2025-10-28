@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/client-sfn": "^3.0.0",
     "crawlee": "^3.0.0",
     "playwright": "*",
     "sst": "^3.0.0",

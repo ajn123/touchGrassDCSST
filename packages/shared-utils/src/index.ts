@@ -63,8 +63,6 @@ export function generateEventId(
   event: NormalizedEvent,
   source?: string
 ): string {
-  const timestamp = Date.now();
-
   // Handle undefined or invalid title
   const title = event.title || "untitled-event";
   const titleSlug = title
@@ -73,7 +71,9 @@ export function generateEventId(
     .replace(/^-+|-+$/g, "");
 
   const sourcePrefix = source ? `${source.toUpperCase()}-` : "";
-  return `EVENT-${sourcePrefix}${titleSlug}-${timestamp}`;
+  // Use start_date as part of the deterministic ID, but don't use any timestamp
+  const startDatePart = event.start_date ? `-${event.start_date}` : "";
+  return `EVENT-${sourcePrefix}${titleSlug}${startDatePart}`;
 }
 
 /**

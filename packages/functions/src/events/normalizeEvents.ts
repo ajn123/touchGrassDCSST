@@ -64,6 +64,62 @@ export function transformWashingtonianEvent(event: any): NormalizedEvent {
 }
 
 /**
+ * Transform ClockOut DC event to normalized format
+ */
+export function transformClockOutEvent(event: any): NormalizedEvent {
+  // Parse time range like "10am-2pm" into start_time and end_time
+  let start_time: string | undefined = undefined;
+  let end_time: string | undefined = undefined;
+
+  if (event.time) {
+    const timeStr = event.time.toLowerCase();
+
+    // Handle keyword times
+    if (timeStr.includes("sunset")) {
+      start_time = "sunset";
+    }
+    // Handle time ranges like "10am-2pm", "7-11pm"
+    else if (timeStr.includes("-")) {
+      const timeMatch = timeStr.match(
+        /^(\d{1,2}(?::\d{2})?)([ap]m)?\s*-\s*(\d{1,2}(?::\d{2})?)([ap]m)$/
+      );
+      if (timeMatch) {
+        const [, start, startPeriod, end, endPeriod] = timeMatch;
+        start_time = normalizeTime(start + (startPeriod || endPeriod || ""));
+        end_time = normalizeTime(end + endPeriod);
+      } else {
+        // Fallback: split on dash
+        const parts = timeStr.split("-");
+        if (parts.length === 2) {
+          start_time = normalizeTime(parts[0].trim());
+          end_time = normalizeTime(parts[1].trim());
+        }
+      }
+    }
+    // Single time like "7pm", "10am"
+    else {
+      start_time = normalizeTime(event.time);
+    }
+  }
+
+  return {
+    title: event.title,
+    description: event.description,
+    start_date: normalizeDate(event.date),
+    start_time: start_time,
+    end_time: end_time,
+    location: event.location,
+    venue: event.venue,
+    category: normalizeCategory(event.category),
+    url: event.url,
+    cost: normalizeCost(event.price),
+    socials: event.url ? { website: event.url } : undefined,
+    is_public: true,
+    source: "clockoutdc",
+  };
+}
+
+/**
  * Transform crawler event to normalized format
  */
 export function transformCrawlerEvent(event: any): NormalizedEvent {
@@ -179,6 +235,9 @@ export const handler: Handler = async (event, context, callback) => {
             break;
           case "crawler":
             normalizedEvent = transformCrawlerEvent(rawEvent);
+            break;
+          case "clockoutdc":
+            normalizedEvent = transformClockOutEvent(rawEvent);
             break;
           default:
             // Assume it's already in normalized format

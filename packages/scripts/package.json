@@ -56,7 +56,9 @@
     "full-sync": "tsx src/full-sync.ts",
     "crawl:washingtonian": "tsx src/washingtonian-selenium.ts",
     "crawl:washingtonian:selenium": "tsx src/washingtonian-selenium.ts",
-    "test:washingtonian:selenium": "tsx src/test-selenium-crawler.ts"
+    "test:washingtonian:selenium": "tsx src/test-selenium-crawler.ts",
+    "delete:hashtag-events": "tsx src/delete-hashtag-events.ts",
+    "delete:duplicates": "tsx src/remove-duplicate-events.ts"
   },
   "devDependencies": {
     "@types/node": "^22",

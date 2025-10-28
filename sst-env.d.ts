@@ -51,6 +51,15 @@ declare module "sst" {
       "name": string
       "type": "sst.aws.Function"
     }
+    "clockoutdcTask": {
+      "assignPublicIp": boolean
+      "cluster": string
+      "containers": any
+      "securityGroups": any
+      "subnets": any
+      "taskDefinition": string
+      "type": "sst.aws.Task"
+    }
     "hi": {
       "configSet": string
       "sender": string

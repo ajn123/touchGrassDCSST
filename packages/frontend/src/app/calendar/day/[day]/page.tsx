@@ -12,6 +12,10 @@ type EventItem = {
   start_time?: string;
   venue?: string;
   location?: string;
+  url?: string;
+  socials?: {
+    website?: string;
+  };
 };
 
 export default function DayPage() {
@@ -48,6 +52,7 @@ export default function DayPage() {
           throw new Error(`Failed to load events (${res.status})`);
         }
         const data = await res.json();
+        console.log("data", data);
         console.log(data);
         setEvents(data.events || []);
       } catch (err: any) {

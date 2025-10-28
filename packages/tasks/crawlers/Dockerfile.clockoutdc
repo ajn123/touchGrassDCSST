@@ -1,0 +1,32 @@
+FROM apify/actor-node-puppeteer-chrome:20
+
+# Switch to root for package installation
+USER root
+
+# Install additional dependencies if needed
+RUN apt-get update && apt-get install -y \
+    curl \
+    procps \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create app directory
+WORKDIR /app
+
+# Copy crawler package.json to install dependencies
+COPY packages/tasks/crawlers/package.json ./package.json
+
+# Install dependencies
+RUN npm install
+
+# Install playwright globally (crawlee uses playwright)
+RUN npm install -g playwright
+
+# Install Playwright browsers
+RUN npx playwright install chromium
+
+# Note: Copy the crawler code (this layer will be rebuilt if clockoutdc.ts changes)
+COPY packages/tasks/crawlers/clockoutdc.ts ./
+
+# Set default command to run the clockoutdc crawler
+CMD ["npx", "tsx", "./clockoutdc.ts"]
+

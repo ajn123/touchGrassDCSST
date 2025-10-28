@@ -16,4 +16,14 @@ const WashingtonianTask = new sst.aws.Task("washingtonianTask", {
   dev: false,
 });
 
-export { WashingtonianTask };
+const ClockOutDCTask = new sst.aws.Task("clockoutdcTask", {
+  cluster,
+  link: [search, db, api, normalizeEventStepFunction],
+  image: {
+    context: ".", // Use project root as context
+    dockerfile: "./packages/tasks/crawlers/Dockerfile.clockoutdc",
+  },
+  dev: false,
+});
+
+export { ClockOutDCTask, WashingtonianTask };

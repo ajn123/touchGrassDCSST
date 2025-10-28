@@ -106,7 +106,7 @@ async function fixDuplicates() {
     console.log(`📊 Found ${groups.length} unique groups`);
 
     // Step 4: Fetch events
-    console.log("📊 Fetching events...");
+    // console.log("📊 Fetching events...");
     const eventsCommand = new ScanCommand({
       TableName: Resource.Db.name,
       FilterExpression:

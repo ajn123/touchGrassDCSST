@@ -127,7 +127,7 @@ export class TouchGrassDynamoDB {
         return null;
       }
 
-      console.log(`Using API key: ${apiKey.substring(0, 10)}...`);
+      // console.log(`Using API key: ${apiKey.substring(0, 10)}...`);
 
       const encodedAddress = encodeURIComponent(address);
       const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&key=${apiKey}`;
@@ -135,10 +135,10 @@ export class TouchGrassDynamoDB {
       const response = await fetch(url);
       const data = await response.json();
 
-      console.log(
-        `Geocoding response for "${address}":`,
-        JSON.stringify(data, null, 2)
-      );
+      // console.log(
+      //   `Geocoding response for "${address}":`,
+      //   JSON.stringify(data, null, 2)
+      // );
 
       if (data.status === "OK" && data.results && data.results.length > 0) {
         const result = data.results[0];
@@ -150,9 +150,9 @@ export class TouchGrassDynamoDB {
           formattedAddress: result.formatted_address,
         };
       } else {
-        console.log(
-          `Geocoding failed for "${address}" with status: ${data.status}`
-        );
+        // console.log(
+        //   `Geocoding failed for "${address}" with status: ${data.status}`
+        // );
         if (data.error_message) {
           console.log(`Error message: ${data.error_message}`);
         }
@@ -225,12 +225,12 @@ export class TouchGrassDynamoDB {
    */
   async getEvents(): Promise<Event[]> {
     try {
-      console.log("🔍 getEvents: Starting to fetch events from DynamoDB...");
-      console.log("🔍 getEvents: Table name:", this.tableName);
-      console.log(
-        "🔍 getEvents: AWS Region:",
-        process.env.AWS_REGION || "us-east-1"
-      );
+      // console.log("🔍 getEvents: Starting to fetch events from DynamoDB...");
+      // console.log("🔍 getEvents: Table name:", this.tableName);
+      // console.log(
+      //   "🔍 getEvents: AWS Region:",
+      //   process.env.AWS_REGION || "us-east-1"
+      // );
 
       // Handle both old EVENT# and new EVENT- prefixes during transition
       // For Washingtonian events, don't require isPublic field since they don't have it
@@ -262,7 +262,7 @@ export class TouchGrassDynamoDB {
         result.Items?.map((item) => {
           // Use AWS SDK's unmarshall utility to convert DynamoDB format to regular object
           const unmarshalledItem = unmarshall(item) as Event;
-          console.log("🔍 getEvents: Unmarshalled item:", unmarshalledItem);
+          // console.log("🔍 getEvents: Unmarshalled item:", unmarshalledItem);
           return unmarshalledItem;
         }) || [];
 
@@ -302,15 +302,15 @@ export class TouchGrassDynamoDB {
         return ev;
       });
 
-      console.log("🔍 getEvents: Final events array length:", events.length);
+      // console.log("🔍 getEvents: Final events array length:", events.length);
       return events;
     } catch (error) {
-      console.error("❌ getEvents: Error fetching events:", error);
-      console.error("❌ getEvents: Error details:", {
-        message: error instanceof Error ? error.message : "Unknown error",
-        stack: error instanceof Error ? error.stack : undefined,
-        name: error instanceof Error ? error.name : "Unknown error type",
-      });
+      // console.error("❌ getEvents: Error fetching events:", error);
+      // console.error("❌ getEvents: Error details:", {
+      //   message: error instanceof Error ? error.message : "Unknown error",
+      //   stack: error instanceof Error ? error.stack : undefined,
+      //   name: error instanceof Error ? error.name : "Unknown error type",
+      // });
       return [];
     }
   }

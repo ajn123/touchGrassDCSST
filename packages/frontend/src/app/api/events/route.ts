@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     const totalTime = Date.now() - startTime;
-    console.error(`❌ Error fetching events after ${totalTime}ms:`, error);
+    // console.error(`❌ Error fetching events after ${totalTime}ms:`, error);
     return NextResponse.json(
       { error: "Failed to fetch events", executionTime: totalTime },
       { status: 500 }

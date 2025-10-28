@@ -69,7 +69,7 @@ export default function MonthlyCalendar({
         const data = await response.json();
         setEvents(data.events as Event[]);
       } catch (error) {
-        console.error("Error fetching events:", error);
+        // console.error("Error fetching events:", error);
       } finally {
         setLoading(false);
       }
@@ -165,14 +165,14 @@ export default function MonthlyCalendar({
     return timeStr;
   };
 
-  const getCostDisplay = (cost: any) => {
-    if (!cost) return "Free";
-    if (cost.type === "free") return "Free";
-    if (cost.type === "unknown") return "Unknown";
-    if (cost.type === "variable") return `$${cost.amount}`;
-    if (typeof cost.amount === "number") return `$${cost.amount}`;
-    return cost.amount || "Unknown";
-  };
+  // const getCostDisplay = (cost: any) => {
+  //   if (!cost) return "Free";
+  //   if (cost.type === "free") return "Free";
+  //   if (cost.type === "unknown") return "Unknown";
+  //   if (cost.type === "variable") return `$${cost.amount}`;
+  //   if (typeof cost.amount === "number") return `$${cost.amount}`;
+  //   return cost.amount || "Unknown";
+  // };
 
   const handleEventClick = (event: Event) => {
     // If this is a Washingtonian-sourced event, open the external URL instead
@@ -301,13 +301,14 @@ export default function MonthlyCalendar({
         {/* Calendar Days */}
         <div className="grid grid-cols-7">
           {calendarDays.map((day, index) => (
-            <div
-              key={index}
+            <Link
+              href={`/calendar/day/${day.date.toISOString()}`}
               className={`border-r border-b ${
                 isCompact ? "border-gray-300" : "border-gray-200"
               } ${isCompact ? "p-1" : "p-2"} ${
                 !day.isCurrentMonth ? "bg-gray-50 text-gray-400" : "bg-white"
               } ${isCompact ? "min-h-[80px]" : "min-h-[200px]"}`}
+              key={index}
             >
               {/* Day Number */}
               <div
@@ -327,7 +328,7 @@ export default function MonthlyCalendar({
               {/* Events */}
               <div className={`${isCompact ? "space-y-0.5" : "space-y-1"}`}>
                 {day.events
-                  .slice(0, isCompact ? 2 : undefined)
+                  .slice(0, isCompact ? 2 : 5)
                   .map((event, eventIndex) => {
                     const eventId = event.pk.replace(/^(EVENT-|EVENT#)/, "");
                     return (
@@ -368,13 +369,13 @@ export default function MonthlyCalendar({
                     );
                   })}
 
-                {isCompact && day.events.length > 2 && (
+                {day.events.length > 2 && (
                   <div className="text-xs text-gray-500 text-center">
-                    +{day.events.length - 2}
+                    +{day.events.length - 2} Show More
                   </div>
                 )}
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 

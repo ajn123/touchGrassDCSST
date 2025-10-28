@@ -79,7 +79,7 @@ export default function GroupsClient({ groups }: { groups: Group[] }) {
           <p className="text-lg">Discover and join groups in the DC area</p>
         </div>
 
-        <div className="rounded-lg shadow-md p-6 mb-8">
+        <div className="rounded-lg shadow-xl p-6 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label
@@ -124,7 +124,7 @@ export default function GroupsClient({ groups }: { groups: Group[] }) {
               </label>
               <select
                 id="category"
-                className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
               >
@@ -167,7 +167,7 @@ export default function GroupsClient({ groups }: { groups: Group[] }) {
             {filteredGroups.map((group) => (
               <div
                 key={group.pk}
-                className="rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden border border-gray-200 dark:border-gray-700"
+                className="rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden border"
               >
                 <Link
                   href={`/groups/${encodeURIComponent(group.title)}`}

@@ -81,7 +81,7 @@ async function queryOpenWebNinjaEvents(
     return response.data.data || [];
   } catch (error) {
     console.error("Error querying OpenWebNinja API:", error);
-    throw error;
+    return [];
   }
 }
 

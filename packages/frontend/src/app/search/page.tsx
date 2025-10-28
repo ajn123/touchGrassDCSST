@@ -47,13 +47,9 @@ function SearchPageContent() {
 
   // Load data whenever filters change
   useEffect(() => {
-    console.log("🔄 useEffect triggered - filters changed, reloading data");
-
     const loadData = async () => {
       try {
         setLoading(true);
-        console.log("📡 Fetching events from API with filters:", filters);
-
         // Build query string for the API
         const queryParams = new URLSearchParams();
 
@@ -82,20 +78,12 @@ function SearchPageContent() {
 
         try {
           // Use the types parameter from filters
-
           const opensearchResponse = await fetch(
             `/api/search-opensearch?${queryParams.toString()}`
           );
 
           if (opensearchResponse.ok) {
             data = await opensearchResponse.json();
-            console.log(
-              "📦 Retrieved",
-              data.events?.length || 0,
-              "events and",
-              data.groups?.length || 0,
-              "groups from OpenSearch API"
-            );
           } else {
             throw new Error(
               `OpenSearch failed with status: ${opensearchResponse.status}`
@@ -164,7 +152,6 @@ function SearchPageContent() {
 
   // Simple function to handle automatic search updates
   const handleSearchUpdate = useCallback((searchFilters: any) => {
-    console.log("🔍 Search filters updated:", searchFilters);
     // The filtering is already handled by the useEffect above
   }, []);
 

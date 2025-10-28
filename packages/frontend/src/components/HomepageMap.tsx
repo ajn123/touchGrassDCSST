@@ -53,7 +53,7 @@ export default function HomepageMap({ className = "" }: HomepageMapProps) {
         );
         setEvents(eventsWithLocation);
       } catch (error) {
-        console.error("Error fetching events:", error);
+        // console.error("Error fetching events:", error);
         setError("Failed to load events");
       } finally {
         setLoading(false);

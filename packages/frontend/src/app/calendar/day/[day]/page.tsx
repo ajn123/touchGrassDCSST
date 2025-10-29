@@ -29,6 +29,14 @@ export default function DayPage() {
     return { rawParam: decoded, normalizedDay: dayOnly };
   }, [params]);
 
+  const monthName = useMemo(() => {
+    if (!normalizedDay) return "";
+    return new Date(normalizedDay + "T12:00:00").toLocaleDateString("en-US", {
+      timeZone: "America/New_York",
+      month: "long",
+    });
+  }, [normalizedDay]);
+
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,8 +61,6 @@ export default function DayPage() {
           throw new Error(`Failed to load events (${res.status})`);
         }
         const data = await res.json();
-        console.log("data", data);
-        console.log(data);
         setEvents(data.events || []);
       } catch (err: any) {
         if (err.name !== "AbortError") {
@@ -76,9 +82,16 @@ export default function DayPage() {
         </Link>
       </div>
 
-      <h1 className="mb-4 text-2xl font-semibold">
-        Events on{" "}
-        {normalizedDay ? new Date(normalizedDay).toLocaleDateString() : ""}
+      <h1 className="mb-2 text-3xl font-bold">
+        {monthName}{" "}
+        {normalizedDay
+          ? new Date(normalizedDay + "T12:00:00").toLocaleDateString("en-US", {
+              timeZone: "America/New_York",
+              weekday: "long",
+              day: "numeric",
+              year: "numeric",
+            })
+          : ""}
       </h1>
 
       {loading && <p>Loading…</p>}

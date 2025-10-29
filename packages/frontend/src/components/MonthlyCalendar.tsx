@@ -57,6 +57,9 @@ export default function MonthlyCalendar({
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [calendarDays, setCalendarDays] = useState<CalendarDay[]>([]);
+  // Rolling window controls: start date (ET anchored) and window days
+  const [windowStartDate, setWindowStartDate] = useState<Date>(new Date());
+  const [windowDays, setWindowDays] = useState<number>(30); // initial 30 days
 
   const isCompact = variant === "compact";
 
@@ -78,46 +81,35 @@ export default function MonthlyCalendar({
     fetchEvents();
   }, []);
 
-  // Generate calendar days
+  // Generate calendar days (ET-based) using rolling window
   useEffect(() => {
     const generateCalendarDays = () => {
-      const year = currentDate.getFullYear();
-      const month = currentDate.getMonth();
       const today = new Date();
+      const todayYmd = getEtYmd(today);
 
-      // First day of the month
-      const firstDay = new Date(year, month, 1);
-      // Last day of the month
-      const lastDay = new Date(year, month + 1, 0);
-
-      // Start from the beginning of the week (Sunday = 0)
-      const startDate = new Date(firstDay);
-      startDate.setDate(startDate.getDate() - firstDay.getDay());
-
-      // End at the end of the week
-      const endDate = new Date(lastDay);
-      endDate.setDate(endDate.getDate() + (6 - lastDay.getDay()));
+      // Start from the ET-anchored windowStartDate (no week alignment)
+      const startDate = new Date(windowStartDate);
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + (windowDays - 1));
 
       const days: CalendarDay[] = [];
       const current = new Date(startDate);
+      const currentMonthEt = getEtParts(today).month; // Use ET month for styling
 
       while (current <= endDate) {
+        const currentYmdEt = getEtYmd(current);
         const dayEvents = events.filter((event) => {
-          // Check for both start_date (internal events) and date (Washingtonian events)
-          const eventDateStr = event.start_date || event.date;
+          const eventDateStr = event.start_date || event.date; // YYYY-MM-DD
           if (!eventDateStr) return false;
-
-          // Parse date as local date to avoid timezone issues
-          const eventDate = new Date(eventDateStr + "T00:00:00");
-          return eventDate.toDateString() === current.toDateString();
+          return eventDateStr === currentYmdEt;
         });
 
-        const isToday = current.toDateString() === today.toDateString();
+        const isToday = currentYmdEt === todayYmd;
 
         days.push({
           date: new Date(current),
           dayNumber: current.getDate(),
-          isCurrentMonth: current.getMonth() === month,
+          isCurrentMonth: getEtParts(current).month === currentMonthEt,
           isToday,
           events: dayEvents,
         });
@@ -129,18 +121,26 @@ export default function MonthlyCalendar({
     };
 
     generateCalendarDays();
-  }, [currentDate, events]);
+  }, [events, windowStartDate, windowDays]);
 
   const goToPreviousMonth = () => {
-    setCurrentDate(
-      (prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1)
-    );
+    // Move window back by 4 weeks and use 28-day windows after initial
+    setWindowStartDate((prev) => {
+      const d = new Date(prev);
+      d.setDate(d.getDate() - 28);
+      return d;
+    });
+    setWindowDays(28);
   };
 
   const goToNextMonth = () => {
-    setCurrentDate(
-      (prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1)
-    );
+    // Move window forward by 4 weeks and use 28-day windows after initial
+    setWindowStartDate((prev) => {
+      const d = new Date(prev);
+      d.setDate(d.getDate() + 28);
+      return d;
+    });
+    setWindowDays(28);
   };
 
   const formatDate = (date: Date) => {
@@ -148,6 +148,24 @@ export default function MonthlyCalendar({
       month: "long",
       year: "numeric",
     });
+  };
+
+  // Header range formatter in ET (e.g., Oct 29 – Nov 27, 2025)
+  const formatEtRange = (start: Date, days: number) => {
+    const end = new Date(start);
+    end.setDate(end.getDate() + (days - 1));
+    const startFmt = new Intl.DateTimeFormat("en-US", {
+      timeZone: ET_TIME_ZONE,
+      month: "short",
+      day: "numeric",
+    }).format(start);
+    const endFmt = new Intl.DateTimeFormat("en-US", {
+      timeZone: ET_TIME_ZONE,
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }).format(end);
+    return `${startFmt} – ${endFmt}`;
   };
 
   const formatTime = (time: string) => {
@@ -163,6 +181,67 @@ export default function MonthlyCalendar({
       return `${displayHour}:${minutes} ${ampm}`;
     }
     return timeStr;
+  };
+
+  // East Coast time zone utilities
+  const ET_TIME_ZONE = "America/New_York";
+
+  const getEtParts = (date: Date) => {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: ET_TIME_ZONE,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      weekday: "short",
+    }).formatToParts(date);
+
+    const map: Record<string, string> = {};
+    for (const p of parts) {
+      if (p.type !== "literal") map[p.type] = p.value;
+    }
+    const weekdayMap: Record<string, number> = {
+      Sun: 0,
+      Mon: 1,
+      Tue: 2,
+      Wed: 3,
+      Thu: 4,
+      Fri: 5,
+      Sat: 6,
+    };
+    return {
+      year: Number(map.year),
+      month: Number(map.month),
+      day: Number(map.day),
+      weekdayIndex: weekdayMap[map.weekday as keyof typeof weekdayMap] ?? 0,
+    };
+  };
+
+  const getEtYmd = (date: Date) => {
+    const { year, month, day } = getEtParts(date);
+    return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(
+      2,
+      "0"
+    )}`;
+  };
+
+  const formatMonthDayET = (date: Date) => {
+    return new Intl.DateTimeFormat("en-US", {
+      timeZone: ET_TIME_ZONE,
+      month: "short",
+      day: "numeric",
+    }).format(date);
+  };
+
+  const formatDateForUrlET = (date: Date) => getEtYmd(date);
+
+  const formatMonthDay = (date: Date) => {
+    // Use ET for display
+    return formatMonthDayET(date);
+  };
+
+  const formatDateForUrl = (date: Date) => {
+    // Format as YYYY-MM-DD in ET
+    return formatDateForUrlET(date);
   };
 
   // const getCostDisplay = (cost: any) => {
@@ -230,7 +309,9 @@ export default function MonthlyCalendar({
                 <FontAwesomeIcon icon={faChevronLeft} className="text-lg" />
               </button>
 
-              <h2 className="text-2xl font-bold">{formatDate(currentDate)}</h2>
+              <h2 className="text-2xl font-bold">
+                {formatEtRange(windowStartDate, windowDays)}
+              </h2>
 
               <button
                 onClick={goToNextMonth}
@@ -262,7 +343,7 @@ export default function MonthlyCalendar({
             </button>
 
             <h3 className="text-lg font-semibold text-gray-900">
-              {formatDate(currentDate)}
+              {formatEtRange(windowStartDate, windowDays)}
             </h3>
 
             <button
@@ -302,7 +383,7 @@ export default function MonthlyCalendar({
         <div className="grid grid-cols-7">
           {calendarDays.map((day, index) => (
             <Link
-              href={`/calendar/day/${day.date.toISOString()}`}
+              href={`/calendar/day/${formatDateForUrl(day.date)}`}
               className={`border-r border-b ${
                 isCompact ? "border-gray-300" : "border-gray-200"
               } ${isCompact ? "p-1" : "p-2"} ${
@@ -314,15 +395,13 @@ export default function MonthlyCalendar({
               <div
                 className={`font-medium ${isCompact ? "mb-1" : "mb-2"} ${
                   day.isToday
-                    ? isCompact
-                      ? "bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
-                      : "bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm"
+                    ? "font-bold text-blue-600"
                     : day.isCurrentMonth
                     ? "text-gray-900"
                     : "text-gray-400"
                 } ${isCompact ? "text-xs" : "text-sm"}`}
               >
-                {day.dayNumber}
+                {formatMonthDay(day.date)}
               </div>
 
               {/* Events */}

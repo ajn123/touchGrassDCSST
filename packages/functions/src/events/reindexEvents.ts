@@ -46,7 +46,7 @@ async function transformEventForOpenSearch(event: any): Promise<any> {
 // Index a single event to OpenSearch
 async function indexEventToOpenSearch(event: any): Promise<void> {
   try {
-    const searchableEvent = transformEventForOpenSearch(event);
+    const searchableEvent = await transformEventForOpenSearch(event);
 
     // Use the event's primary key as the document ID to prevent duplicates
     const eventId =
@@ -79,11 +79,11 @@ export const handler: Handler = async (event: any) => {
   const { eventIds, savedEvents } = payload;
 
   console.log("Events in reindexEvents:", savedEvents);
-  for (const event of savedEvents) {
-    transformEventForOpenSearch(event).then((parsedEvent) =>
-      indexEventToOpenSearch(parsedEvent)
-    );
-  }
+
+  // Index all events in parallel but wait for completion
+  await Promise.all(
+    savedEvents.map((event: any) => indexEventToOpenSearch(event))
+  );
 
   return {
     statusCode: 200,

@@ -21,6 +21,10 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
+    "LakehouseStorage": {
+      "name": string
+      "type": "sst.aws.Bucket"
+    }
     "MediaBucket": {
       "name": string
       "type": "sst.aws.Bucket"

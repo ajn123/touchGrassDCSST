@@ -76,7 +76,7 @@ export default function AnalyticsDashboard() {
             <li>
               • Switch between line and bar charts for different visualizations
             </li>
-            <li>• The chart shows visits grouped by day</li>
+            <li>• The chart shows unique users (grouped by IP) per day</li>
             <li>• Summary statistics are displayed below the chart</li>
           </ul>
         </div>

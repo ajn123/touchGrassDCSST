@@ -1,4 +1,5 @@
 import { DynamoDBClient, QueryCommand } from "@aws-sdk/client-dynamodb";
+import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { AnalyticsAction } from "../analyticsTrack";
 
 const client = new DynamoDBClient({
@@ -39,29 +40,56 @@ export async function getTotalVisitsByDay(
       ExpressionAttributeValues: {
         ":pk": { S: `ANALYTICS#${type}` },
       },
-      ProjectionExpression: "sk",
+      // Fetch full items to access properties.ip
     });
 
     const result = await client.send(command);
 
-    // Group by day (parsing TIME#timestamp format)
+    // Group by day and count unique IPs per day
     const visitsByDay: Record<string, number> = {};
+    const ipsByDay: Record<string, Set<string>> = {};
 
     (result.Items || []).forEach((item) => {
-      const sk = item.sk?.S;
+      // Unmarshall the DynamoDB item (converts M/S/N formats to JS objects)
+      const unmarshalledItem = unmarshall(item);
+      const sk = unmarshalledItem.sk as string | undefined;
+
+      // Handle nested properties.M.ip.S structure
+      const properties = unmarshalledItem.properties as
+        | {
+            ip?: string;
+          }
+        | undefined;
+      const ip = properties?.ip;
+
       if (sk) {
+        let dateString: string;
+
         // Handle TIME#timestamp format
         if (sk.startsWith("TIME#")) {
           const timestamp = sk.replace("TIME#", "");
           const date = new Date(parseInt(timestamp));
-          const dateString = date.toISOString().split("T")[0]; // YYYY-MM-DD format
-          visitsByDay[dateString] = (visitsByDay[dateString] || 0) + 1;
+          dateString = date.toISOString().split("T")[0]; // YYYY-MM-DD format
         } else {
           // Handle other formats (fallback)
-          const date = sk.slice(0, 10);
-          visitsByDay[date] = (visitsByDay[date] || 0) + 1;
+          dateString = sk.slice(0, 10);
+        }
+
+        // Initialize the set for this day if it doesn't exist
+        if (!ipsByDay[dateString]) {
+          ipsByDay[dateString] = new Set<string>();
+        }
+
+        // Add IP to the set for this day (only if IP exists and is not empty)
+        if (ip && ip.trim().length > 0) {
+          ipsByDay[dateString].add(ip);
         }
       }
+    });
+
+    // Convert sets to counts (unique users per day)
+    Object.keys(ipsByDay).forEach((date) => {
+      visitsByDay[date] = ipsByDay[date].size;
     });
 
     return visitsByDay;

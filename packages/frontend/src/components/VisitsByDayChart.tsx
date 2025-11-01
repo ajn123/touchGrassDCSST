@@ -101,7 +101,7 @@ export function VisitsByDayChart({
     labels: sortedDates,
     datasets: [
       {
-        label: `${action} Visits`,
+        label: `Unique Users`,
         data: sortedDates.map((date) => data.visitsByDay[date]),
         borderColor: "rgb(59, 130, 246)",
         backgroundColor: "rgba(59, 130, 246, 0.1)",
@@ -120,7 +120,7 @@ export function VisitsByDayChart({
       },
       title: {
         display: true,
-        text: `${action} Visits by Day`,
+        text: `${action} Unique Users by Day`,
       },
     },
     scales: {
@@ -148,7 +148,7 @@ export function VisitsByDayChart({
               0
             )}
           </div>
-          <div className="text-sm text-gray-600">Total Visits</div>
+          <div className="text-sm text-gray-600">Total Unique Users</div>
         </div>
         <div className="bg-green-50 p-3 rounded">
           <div className="text-2xl font-bold text-green-600">
@@ -165,7 +165,7 @@ export function VisitsByDayChart({
               ) / sortedDates.length
             ) || 0}
           </div>
-          <div className="text-sm text-gray-600">Avg/Day</div>
+          <div className="text-sm text-gray-600">Avg Unique Users/Day</div>
         </div>
       </div>
     </div>

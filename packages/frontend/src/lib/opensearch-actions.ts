@@ -176,12 +176,13 @@ export async function searchOpenSearch(
       });
     }
 
-    // Date range filter
-    if (filters.dateRange) {
+    // Date range filter - only apply to events, groups should always be included
+    if (filters.dateRange && filters.type !== "group") {
       // For date range filtering, we want to find events that overlap with the specified range
       // An event overlaps with a date range if:
       // - The event starts before or on the end date (event.start_date <= range.end)
       // - The event ends on or after the start date (event.end_date >= range.start)
+      // Groups are always included regardless of date range
 
       const dateRangeFilters: any[] = [];
 
@@ -219,13 +220,37 @@ export async function searchOpenSearch(
         });
       }
 
-      // Add all date range filters
+      // Add all date range filters - but make them only apply to events
+      // Groups will always match because they don't need to satisfy date filters
       if (dateRangeFilters.length > 0) {
-        searchBody.query.bool.filter.push({
-          bool: {
-            must: dateRangeFilters,
-          },
-        });
+        // If searching both types, apply date filter only to events
+        // Groups will pass through because they don't have date fields
+        if (!filters.type) {
+          // When searching both events and groups, use a should clause:
+          // Match if it's a group OR if it's an event that matches the date range
+          searchBody.query.bool.filter.push({
+            bool: {
+              should: [
+                // Include all groups
+                { term: { type: "group" } },
+                // Include events that match the date range
+                {
+                  bool: {
+                    must: [{ term: { type: "event" } }, ...dateRangeFilters],
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          });
+        } else {
+          // When searching only events, apply date filters normally
+          searchBody.query.bool.filter.push({
+            bool: {
+              must: dateRangeFilters,
+            },
+          });
+        }
       }
     }
 

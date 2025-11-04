@@ -19,6 +19,7 @@ interface SearchFilters {
   dateRange: { start?: string; end?: string };
   sortBy: string;
   sortOrder: "asc" | "desc";
+  includePastEvents?: boolean;
 }
 
 interface SearchFiltersProps {
@@ -49,6 +50,7 @@ export default function SearchFilters({
     dateRange: {},
     sortBy: "date",
     sortOrder: "asc",
+    includePastEvents: false, // Default to false - only show present/future events
     ...initialFilters,
   });
   const isSearchingRef = useRef(false);
@@ -102,6 +104,8 @@ export default function SearchFilters({
     if (currentFilters.sortBy) params.set("sortBy", currentFilters.sortBy);
     if (currentFilters.sortOrder)
       params.set("sortOrder", currentFilters.sortOrder);
+    if (currentFilters.includePastEvents)
+      params.set("includePastEvents", "true");
 
     const queryString = params.toString();
     const url = queryString ? `/search?${queryString}` : "/search";
@@ -153,6 +157,7 @@ export default function SearchFilters({
       dateRange: {},
       sortBy: "date",
       sortOrder: "asc" as const,
+      includePastEvents: false,
     };
     setFilters(resetFilters);
     router.push("/search?sortBy=date&sortOrder=asc");
@@ -167,7 +172,8 @@ export default function SearchFilters({
       filters.costRange.type ||
       filters.location.length > 0 ||
       filters.dateRange.start ||
-      filters.dateRange.end
+      filters.dateRange.end ||
+      filters.includePastEvents
     );
   };
 
@@ -341,6 +347,17 @@ export default function SearchFilters({
             Date Range
           </label>
           <div className="space-y-2">
+            <label className="flex items-center mb-2">
+              <input
+                type="checkbox"
+                checked={filters.includePastEvents || false}
+                onChange={(e) =>
+                  handleFilterChange("includePastEvents", e.target.checked)
+                }
+                className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <span className="text-sm text-gray-700">Include past events</span>
+            </label>
             <input
               type="date"
               value={filters.dateRange.start || ""}
@@ -351,6 +368,7 @@ export default function SearchFilters({
                 })
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Start date"
             />
             <input
               type="date"
@@ -362,6 +380,7 @@ export default function SearchFilters({
                 })
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="End date"
             />
           </div>
         </div>

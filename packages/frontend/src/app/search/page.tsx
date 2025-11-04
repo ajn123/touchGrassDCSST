@@ -16,8 +16,15 @@ function SearchPageContent() {
   const [allCategories, setAllCategories] = useState<string[]>([]);
 
   // Memoize filters to prevent unnecessary re-renders
-  const filters = useMemo(
-    () => ({
+  const filters = useMemo(() => {
+    const includePastEvents = searchParams.get("includePastEvents") === "true";
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
+
+    // If not including past events and no explicit dateStart, set to today
+    const dateStart =
+      searchParams.get("dateStart") || (!includePastEvents ? today : undefined);
+
+    return {
       query: searchParams.get("q") || "",
       categories: searchParams.get("categories")
         ? searchParams.get("categories")!.split(",")
@@ -35,15 +42,15 @@ function SearchPageContent() {
         ? searchParams.get("location")!.split(",")
         : [],
       dateRange: {
-        start: searchParams.get("dateStart") || undefined,
+        start: dateStart,
         end: searchParams.get("dateEnd") || undefined,
       },
       sortBy: searchParams.get("sortBy") || "date",
       sortOrder: (searchParams.get("sortOrder") as "asc" | "desc") || "asc",
       types: searchParams.get("types") || "event,group",
-    }),
-    [searchParams]
-  );
+      includePastEvents,
+    };
+  }, [searchParams]);
 
   // Load data whenever filters change
   useEffect(() => {
@@ -64,6 +71,7 @@ function SearchPageContent() {
           queryParams.append("costType", filters.costRange.type);
         if (filters.location.length > 0)
           queryParams.append("location", filters.location.join(","));
+        // Always include dateStart if it's set (defaults to today if includePastEvents is false)
         if (filters.dateRange.start)
           queryParams.append("dateStart", filters.dateRange.start);
         if (filters.dateRange.end)
@@ -72,9 +80,12 @@ function SearchPageContent() {
         if (filters.sortOrder)
           queryParams.append("sortOrder", filters.sortOrder);
         if (filters.types) queryParams.append("types", filters.types);
+        if (filters.includePastEvents)
+          queryParams.append("includePastEvents", "true");
 
         // Try OpenSearch first, fallback to DynamoDB if it fails
         let data: any = { events: [], groups: [] };
+        let useOpenSearch = false;
 
         try {
           // Use the types parameter from filters
@@ -83,7 +94,51 @@ function SearchPageContent() {
           );
 
           if (opensearchResponse.ok) {
-            data = await opensearchResponse.json();
+            const opensearchData = await opensearchResponse.json();
+
+            // Validate that this is actually an OpenSearch response
+            // Check for error field or confirm searchMethod is opensearch
+            if (opensearchData.error) {
+              throw new Error(
+                opensearchData.error || "OpenSearch returned an error"
+              );
+            }
+
+            // Only use OpenSearch data if it's confirmed to be from OpenSearch
+            if (opensearchData.searchMethod === "opensearch") {
+              // Check if we got meaningful results
+              const hasResults =
+                (opensearchData.events && opensearchData.events.length > 0) ||
+                (opensearchData.groups && opensearchData.groups.length > 0) ||
+                (opensearchData.total && opensearchData.total > 0);
+
+              if (hasResults || !filters.query) {
+                // Use OpenSearch if we have results OR if there's no search query (browsing all)
+                data = opensearchData;
+                useOpenSearch = true;
+                console.log(
+                  "✅ Using OpenSearch results:",
+                  opensearchData.eventsCount || 0,
+                  "events,",
+                  opensearchData.groupsCount || 0,
+                  "groups (total:",
+                  opensearchData.total || 0,
+                  ")"
+                );
+              } else {
+                // OpenSearch returned no results but we had a query - might be stale index
+                console.warn(
+                  "⚠️ OpenSearch returned no results for query, falling back to DynamoDB",
+                  { query: filters.query, total: opensearchData.total }
+                );
+                throw new Error(
+                  "OpenSearch returned no results - possible stale index"
+                );
+              }
+            } else {
+              // Response looks invalid, fall back
+              throw new Error("OpenSearch response validation failed");
+            }
           } else {
             throw new Error(
               `OpenSearch failed with status: ${opensearchResponse.status}`
@@ -91,7 +146,7 @@ function SearchPageContent() {
           }
         } catch (opensearchError) {
           console.warn(
-            "⚠️ OpenSearch failed, falling back to DynamoDB:",
+            "⚠️ OpenSearch failed or returned invalid data, falling back to DynamoDB:",
             opensearchError
           );
 
@@ -104,6 +159,7 @@ function SearchPageContent() {
             if (dynamoResponse.ok) {
               const dynamoData = await dynamoResponse.json();
               data.events = dynamoData.events || [];
+              data.groups = []; // DynamoDB fallback doesn't include groups
               console.log(
                 "📦 Retrieved",
                 data.events.length,

@@ -35,7 +35,7 @@ const reindexEvents = sst.aws.StepFunctions.lambdaInvoke({
   }),
 });
 
-const eventInsertionSuccess = sst.aws.StepFunctions.succeed({ name: "Dane" });
+const eventInsertionSuccess = sst.aws.StepFunctions.succeed({ name: "Done" });
 
 const normalizeEventStepFunction = new sst.aws.StepFunctions(
   "normaizeEventStepFunction",

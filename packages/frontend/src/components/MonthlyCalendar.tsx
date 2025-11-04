@@ -58,10 +58,45 @@ export default function MonthlyCalendar({
   const [loading, setLoading] = useState(true);
   const [calendarDays, setCalendarDays] = useState<CalendarDay[]>([]);
   // Rolling window controls: start date (ET anchored) and window days
-  const [windowStartDate, setWindowStartDate] = useState<Date>(new Date());
+  const [windowStartDate, setWindowStartDate] = useState<Date | null>(null);
   const [windowDays, setWindowDays] = useState<number>(30); // initial 30 days
 
   const isCompact = variant === "compact";
+
+  // Initialize windowStartDate aligned to Sunday of current week (in ET)
+  useEffect(() => {
+    if (windowStartDate === null) {
+      const today = new Date();
+      const ET_TIME_ZONE = "America/New_York";
+      const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: ET_TIME_ZONE,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        weekday: "short",
+      }).formatToParts(today);
+
+      const map: Record<string, string> = {};
+      for (const p of parts) {
+        if (p.type !== "literal") map[p.type] = p.value;
+      }
+      const weekdayMap: Record<string, number> = {
+        Sun: 0,
+        Mon: 1,
+        Tue: 2,
+        Wed: 3,
+        Thu: 4,
+        Fri: 5,
+        Sat: 6,
+      };
+      const weekdayIndex = weekdayMap[map.weekday as keyof typeof weekdayMap] ?? 0;
+      
+      const daysToSunday = weekdayIndex;
+      const alignedDate = new Date(today);
+      alignedDate.setDate(alignedDate.getDate() - daysToSunday);
+      setWindowStartDate(alignedDate);
+    }
+  }, [windowStartDate]);
 
   // Get events from API
   useEffect(() => {
@@ -83,14 +118,23 @@ export default function MonthlyCalendar({
 
   // Generate calendar days (ET-based) using rolling window
   useEffect(() => {
+    if (windowStartDate === null) return; // Wait for initialization
+    
     const generateCalendarDays = () => {
       const today = new Date();
       const todayYmd = getEtYmd(today);
 
-      // Start from the ET-anchored windowStartDate (no week alignment)
+      // windowStartDate is already aligned to Sunday, so use it directly
       const startDate = new Date(windowStartDate);
+      
+      // Calculate end date: start from aligned startDate, add windowDays, then round up to end of week
       const endDate = new Date(startDate);
       endDate.setDate(endDate.getDate() + (windowDays - 1));
+      
+      // Round up to Saturday to complete the week
+      const endDateEt = getEtParts(endDate);
+      const daysToSaturday = 6 - endDateEt.weekdayIndex;
+      endDate.setDate(endDate.getDate() + daysToSaturday);
 
       const days: CalendarDay[] = [];
       const current = new Date(startDate);
@@ -124,9 +168,12 @@ export default function MonthlyCalendar({
   }, [events, windowStartDate, windowDays]);
 
   const goToPreviousMonth = () => {
-    // Move window back by 4 weeks and use 28-day windows after initial
+    // Move window back by 4 weeks (28 days) and use 28-day windows after initial
+    // windowStartDate is already aligned to Sunday, so just move back 28 days
     setWindowStartDate((prev) => {
+      if (prev === null) return null;
       const d = new Date(prev);
+      // Move back 28 days (4 weeks) - will still be on Sunday
       d.setDate(d.getDate() - 28);
       return d;
     });
@@ -134,9 +181,12 @@ export default function MonthlyCalendar({
   };
 
   const goToNextMonth = () => {
-    // Move window forward by 4 weeks and use 28-day windows after initial
+    // Move window forward by 4 weeks (28 days) and use 28-day windows after initial
+    // windowStartDate is already aligned to Sunday, so just move forward 28 days
     setWindowStartDate((prev) => {
+      if (prev === null) return null;
       const d = new Date(prev);
+      // Move forward 28 days (4 weeks) - will still be on Sunday
       d.setDate(d.getDate() + 28);
       return d;
     });
@@ -310,7 +360,7 @@ export default function MonthlyCalendar({
               </button>
 
               <h2 className="text-2xl font-bold">
-                {formatEtRange(windowStartDate, windowDays)}
+                {windowStartDate ? formatEtRange(windowStartDate, windowDays) : "Loading..."}
               </h2>
 
               <button
@@ -343,7 +393,7 @@ export default function MonthlyCalendar({
             </button>
 
             <h3 className="text-lg font-semibold text-gray-900">
-              {formatEtRange(windowStartDate, windowDays)}
+              {windowStartDate ? formatEtRange(windowStartDate, windowDays) : "Loading..."}
             </h3>
 
             <button

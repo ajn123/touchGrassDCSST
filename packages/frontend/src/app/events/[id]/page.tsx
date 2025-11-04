@@ -119,7 +119,7 @@ export default async function ItemPage({
               : item.cost
             : undefined
         }
-        socials={item.socials}
+        socials={item.socials ? item.socials : { website: item.url }}
         date={item.start_date as any}
         location={item.location}
         categories={item.category}

@@ -27,6 +27,8 @@ export async function POST(request: NextRequest) {
       searchResults: null,
     };
 
+    let createdTestEvent = false;
+
     // Step 1: Get event from DynamoDB
     let event: any = null;
     if (eventId) {
@@ -84,6 +86,7 @@ export async function POST(request: NextRequest) {
       };
 
       results.eventId = event.pk;
+      createdTestEvent = true;
       results.steps.push({
         step: "create_test_event",
         status: "success",
@@ -262,6 +265,34 @@ export async function POST(request: NextRequest) {
           error instanceof Error ? error.message : "Unknown error"
         }`,
       });
+    }
+
+    // Step 7: If we created a synthetic test event, delete it from the index
+    if (createdTestEvent) {
+      results.steps.push({
+        step: "cleanup_test_event",
+        status: "in_progress",
+        message: `Deleting test event from OpenSearch (ID: ${documentId})...`,
+      });
+
+      try {
+        await openSearchClient.delete({ index: INDEX_NAME, id: documentId });
+        await openSearchClient.indices.refresh({ index: INDEX_NAME });
+
+        results.steps.push({
+          step: "cleanup_test_event",
+          status: "success",
+          message: "Test event deleted and index refreshed",
+        });
+      } catch (error) {
+        results.steps.push({
+          step: "cleanup_test_event",
+          status: "warning",
+          message: `Failed to delete test event: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`,
+        });
+      }
     }
 
     return NextResponse.json(results, { status: 200 });

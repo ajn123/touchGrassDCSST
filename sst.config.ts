@@ -29,7 +29,7 @@ export default $config({
     const { queue } = await import("./infra/queue");
     const { search } = await import("./infra/opensearch");
     const { cron, washingtonianCron } = await import("./infra/cron");
-    const { WashingtonianTask } = await import("./infra/tasks");
+    const { WashingtonianTask, ClockOutDCTask, EventbriteTask } = await import("./infra/tasks");
     const { normalizeEventStepFunction } = await import(
       "./infra/step_functions"
     );
@@ -45,6 +45,8 @@ export default $config({
       Queue: queue,
       Search: search,
       WashingtonianTask: WashingtonianTask,
+      ClockOutDCTask: ClockOutDCTask,
+      EventbriteTask: EventbriteTask,
       NormalizeEventStepFunction: normalizeEventStepFunction,
     };
   },

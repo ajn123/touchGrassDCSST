@@ -3,7 +3,7 @@ import { db } from "./db";
 import { search } from "./opensearch";
 import { OPENWEBNINJA_API_KEY } from "./secrets";
 import { normalizeEventStepFunction } from "./step_functions";
-import { ClockOutDCTask, WashingtonianTask } from "./tasks";
+import { ClockOutDCTask, EventbriteTask, WashingtonianTask } from "./tasks";
 
 const cron = new sst.aws.Cron("cron", {
   function: {
@@ -23,4 +23,9 @@ const clockoutdcCron = new sst.aws.Cron("clockoutdcCron", {
   schedule: "rate(10 days)",
 });
 
-export { clockoutdcCron, cron, washingtonianCron };
+const eventbriteCron = new sst.aws.Cron("eventbriteCron", {
+  task: EventbriteTask,
+  schedule: "rate(7 days)",
+});
+
+export { clockoutdcCron, cron, eventbriteCron, washingtonianCron };

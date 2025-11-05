@@ -26,4 +26,14 @@ const ClockOutDCTask = new sst.aws.Task("clockoutdcTask", {
   dev: false,
 });
 
-export { ClockOutDCTask, WashingtonianTask };
+const EventbriteTask = new sst.aws.Task("eventbriteTask", {
+  cluster,
+  link: [search, db, api, normalizeEventStepFunction],
+  image: {
+    context: ".", // Use project root as context
+    dockerfile: "./packages/tasks/crawlers/Dockerfile.eventbrite",
+  },
+  dev: false,
+});
+
+export { ClockOutDCTask, EventbriteTask, WashingtonianTask };

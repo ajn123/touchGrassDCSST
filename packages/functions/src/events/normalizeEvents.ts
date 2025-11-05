@@ -139,6 +139,60 @@ export function transformCrawlerEvent(event: any): NormalizedEvent {
   };
 }
 
+/**
+ * Transform Eventbrite event to normalized format
+ */
+export function transformEventbriteEvent(event: any): NormalizedEvent {
+  // Parse time range like "7:30 PM - 9:30 PM" into start_time and end_time
+  let start_time: string | undefined = undefined;
+  let end_time: string | undefined = undefined;
+
+  if (event.time) {
+    const timeStr = event.time.toLowerCase();
+
+    // Handle time ranges like "7:30 PM - 9:30 PM", "7-11pm"
+    if (timeStr.includes("-")) {
+      const timeMatch = timeStr.match(
+        /^(\d{1,2}(?::\d{2})?)\s*([ap]m)?\s*-\s*(\d{1,2}(?::\d{2})?)\s*([ap]m)$/
+      );
+      if (timeMatch) {
+        const [, start, startPeriod, end, endPeriod] = timeMatch;
+        start_time = normalizeTime(start + (startPeriod || endPeriod || ""));
+        end_time = normalizeTime(end + endPeriod);
+      } else {
+        // Fallback: split on dash
+        const parts = timeStr.split("-");
+        if (parts.length === 2) {
+          start_time = normalizeTime(parts[0].trim());
+          end_time = normalizeTime(parts[1].trim());
+        }
+      }
+    }
+    // Single time like "7:30 PM", "7pm"
+    else {
+      start_time = normalizeTime(event.time);
+    }
+  }
+
+  return {
+    title: event.title,
+    description: event.description,
+    start_date: normalizeDate(event.start_date || event.date),
+    end_date: normalizeDate(event.end_date),
+    start_time: start_time,
+    end_time: end_time,
+    location: event.location,
+    venue: event.venue,
+    category: normalizeCategory(event.category),
+    url: event.url,
+    cost: normalizeCost(event.price),
+    image_url: event.image_url,
+    socials: event.url ? { website: event.url } : undefined,
+    is_public: true,
+    source: "eventbrite",
+  };
+}
+
 // Dummy saveEvents function to mimic member function, you will need to implement it or import if defined elsewhere.
 export async function saveEvents(
   normalizedEvents: NormalizedEvent[],
@@ -238,6 +292,9 @@ export const handler: Handler = async (event, context, callback) => {
             break;
           case "clockoutdc":
             normalizedEvent = transformClockOutEvent(rawEvent);
+            break;
+          case "eventbrite":
+            normalizedEvent = transformEventbriteEvent(rawEvent);
             break;
           default:
             // Assume it's already in normalized format

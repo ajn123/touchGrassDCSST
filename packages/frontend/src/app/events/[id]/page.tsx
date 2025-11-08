@@ -112,13 +112,7 @@ export default async function ItemPage({
           <ReportWrongInfoButton eventTitle={item.title} eventId={item.pk} />
         }
         imageUrl={resolveImageUrl(item.image_url) || undefined}
-        cost={
-          item.cost
-            ? typeof item.cost === "object"
-              ? `${item.cost.type} - ${item.cost.amount} ${item.cost.currency}`
-              : item.cost
-            : undefined
-        }
+        cost={item.cost}
         socials={item.socials ? item.socials : { website: item.url }}
         date={item.start_date as any}
         location={item.location}

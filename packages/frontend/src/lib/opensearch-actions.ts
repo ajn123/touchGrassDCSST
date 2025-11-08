@@ -255,11 +255,13 @@ export async function searchOpenSearch(
     }
 
     // Add aggregations for categories
+    // In OpenSearch, `size` in a terms aggregation specifies the maximum number of unique terms (buckets) to return.
+    // For the categories aggregation, this means up to 50 unique category values (with the highest doc counts) will be included in the results.
     searchBody.aggs = {
       categories: {
         terms: {
           field: "category.keyword",
-          size: 50,
+          size: 50, // Maximum number of unique category buckets to return
         },
       },
     };

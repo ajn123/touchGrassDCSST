@@ -12,7 +12,7 @@ import { ReactNode } from "react";
 interface EntityDetailProps {
   title: string;
   imageUrl?: string;
-  cost?: string;
+  cost?: string | { type: string; currency?: string; amount: string | number };
   socials?: Record<string, string>;
   date?: string | number | Date;
   location?: string;
@@ -20,6 +20,22 @@ interface EntityDetailProps {
   schedules?: any[];
   description?: string;
   rightActionNode?: ReactNode;
+}
+
+// Helper function to check if cost is valid
+function hasValidCost(cost: any): boolean {
+  if (!cost) return false;
+
+  if (typeof cost === "string") {
+    return cost.trim().length > 0;
+  }
+
+  if (typeof cost === "object") {
+    // Valid if it has a type, or if it has an amount
+    return !!(cost.type || (cost.amount !== undefined && cost.amount !== null));
+  }
+
+  return false;
 }
 
 export function EntityDetail({
@@ -58,7 +74,7 @@ export function EntityDetail({
 
         <div className="grid grid-cols-1">
           <div className="space-y-4">
-            {cost && <Cost cost={cost} />}
+            {hasValidCost(cost) && <Cost cost={cost} />}
             {socials && <Socials socials={socials} />}
             {date != null && <DateDisplay date={date} />}
             {location && <Location location={location} />}

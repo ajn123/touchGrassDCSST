@@ -3,21 +3,13 @@
 export default $config({
   app(input) {
     return {
-      name: "monorepo-template",
+      name: "touchgrassdcsst",
       removal: input?.stage === "production" ? "retain" : "remove",
       protect: ["production"].includes(input?.stage),
       home: "aws",
     };
   },
-  console: {
-    autodeploy: {
-      async workflow({ $, event }) {
-        //   Perform deployment workflow actions here
-        //   await $`cd packages/scripts && npm install`;
-        //   await $`cd packages/scripts && npm run migrate:opensearch`;
-      },
-    },
-  },
+
   async run() {
     // Import infrastructure modules
     const { db } = await import("./infra/db");
@@ -29,7 +21,9 @@ export default $config({
     const { queue } = await import("./infra/queue");
     const { search } = await import("./infra/opensearch");
     const { cron, washingtonianCron } = await import("./infra/cron");
-    const { WashingtonianTask, ClockOutDCTask, EventbriteTask } = await import("./infra/tasks");
+    const { WashingtonianTask, ClockOutDCTask, EventbriteTask } = await import(
+      "./infra/tasks"
+    );
     const { normalizeEventStepFunction } = await import(
       "./infra/step_functions"
     );

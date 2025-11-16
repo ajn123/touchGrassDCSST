@@ -15,17 +15,17 @@ const cron = new sst.aws.Cron("cron", {
 
 const washingtonianCron = new sst.aws.Cron("washingtonianCron", {
   task: WashingtonianTask,
-  schedule: "rate(7 days)",
+  schedule: "rate(1 day)",
 });
 
 const clockoutdcCron = new sst.aws.Cron("clockoutdcCron", {
   task: ClockOutDCTask,
-  schedule: "rate(10 days)",
+  schedule: "rate(1 day)",
 });
 
 const eventbriteCron = new sst.aws.Cron("eventbriteCron", {
   task: EventbriteTask,
-  schedule: "rate(7 days)",
+  schedule: "rate(1 day)",
 });
 
 export { clockoutdcCron, cron, eventbriteCron, washingtonianCron };

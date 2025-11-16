@@ -161,7 +161,7 @@ export default function EventMap({
   return (
     <div className={`relative ${className}`}>
       <a
-        className="button-blue mb-10"
+        className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
         href={(() => {
           if (address) {
             // Use address if available - more reliable for navigation
@@ -183,11 +183,11 @@ export default function EventMap({
       >
         Open in Google Maps
       </a>
-      <div
+      {/* <div
         ref={mapRef}
         className="w-full h-64 rounded-lg shadow-md mt-2"
         style={{ minHeight: "256px", marginTop: "10px" }}
-      />
+      /> */}
 
       {/* Debug info panel */}
       {process.env.NODE_ENV === "development" && (

@@ -267,6 +267,32 @@ export const handler: Handler = async (event, context, callback) => {
       };
     }
 
+    // Check if these are groups
+    const isGroup = eventType === "group" || events.some((item: any) => item.isGroup || item.type === "group");
+
+    if (isGroup) {
+      // Groups don't need normalization, just pass them through
+      console.log(
+        `📋 Processing ${events.length} groups from source: ${
+          source || "unknown"
+        }`
+      );
+      
+      // Log GROUP_INFO items to verify they're being passed through
+      const groupInfoItems = events.filter((item: any) => item.sk === "GROUP_INFO");
+      console.log(`🔍 Normalize step: ${groupInfoItems.length} GROUP_INFO items detected`);
+      if (groupInfoItems.length > 0) {
+        console.log(`   - Sample GROUP_INFO: pk=${groupInfoItems[0].pk}, sk=${groupInfoItems[0].sk}`);
+      }
+      
+      return JSON.stringify({
+        success: true,
+        events: events, // Pass groups through as-is
+        source: source || "unknown",
+        eventType: "group",
+      });
+    }
+
     console.log(
       `📊 Processing ${events.length} events from source: ${
         source || "unknown"

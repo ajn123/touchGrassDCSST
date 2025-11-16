@@ -16,6 +16,28 @@ const openSearchClient = new Client({
   },
 });
 
+// Transform DynamoDB group to OpenSearch format
+async function transformGroupForOpenSearch(group: any): Promise<any> {
+  const groupId = group.pk || `group-${Date.now()}-${Math.random()}`;
+
+  return {
+    id: groupId,
+    type: "group",
+    title: group.title || "",
+    description: group.description || "",
+    category: parseCategories(group.category),
+    location: group.scheduleLocation || "",
+    image_url: group.image_url || "",
+    socials: group.socials || {},
+    isPublic: group.isPublic === "true" || group.isPublic === true,
+    createdAt: group.createdAt || Date.now(),
+    // Group-specific fields
+    scheduleDay: group.scheduleDay,
+    scheduleTime: group.scheduleTime,
+    scheduleLocation: group.scheduleLocation,
+  };
+}
+
 // Transform DynamoDB event to OpenSearch format
 async function transformEventForOpenSearch(event: any): Promise<any> {
   const eventId = event.pk || `event-${Date.now()}-${Math.random()}`;
@@ -43,27 +65,41 @@ async function transformEventForOpenSearch(event: any): Promise<any> {
   };
 }
 
-// Index a single event to OpenSearch
-async function indexEventToOpenSearch(event: any): Promise<void> {
+// Index a single item (event or group) to OpenSearch
+async function indexItemToOpenSearch(item: any): Promise<void> {
   try {
-    const searchableEvent = await transformEventForOpenSearch(event);
+    // Check if this is a group (has schedule fields or pk starts with GROUP#)
+    const isGroup = item.isGroup || 
+                    item.type === "group" || 
+                    (item.pk && item.pk.startsWith("GROUP#")) ||
+                    item.scheduleDay !== undefined;
 
-    // Use the event's primary key as the document ID to prevent duplicates
-    const eventId =
-      event.pk || event.id || `event-${Date.now()}-${Math.random()}`;
+    let searchableItem;
+    let itemId;
+    let itemType;
+
+    if (isGroup) {
+      searchableItem = await transformGroupForOpenSearch(item);
+      itemId = item.pk || item.id || `group-${Date.now()}-${Math.random()}`;
+      itemType = "group";
+    } else {
+      searchableItem = await transformEventForOpenSearch(item);
+      itemId = item.pk || item.id || `event-${Date.now()}-${Math.random()}`;
+      itemType = "event";
+    }
 
     await openSearchClient.index({
       index: "events-groups-index",
-      id: eventId, // Explicitly set the document ID
-      body: searchableEvent,
+      id: itemId, // Explicitly set the document ID
+      body: searchableItem,
     });
 
     console.log(
-      `✅ Indexed event to OpenSearch: ${event.title} (ID: ${eventId})`
+      `✅ Indexed ${itemType} to OpenSearch: ${item.title} (ID: ${itemId})`
     );
   } catch (error) {
     console.error(
-      `❌ Error indexing event to OpenSearch: ${event.title}`,
+      `❌ Error indexing item to OpenSearch: ${item.title}`,
       error
     );
     // Don't throw - we don't want OpenSearch errors to break the main flow
@@ -78,15 +114,15 @@ export const handler: Handler = async (event: any) => {
 
   const { eventIds, savedEvents } = payload;
 
-  console.log("Events in reindexEvents:", savedEvents);
+  console.log("Items in reindexEvents:", savedEvents?.length || 0);
 
-  // Index all events in parallel but wait for completion
+  // Index all items (events and groups) in parallel but wait for completion
   await Promise.all(
-    savedEvents.map((event: any) => indexEventToOpenSearch(event))
+    savedEvents.map((item: any) => indexItemToOpenSearch(item))
   );
 
   return {
     statusCode: 200,
-    body: JSON.stringify({ message: "Events reindexed successfully" }),
+    body: JSON.stringify({ message: "Items reindexed successfully" }),
   };
 };

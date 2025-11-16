@@ -5,6 +5,8 @@
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.864.0",
     "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/client-glue": "^3.0.0",
+    "@aws-sdk/client-sfn": "^3.917.0",
     "@aws-sdk/credential-provider-node": "^3.0.0",
     "@aws-sdk/util-dynamodb": "^3.0.0",
     "@opensearch-project/opensearch": "^2.4.0",
@@ -58,7 +60,8 @@
     "crawl:washingtonian:selenium": "tsx src/washingtonian-selenium.ts",
     "test:washingtonian:selenium": "tsx src/test-selenium-crawler.ts",
     "delete:hashtag-events": "tsx src/delete-hashtag-events.ts",
-    "delete:duplicates": "tsx src/remove-duplicate-events.ts"
+    "delete:duplicates": "tsx src/remove-duplicate-events.ts",
+    "create:glue-connection": "tsx src/create-glue-connection.ts"
   },
   "devDependencies": {
     "@types/node": "^22",

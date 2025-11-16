@@ -5,17 +5,18 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "sst dev",
     "build": "sst build",
-    "deploy": "sst deploy",
-    "remove": "sst remove",
     "console": "sst console",
+    "deploy": "sst deploy",
+    "dev": "sst dev",
     "diff": "sst diff",
-    "test": "sst test",
-    "script:seed": "sst run packages/scripts/src/seed-data.ts"
+    "remove": "sst remove",
+    "script:seed": "sst run packages/scripts/src/seed-data.ts",
+    "test": "sst test"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22",
+    "@types/aws-lambda": "8.10.158",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5"
   },
@@ -30,7 +31,7 @@
     "crawlee": "^3.15.1",
     "hono": "^4.8.10",
     "pulumi": "^0.0.1",
-    "sst": "^3",
+    "sst": "3.17.23",
     "valibot": "^1.1.0"
   }
 }

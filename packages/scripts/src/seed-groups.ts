@@ -1,9 +1,5 @@
-import {
-  DynamoDBClient,
-  PutItemCommand,
-  ScanCommand,
-} from "@aws-sdk/client-dynamodb";
-import { marshall } from "@aws-sdk/util-dynamodb";
+import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
+import { SFNClient, StartExecutionCommand } from "@aws-sdk/client-sfn";
 import * as fs from "fs";
 import * as path from "path";
 import { Resource } from "sst";
@@ -138,72 +134,101 @@ async function seedGroups() {
 
     console.log(`Created ${items.length} items to insert`);
 
-    // Debug: Log all items to see what fields are being sent
-    if (items.length > 0) {
-      console.log("First item fields:", Object.keys(items[0]));
-      console.log("First item:", JSON.stringify(items[0], null, 2));
-
-      // Log all items to see if there are any issues
-      items.forEach((item, index) => {
-        console.log(`Item ${index + 1} fields:`, Object.keys(item));
-        console.log(`Item ${index + 1} pk:`, item.pk);
-        console.log(`Item ${index + 1} sk:`, item.sk);
-
-        // Check each field name for validation issues
-        Object.keys(item).forEach((fieldName) => {
-          if (fieldName.length < 3) {
-            console.log(
-              `⚠️  Field "${fieldName}" is too short (${fieldName.length} chars)`
-            );
-          }
-          if (fieldName.length > 255) {
-            console.log(
-              `⚠️  Field "${fieldName}" is too long (${fieldName.length} chars)`
-            );
-          }
-          if (!/^[a-zA-Z0-9_.-]+$/.test(fieldName)) {
-            console.log(`⚠️  Field "${fieldName}" contains invalid characters`);
-          }
-        });
-      });
+    // Log GROUP_INFO items specifically
+    const groupInfoItems = items.filter((item) => item.sk === "GROUP_INFO");
+    const scheduleItems = items.filter((item) =>
+      item.sk?.startsWith("SCHEDULE#")
+    );
+    console.log(`📊 Item breakdown:`);
+    console.log(`   - GROUP_INFO items: ${groupInfoItems.length}`);
+    console.log(`   - SCHEDULE items: ${scheduleItems.length}`);
+    if (groupInfoItems.length > 0) {
+      console.log(
+        `   - Sample GROUP_INFO item:`,
+        JSON.stringify(groupInfoItems[0], null, 2)
+      );
     }
 
-    // Insert items one by one instead of batching
-    console.log(`Inserting ${items.length} items individually...`);
+    // Use Step Functions for DB insertion and OpenSearch indexing
+    console.log(`🚀 Using Step Functions for ${items.length} group items`);
+    console.log(
+      `   This will: normalize (pass-through) → save to DB → index to OpenSearch`
+    );
 
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
+    const config = {};
+    const sfnClient = new SFNClient(config);
 
-      try {
-        // Debug: Show what the marshalled item looks like
-        const marshalledItem = marshall(item, { removeUndefinedValues: true });
+    // Generate unique execution name with timestamp
+    const executionName = `seed-groups-${Date.now()}-${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+
+    // Transform group items to events format for step function
+    // The step function expects events, but we'll pass groups with eventType "group"
+    // The normalize step will pass them through (default case), then DB insert and reindex will handle them
+    const groupsAsEvents = items.map((item) => {
+      const transformed = {
+        // Map group item to event-like structure for step function
+        pk: item.pk,
+        sk: item.sk, // ← Critical: preserve sk value
+        title: item.title,
+        description: item.description,
+        category: item.category,
+        image_url: item.image_url,
+        socials: item.socials,
+        isPublic: item.isPublic,
+        createdAt: item.createdAt,
+        // Group-specific fields
+        scheduleDay: item.scheduleDay,
+        scheduleTime: item.scheduleTime,
+        scheduleLocation: item.scheduleLocation,
+        // Mark as group for handlers
+        type: "group",
+        isGroup: true,
+      };
+
+      // Log GROUP_INFO items to verify sk is preserved
+      if (item.sk === "GROUP_INFO") {
         console.log(
-          `🔍 Item ${i + 1} marshalled:`,
-          JSON.stringify(marshalledItem, null, 2)
+          `✅ Preserving GROUP_INFO item: pk=${transformed.pk}, sk=${transformed.sk}`
         );
-
-        const putCommand = new PutItemCommand({
-          TableName: tableName,
-          Item: marshalledItem,
-        });
-
-        await client.send(putCommand);
-        console.log(
-          `✅ Inserted item ${i + 1}/${items.length}: ${item.pk} | ${item.sk}`
-        );
-      } catch (error) {
-        console.error(`❌ Failed to insert item ${i + 1}/${items.length}:`, {
-          pk: item.pk,
-          sk: item.sk,
-          error: error instanceof Error ? error.message : String(error),
-        });
-
-        // Continue with next item instead of failing completely
-        continue;
       }
-    }
 
-    console.log("✅ Groups seeding completed!");
+      return transformed;
+    });
+
+    // Verify GROUP_INFO items are in the payload
+    const groupInfoInPayload = groupsAsEvents.filter(
+      (item) => item.sk === "GROUP_INFO"
+    );
+    console.log(
+      `🔍 Verification: ${groupInfoInPayload.length} GROUP_INFO items in Step Functions payload`
+    );
+
+    const inputObject = {
+      stateMachineArn: Resource.normaizeEventStepFunction.arn,
+      input: JSON.stringify({
+        events: groupsAsEvents,
+        source: "seed-groups",
+        eventType: "group",
+      }),
+      name: executionName,
+    };
+
+    const command = new StartExecutionCommand(inputObject);
+    const response = await sfnClient.send(command);
+
+    console.log(`✅ Step Functions execution started:`);
+    console.log(`   📊 Group items: ${items.length}`);
+    console.log(`   🔄 Execution ARN: ${response.executionArn}`);
+    console.log(`   📝 Execution Name: ${executionName}`);
+    console.log(
+      `   ⏱️  The workflow will process groups, save to DynamoDB, and index to OpenSearch`
+    );
+
+    console.log(
+      "✅ Groups seeding initiated! Check Step Functions console for progress."
+    );
 
     // Show example queries
     console.log("\n📋 Example queries you can now run:");

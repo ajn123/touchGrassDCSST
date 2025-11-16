@@ -1,6 +1,6 @@
-import { Resource } from "sst";
 import { createClient } from "@openauthjs/openauth/client";
 import { cookies as getCookies } from "next/headers";
+import { Resource } from "sst";
 
 export const client = createClient({
   clientID: "nextjs",

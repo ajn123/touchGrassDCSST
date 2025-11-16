@@ -1,3 +1,4 @@
+import { SFNClient, StartExecutionCommand } from "@aws-sdk/client-sfn";
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
@@ -33,7 +34,7 @@ dotenv.config();
 export async function main() {
   console.log("Seeding sample data...");
 
-  // Load the test-map-event.json file for map testing
+  // Load the events.json file
   const eventsPath = path.join(process.cwd(), "events.json");
   const eventsData = JSON.parse(fs.readFileSync(eventsPath, "utf8"));
   const sampleEvents = eventsData.events || eventsData;
@@ -41,40 +42,42 @@ export async function main() {
   console.log(`Found ${sampleEvents.length} events to seed`);
 
   try {
-    // Use Lambda normalization for batch processing
+    // Use Step Functions for normalization, DB insertion, and OpenSearch indexing
     console.log(
-      `🚀 Using Lambda normalization for ${sampleEvents.length} seed events`
+      `🚀 Using Step Functions for ${sampleEvents.length} seed events`
     );
+    console.log(`   This will: normalize → save to DB → index to OpenSearch`);
 
-    const response = await fetch(`${Resource.Api.url}/events/normalize`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const config = {};
+    const client = new SFNClient(config);
+
+    // Generate unique execution name with timestamp
+    const executionName = `seed-data-${Date.now()}-${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+
+    const inputObject = {
+      stateMachineArn: Resource.normaizeEventStepFunction.arn,
+      input: JSON.stringify({
         events: sampleEvents,
         source: "seed-data",
         eventType: "seed-data",
       }),
-    });
+      name: executionName,
+    };
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP ${response.status}: ${errorText}`);
-    }
+    const command = new StartExecutionCommand(inputObject);
+    const response = await client.send(command);
 
-    const result = await response.json();
-    console.log(`✅ Lambda normalization completed:`);
-    console.log(`   📊 Processed: ${sampleEvents.length} events`);
-    console.log(`   💾 Inserted: ${result.savedCount} events`);
-    console.log(`   ⏱️ Execution time: ${result.executionTime}ms`);
+    console.log(`✅ Step Functions execution started:`);
+    console.log(`   📊 Events: ${sampleEvents.length}`);
+    console.log(`   🔄 Execution ARN: ${response.executionArn}`);
+    console.log(`   📝 Execution Name: ${executionName}`);
     console.log(
-      `📊 Event IDs: ${result.eventIds.slice(0, 3).join(", ")}${
-        result.eventIds.length > 3 ? "..." : ""
-      }`
+      `   ⏱️  The workflow will normalize events, save to DynamoDB, and index to OpenSearch`
     );
 
-    console.log("Seeding complete!");
+    console.log("Seeding complete! Check Step Functions console for progress.");
   } catch (error) {
     console.error("❌ Error seeding data:", error);
     throw error;

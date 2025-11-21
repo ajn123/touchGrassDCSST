@@ -14,6 +14,91 @@ const openSearchClient = new Client({
 
 const INDEX_NAME = "events-groups-index";
 
+/**
+ * Ensure the OpenSearch index exists, create it if it doesn't
+ */
+async function ensureIndex(): Promise<void> {
+  try {
+    const exists = await openSearchClient.indices.exists({
+      index: INDEX_NAME,
+    });
+
+    if (exists.body) {
+      return; // Index already exists
+    }
+
+    console.log("📝 Creating OpenSearch index...");
+
+    const indexBody = {
+      settings: {
+        analysis: {
+          analyzer: {
+            text_analyzer: {
+              type: "custom",
+              tokenizer: "standard",
+              filter: ["lowercase", "stop", "snowball"],
+            },
+          },
+        },
+        index: {
+          number_of_shards: 1,
+          number_of_replicas: 0, // Use 0 replicas for development/staging
+        },
+      },
+      mappings: {
+        properties: {
+          id: { type: "keyword" },
+          type: { type: "keyword" },
+          title: {
+            type: "text",
+            analyzer: "text_analyzer",
+            fields: {
+              keyword: { type: "keyword" },
+            },
+          },
+          description: { type: "text", analyzer: "text_analyzer" },
+          category: {
+            type: "keyword",
+            fields: {
+              text: { type: "text", analyzer: "text_analyzer" },
+              keyword: { type: "keyword" },
+            },
+          },
+          location: { type: "text", analyzer: "text_analyzer" },
+          venue: { type: "text", analyzer: "text_analyzer" },
+          date: { type: "date" },
+          start_date: { type: "date" },
+          end_date: { type: "date" },
+          cost: { type: "object" },
+          image_url: { type: "keyword" },
+          socials: { type: "object" },
+          isPublic: { type: "boolean" },
+          createdAt: { type: "long" },
+          scheduleDay: { type: "keyword" },
+          scheduleTime: { type: "keyword" },
+          scheduleLocation: { type: "text", analyzer: "text_analyzer" },
+          schedules: { type: "object" },
+        },
+      },
+    };
+
+    await openSearchClient.indices.create({
+      index: INDEX_NAME,
+      body: indexBody,
+    });
+
+    console.log("✅ OpenSearch index created successfully");
+  } catch (error: any) {
+    // If index already exists (race condition), that's fine
+    if (error.body?.error?.type === "resource_already_exists_exception") {
+      console.log("ℹ️ Index already exists (created by another process)");
+      return;
+    }
+    console.error("❌ Error creating OpenSearch index:", error);
+    throw error;
+  }
+}
+
 // Types for search functionality
 export interface SearchFilters {
   type?: "event" | "group";
@@ -81,6 +166,8 @@ export async function searchOpenSearch(
   filters: SearchFilters = {}
 ): Promise<SearchResponse> {
   try {
+    // Ensure index exists before searching
+    await ensureIndex();
     const searchBody: any = {
       query: {
         bool: {
@@ -304,6 +391,8 @@ export async function getOpenSearchCategories(): Promise<
   CategoryAggregation[]
 > {
   try {
+    // Ensure index exists
+    await ensureIndex();
     const response = await openSearchClient.search({
       index: INDEX_NAME,
       body: {
@@ -372,6 +461,8 @@ export async function autocompleteOpenSearch(
   }
 
   try {
+    // Ensure index exists
+    await ensureIndex();
     const response = await openSearchClient.search({
       index: INDEX_NAME,
       body: {
@@ -421,6 +512,8 @@ export async function getRecentOpenSearchItems(
   limit: number = 10
 ): Promise<SearchResult[]> {
   try {
+    // Ensure index exists
+    await ensureIndex();
     const response = await openSearchClient.search({
       index: INDEX_NAME,
       body: {
@@ -458,6 +551,8 @@ export async function getOpenSearchStats(): Promise<{
   lastUpdated: string;
 }> {
   try {
+    // Ensure index exists
+    await ensureIndex();
     const [statsResponse, healthResponse] = await Promise.all([
       openSearchClient.indices.stats({ index: INDEX_NAME }),
       openSearchClient.cluster.health({ index: INDEX_NAME }),
@@ -488,6 +583,8 @@ export async function getOpenSearchStats(): Promise<{
  */
 export async function isOpenSearchHealthy(): Promise<boolean> {
   try {
+    // Ensure index exists
+    await ensureIndex();
     const response = await openSearchClient.cluster.health({
       index: INDEX_NAME,
     });

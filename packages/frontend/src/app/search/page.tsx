@@ -220,9 +220,7 @@ function SearchPageContent() {
             {filters.types === "group" ? "Search Groups" : "Search Events"}
           </h1>
           {filters.query && (
-            <p className="text-center text-gray-600">
-              Showing results for "{filters.query}"
-            </p>
+            <p className="text-center">Showing results for "{filters.query}"</p>
           )}
           {filters.types === "group" && !filters.query && (
             <p className="text-center text-gray-600">Browse all groups</p>
@@ -263,7 +261,7 @@ function SearchPageContent() {
               </div>
             ) : (
               <div>
-                <p className="text-center text-gray-600 mb-8">
+                <p className="text-center mb-8">
                   {filters.types === "group"
                     ? `Found ${groups.length} group${
                         groups.length !== 1 ? "s" : ""

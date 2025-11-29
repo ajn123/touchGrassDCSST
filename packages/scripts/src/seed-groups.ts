@@ -3,6 +3,10 @@ import { SFNClient, StartExecutionCommand } from "@aws-sdk/client-sfn";
 import * as fs from "fs";
 import * as path from "path";
 import { Resource } from "sst";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 interface Group {
   title: string;
@@ -41,14 +45,18 @@ async function seedGroups() {
   console.log("  - Table name length:", tableName.length);
   console.log("  - Current working directory:", process.cwd());
 
-  console.log("🔍 Checking for existing groups to avoid duplicates...");
+  console.log(
+    "🔍 Checking for existing GROUP_INFO items to avoid duplicates..."
+  );
 
-  // Get existing group IDs to avoid duplicates
+  // Get existing GROUP_INFO items only (not schedule items)
+  // This ensures we only skip groups that actually have GROUP_INFO items
   const existingGroupsCommand = new ScanCommand({
     TableName: tableName,
-    FilterExpression: "begins_with(pk, :groupPrefix)",
+    FilterExpression: "begins_with(pk, :groupPrefix) AND sk = :groupInfo",
     ExpressionAttributeValues: {
       ":groupPrefix": { S: "GROUP#" },
+      ":groupInfo": { S: "GROUP_INFO" },
     },
     ProjectionExpression: "pk",
   });
@@ -58,11 +66,15 @@ async function seedGroups() {
     existingGroupsResult.Items?.map((item) => item.pk?.S).filter(Boolean) || []
   );
 
-  console.log(`📋 Found ${existingGroupIds.size} existing groups in database`);
+  console.log(
+    `📋 Found ${existingGroupIds.size} existing GROUP_INFO items in database`
+  );
 
   try {
-    // Read the groups.json file
-    const groupsPath = path.join(process.cwd(), "groups.json");
+    // Read the groups.json file from project root
+    // Script is in packages/scripts/src/, so go up 3 levels to project root
+    const projectRoot = path.resolve(__dirname, "../../..");
+    const groupsPath = path.join(projectRoot, "groups.json");
     console.log("  - Groups file path:", groupsPath);
     console.log("  - Groups file exists:", fs.existsSync(groupsPath));
 
@@ -71,16 +83,24 @@ async function seedGroups() {
     console.log(`Found ${groupsData.length} groups to seed`);
 
     const items: any[] = [];
+    let skippedCount = 0;
+    let newGroupsCount = 0;
 
     // Process each group
     for (const group of groupsData) {
       const groupPk = `GROUP#${group.title}`;
 
-      // Skip if group already exists
+      // Skip if GROUP_INFO already exists (only check GROUP_INFO, not schedule items)
       if (existingGroupIds.has(groupPk)) {
-        console.log(`⏭️  Skipping existing group: ${group.title}`);
+        console.log(
+          `⏭️  Skipping existing group: ${group.title} (GROUP_INFO already exists)`
+        );
+        skippedCount++;
         continue;
       }
+
+      newGroupsCount++;
+      console.log(`➕ Adding new group: ${group.title}`);
 
       // Always create an INFO item for the group
       const groupInfoItem = {
@@ -132,14 +152,18 @@ async function seedGroups() {
       }
     }
 
-    console.log(`Created ${items.length} items to insert`);
+    console.log(`\n📊 Processing Summary:`);
+    console.log(`   - Total groups in file: ${groupsData.length}`);
+    console.log(`   - New groups to add: ${newGroupsCount}`);
+    console.log(`   - Skipped (already exist): ${skippedCount}`);
+    console.log(`   - Total items to insert: ${items.length}`);
 
     // Log GROUP_INFO items specifically
     const groupInfoItems = items.filter((item) => item.sk === "GROUP_INFO");
     const scheduleItems = items.filter((item) =>
       item.sk?.startsWith("SCHEDULE#")
     );
-    console.log(`📊 Item breakdown:`);
+    console.log(`\n📦 Item breakdown:`);
     console.log(`   - GROUP_INFO items: ${groupInfoItems.length}`);
     console.log(`   - SCHEDULE items: ${scheduleItems.length}`);
     if (groupInfoItems.length > 0) {

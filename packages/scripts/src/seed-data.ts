@@ -2,7 +2,11 @@ import { SFNClient, StartExecutionCommand } from "@aws-sdk/client-sfn";
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 import { Resource } from "sst";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * IMPORTANT: To show actual place names (like "Penn Social") instead of coordinates on Google Maps:
@@ -34,8 +38,10 @@ dotenv.config();
 export async function main() {
   console.log("Seeding sample data...");
 
-  // Load the events.json file
-  const eventsPath = path.join(process.cwd(), "events.json");
+  // Load the events.json file from project root
+  // Script is in packages/scripts/src/, so go up 3 levels to project root
+  const projectRoot = path.resolve(__dirname, "../../..");
+  const eventsPath = path.join(projectRoot, "events.json");
   const eventsData = JSON.parse(fs.readFileSync(eventsPath, "utf8"));
   const sampleEvents = eventsData.events || eventsData;
 

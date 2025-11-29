@@ -2,6 +2,9 @@ import { getPublicGroups } from "@/lib/dynamodb/dynamodb-groups";
 import Link from "next/link";
 import FeaturedGroup from "./FeaturedGroup";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function FeaturedGroups() {
   try {
     const allGroups = await getPublicGroups();

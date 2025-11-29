@@ -6,7 +6,11 @@ import {
 import { marshall } from "@aws-sdk/util-dynamodb";
 import * as fs from "fs";
 import * as path from "path";
+import { fileURLToPath } from "url";
 import { Resource } from "sst";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 interface Venue {
   title: string;
@@ -66,8 +70,10 @@ async function seedVenues() {
   console.log(`📋 Found ${existingVenueIds.size} existing venues in database`);
 
   try {
-    // Read the venues.json file
-    const venuesPath = path.join(process.cwd(), "venues.json");
+    // Read the venues.json file from project root
+    // Script is in packages/scripts/src/, so go up 3 levels to project root
+    const projectRoot = path.resolve(__dirname, "../../..");
+    const venuesPath = path.join(projectRoot, "venues.json");
     console.log("  - Venues file path:", venuesPath);
     console.log("  - Venues file exists:", fs.existsSync(venuesPath));
 

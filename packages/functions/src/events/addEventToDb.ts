@@ -154,9 +154,11 @@ async function saveGroup(group: any): Promise<{
 }> {
   // Groups already have pk and sk set, use them directly
   if (!group.pk || !group.sk) {
-    throw new Error(`Group must have pk and sk. Received: pk=${group.pk}, sk=${group.sk}`);
+    throw new Error(
+      `Group must have pk and sk. Received: pk=${group.pk}, sk=${group.sk}`
+    );
   }
-  
+
   // Log the group being saved (especially GROUP_INFO)
   if (group.sk === "GROUP_INFO") {
     console.log(`🔍 saveGroup() called for GROUP_INFO:`, {
@@ -174,7 +176,7 @@ async function saveGroup(group: any): Promise<{
     sk: group.sk, // ← Critical: preserve sk value
     createdAt: timestamp,
     updatedAt: timestamp,
-    
+
     // Core fields
     title: group.title || "",
     description: group.description || "",
@@ -182,16 +184,18 @@ async function saveGroup(group: any): Promise<{
     image_url: group.image_url || "",
     socials: group.socials || {},
     isPublic: group.isPublic || "true",
-    
+
     // Group-specific fields (only for SCHEDULE items)
     scheduleDay: group.scheduleDay,
     scheduleTime: group.scheduleTime,
     scheduleLocation: group.scheduleLocation,
   };
-  
+
   // Verify GROUP_INFO items have correct sk
   if (group.sk === "GROUP_INFO" && item.sk !== "GROUP_INFO") {
-    console.error(`❌ CRITICAL: GROUP_INFO sk was lost! Original: ${group.sk}, Item: ${item.sk}`);
+    console.error(
+      `❌ CRITICAL: GROUP_INFO sk was lost! Original: ${group.sk}, Item: ${item.sk}`
+    );
     throw new Error(`GROUP_INFO sk was not preserved: ${item.sk}`);
   }
 
@@ -205,7 +209,7 @@ async function saveGroup(group: any): Promise<{
     });
 
     await client.send(command);
-    
+
     // Log what was actually saved (especially for GROUP_INFO)
     if (group.sk === "GROUP_INFO") {
       console.log(`✅ Successfully saved GROUP_INFO to DynamoDB:`, {
@@ -215,7 +219,9 @@ async function saveGroup(group: any): Promise<{
         category: item.category,
       });
     } else {
-      console.log(`✅ Successfully saved group: ${group.title} (${group.pk}/${group.sk})`);
+      console.log(
+        `✅ Successfully saved group: ${group.title} (${group.pk}/${group.sk})`
+      );
     }
 
     return {
@@ -224,7 +230,9 @@ async function saveGroup(group: any): Promise<{
     };
   } catch (error: any) {
     if (error.name === "ConditionalCheckFailedException") {
-      console.log(`Group item already exists: ${group.title} (${group.pk}/${group.sk})`);
+      console.log(
+        `Group item already exists: ${group.title} (${group.pk}/${group.sk})`
+      );
       return {
         eventId: group.pk,
         savedEvent: item,
@@ -241,37 +249,118 @@ export const handler: Handler = async (
   context: any,
   callback: any
 ) => {
-  let payload =
-    typeof event.body === "string"
-      ? JSON.parse(event.body)
-      : JSON.parse(event.body.Payload);
+  // Handle Step Functions payload format
+  // Step Functions wraps the previous step's output in a body property
+  // The normalize step returns a JSON string like: '{"success":true,"events":[...],"source":"...","eventType":"group"}'
+  // Step Functions parses this JSON string and passes the parsed object to the next step
+  // So event.body will be the parsed object from the normalize step
+  let payload;
 
+  if (event.body) {
+    if (typeof event.body === "string") {
+      // Body is a JSON string, parse it
+      try {
+        payload = JSON.parse(event.body);
+      } catch (e) {
+        console.error("Failed to parse event.body as JSON:", e);
+        // Try to parse as nested JSON (in case it's double-encoded)
+        try {
+          payload = JSON.parse(JSON.parse(event.body));
+        } catch (e2) {
+          throw new Error(`Invalid payload format: ${e.message}`);
+        }
+      }
+    } else if (event.body.Payload) {
+      // API Gateway format with Payload wrapper
+      payload =
+        typeof event.body.Payload === "string"
+          ? JSON.parse(event.body.Payload)
+          : event.body.Payload;
+    } else {
+      // Body is already the parsed object (Step Functions format)
+      payload = event.body;
+    }
+  } else {
+    // No body, event itself might be the payload (direct invocation)
+    payload = event;
+  }
+
+  // The normalize step returns: { success: true, events: [...], source: "...", eventType: "group" }
+  // Extract events array and metadata
   let items = payload.events || payload;
   const eventType = payload.eventType;
   const source = payload.source || "unknown";
 
+  // Log for debugging
+  console.log(`📦 Parsed payload:`, {
+    hasEvents: !!payload.events,
+    eventsCount: Array.isArray(payload.events) ? payload.events.length : 0,
+    eventType,
+    source,
+    payloadKeys: Object.keys(payload),
+  });
+
+  // Ensure items is an array
+  if (!Array.isArray(items)) {
+    console.error("❌ Items is not an array:", typeof items, items);
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        error: "Items must be an array",
+        received: typeof items,
+      }),
+    };
+  }
+
   // Check if these are groups
-  const isGroup = eventType === "group" || items.some((item: any) => item.isGroup || item.type === "group");
+  const isGroup =
+    eventType === "group" ||
+    items.some((item: any) => item.isGroup || item.type === "group");
 
   if (isGroup) {
     // Handle groups
-    console.log(`📋 Processing ${items.length} groups`);
-    
+    console.log(`📋 Processing ${items.length} group items`);
+
     // Log GROUP_INFO items specifically
-    const groupInfoItems = items.filter((item: any) => item.sk === "GROUP_INFO");
-    const scheduleItems = items.filter((item: any) => item.sk?.startsWith("SCHEDULE#"));
+    const groupInfoItems = items.filter(
+      (item: any) => item.sk === "GROUP_INFO"
+    );
+    const scheduleItems = items.filter((item: any) =>
+      item.sk?.startsWith("SCHEDULE#")
+    );
     console.log(`📊 Received items breakdown:`);
     console.log(`   - GROUP_INFO items: ${groupInfoItems.length}`);
     console.log(`   - SCHEDULE items: ${scheduleItems.length}`);
-    
+    console.log(`   - Total items: ${items.length}`);
+
     if (groupInfoItems.length > 0) {
-      console.log(`   - Sample GROUP_INFO item received:`, JSON.stringify({
-        pk: groupInfoItems[0].pk,
-        sk: groupInfoItems[0].sk,
-        title: groupInfoItems[0].title,
-      }, null, 2));
+      console.log(
+        `   - Sample GROUP_INFO item received:`,
+        JSON.stringify(
+          {
+            pk: groupInfoItems[0].pk,
+            sk: groupInfoItems[0].sk,
+            title: groupInfoItems[0].title,
+            hasDescription: !!groupInfoItems[0].description,
+          },
+          null,
+          2
+        )
+      );
+    } else {
+      console.warn(
+        `⚠️  WARNING: No GROUP_INFO items found in ${items.length} items!`
+      );
+      console.log(
+        `   - Sample items:`,
+        items.slice(0, 3).map((item: any) => ({
+          pk: item.pk,
+          sk: item.sk,
+          title: item.title,
+        }))
+      );
     }
-    
+
     const eventIds: string[] = [];
     const savedEvents: any[] = [];
 
@@ -281,19 +370,23 @@ export const handler: Handler = async (
           console.warn(`Skipping group without valid title:`, group);
           continue;
         }
-        
+
         // Log GROUP_INFO items before saving
         if (group.sk === "GROUP_INFO") {
-          console.log(`💾 Saving GROUP_INFO item: pk=${group.pk}, sk=${group.sk}, title=${group.title}`);
+          console.log(
+            `💾 Saving GROUP_INFO item: pk=${group.pk}, sk=${group.sk}, title=${group.title}`
+          );
         }
 
         const result = await saveGroup(group);
         eventIds.push(result.eventId);
         savedEvents.push(result.savedEvent);
-        
+
         // Log successful GROUP_INFO saves
         if (group.sk === "GROUP_INFO") {
-          console.log(`✅ Successfully processed GROUP_INFO: ${group.title} (${result.eventId})`);
+          console.log(
+            `✅ Successfully processed GROUP_INFO: ${group.title} (${result.eventId})`
+          );
         }
 
         // Add delay between saves to avoid throttling
@@ -312,16 +405,22 @@ export const handler: Handler = async (
     }
 
     // Final summary
-    const savedGroupInfo = savedEvents.filter((item: any) => item.sk === "GROUP_INFO");
-    const savedSchedules = savedEvents.filter((item: any) => item.sk?.startsWith("SCHEDULE#"));
+    const savedGroupInfo = savedEvents.filter(
+      (item: any) => item.sk === "GROUP_INFO"
+    );
+    const savedSchedules = savedEvents.filter((item: any) =>
+      item.sk?.startsWith("SCHEDULE#")
+    );
     console.log(`📊 Final summary:`);
     console.log(`   - Total items processed: ${items.length}`);
     console.log(`   - GROUP_INFO items saved: ${savedGroupInfo.length}`);
     console.log(`   - SCHEDULE items saved: ${savedSchedules.length}`);
     console.log(`   - Total items saved: ${savedEvents.length}`);
-    
+
     if (savedGroupInfo.length === 0 && groupInfoItems.length > 0) {
-      console.error(`❌ WARNING: No GROUP_INFO items were saved despite ${groupInfoItems.length} being received!`);
+      console.error(
+        `❌ WARNING: No GROUP_INFO items were saved despite ${groupInfoItems.length} being received!`
+      );
     }
 
     return {

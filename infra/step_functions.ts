@@ -19,7 +19,7 @@ const dbInsert = sst.aws.StepFunctions.lambdaInvoke({
     body: "{% $states.input %}",
   },
   function: new sst.aws.Function("addEventToDBFunction", {
-    handler: "packages/functions/src/events/addEventToDB.handler",
+    handler: "packages/functions/src/events/addEventToDb.handler",
     link: [db],
   }),
 });

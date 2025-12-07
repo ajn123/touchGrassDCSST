@@ -13,6 +13,30 @@ const client = new DynamoDBClient({
 });
 
 /**
+ * Get the DynamoDB table name with validation
+ */
+function getTableName(): string {
+  try {
+    const tableName = Resource.Db?.name;
+    if (!tableName) {
+      throw new Error(
+        "DynamoDB table name is not available. Resource.Db.name is undefined. " +
+          "Make sure the function is properly linked to the db resource."
+      );
+    }
+    return tableName;
+  } catch (error: any) {
+    if (error.message?.includes("Resource.Db")) {
+      throw error;
+    }
+    throw new Error(
+      `Failed to access DynamoDB table name: ${error.message}. ` +
+        "Make sure the function is properly linked to the db resource."
+    );
+  }
+}
+
+/**
  * Save normalized event to DynamoDB
  */
 export async function saveEvent(
@@ -83,8 +107,9 @@ export async function saveEvent(
   };
 
   try {
+    const tableName = getTableName();
     const command = new PutItemCommand({
-      TableName: Resource.Db.name,
+      TableName: tableName,
       Item: marshall(item, { removeUndefinedValues: true }),
       ConditionExpression: "attribute_not_exists(pk)", // Ensure idempotency
     });
@@ -200,8 +225,9 @@ async function saveGroup(group: any): Promise<{
   }
 
   try {
+    const tableName = getTableName();
     const command = new PutItemCommand({
-      TableName: Resource.Db.name,
+      TableName: tableName,
       Item: marshall(item, { removeUndefinedValues: true }),
       // For composite keys, DynamoDB checks the full key (pk+sk) combination
       // This allows multiple items with same pk but different sk values
@@ -267,7 +293,8 @@ export const handler: Handler = async (
         try {
           payload = JSON.parse(JSON.parse(event.body));
         } catch (e2) {
-          throw new Error(`Invalid payload format: ${e.message}`);
+          const errorMessage = e instanceof Error ? e.message : String(e);
+          throw new Error(`Invalid payload format: ${errorMessage}`);
         }
       }
     } else if (event.body.Payload) {

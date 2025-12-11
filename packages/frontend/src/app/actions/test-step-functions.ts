@@ -7,32 +7,45 @@ export default async function testStepFunctionsNormalization() {
   try {
     console.log("🚀 Testing Step Functions normalization workflow...");
 
+    // Generate random ID to ensure unique events that can always be inserted
+    const randomId = Math.random().toString(36).substring(2, 9);
+    const timestamp = Date.now();
+    
+    // Calculate future dates to ensure events are in the future
+    const today = new Date();
+    const futureDate1 = new Date(today);
+    futureDate1.setDate(today.getDate() + 7);
+    const futureDate2 = new Date(today);
+    futureDate2.setDate(today.getDate() + 8);
+    const futureDate3 = new Date(today);
+    futureDate3.setDate(today.getDate() + 9);
+
     const testEvents = [
       {
-        title: "Test Washingtonian Event",
-        description: "A test event from Washingtonian",
-        date: "2024-12-25",
+        title: `Test Washingtonian Event ${randomId}`,
+        description: `A test event from Washingtonian (${timestamp})`,
+        date: futureDate1.toISOString().split('T')[0],
         time: "7:00 PM",
         location: "Test Venue, Washington DC",
         category: "Music",
         source: "washingtonian",
-        url: "https://washingtonian.com/test-event",
+        url: `https://washingtonian.com/test-event-${randomId}`,
       },
       {
-        title: "Test OpenWebNinja Event",
-        description: "A test event from OpenWebNinja API",
-        start_date: "2024-12-26",
+        title: `Test OpenWebNinja Event ${randomId}`,
+        description: `A test event from OpenWebNinja API (${timestamp})`,
+        start_date: futureDate2.toISOString().split('T')[0],
         start_time: "8:00 PM",
         venue: "Test Venue",
         location: "Washington DC",
         category: ["Arts", "Culture"],
         source: "openwebninja",
-        external_id: "test-123",
+        external_id: `test-${randomId}-${timestamp}`,
       },
       {
-        title: "Test Crawler Event",
-        description: "A test event from crawler",
-        eventDate: "2024-12-27",
+        title: `Test Crawler Event ${randomId}`,
+        description: `A test event from crawler (${timestamp})`,
+        eventDate: futureDate3.toISOString().split('T')[0],
         eventTime: "9:00 PM",
         eventLocation: "Test Location",
         eventCategory: "Food & Drink",

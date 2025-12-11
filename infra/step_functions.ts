@@ -21,6 +21,12 @@ const dbInsert = sst.aws.StepFunctions.lambdaInvoke({
   function: new sst.aws.Function("addEventToDBFunction", {
     handler: "packages/functions/src/events/addEventToDb.handler",
     link: [db],
+    environment: {
+      // Explicitly set table name as environment variable as workaround
+      // for SST resource injection issue in Step Functions
+      DB_NAME: db.name,
+      SST_RESOURCE_Db_name: db.name,
+    },
   }),
 });
 

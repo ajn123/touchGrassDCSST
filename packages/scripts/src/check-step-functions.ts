@@ -300,10 +300,11 @@ async function main() {
   console.log("📋 Checking Lambda Function Logs:");
   console.log("=".repeat(80));
 
+  // Get actual function names from Resource
   const lambdaFunctions = [
-    "addEventToDBFunction",
-    "normalizeEventFunction",
-    "reindexEventsFunction",
+    Resource.addEventToDBFunction?.name || "addEventToDBFunction",
+    Resource.normalizeEventFunction?.name || "normalizeEventFunction",
+    Resource.reindexEventsFunction?.name || "reindexEventsFunction",
   ];
 
   for (const funcName of lambdaFunctions) {

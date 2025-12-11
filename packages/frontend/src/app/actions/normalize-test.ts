@@ -4,32 +4,45 @@ import { Resource } from "sst";
 
 export async function testNormalizeEvents() {
   try {
-    // Create test events with different formats
+    // Generate random ID to ensure unique events that can always be inserted
+    const randomId = Math.random().toString(36).substring(2, 9);
+    const timestamp = Date.now();
+    
+    // Calculate future dates to ensure events are in the future
+    const today = new Date();
+    const futureDate1 = new Date(today);
+    futureDate1.setDate(today.getDate() + 7);
+    const futureDate2 = new Date(today);
+    futureDate2.setDate(today.getDate() + 8);
+    const futureDate3 = new Date(today);
+    futureDate3.setDate(today.getDate() + 9);
+    
+    // Create test events with different formats - using random ID to ensure uniqueness
     const testEvents = [
       {
-        title: "Test Music Concert",
-        description: "A test music concert for normalization testing",
-        date: "2024-12-25",
+        title: `Test Music Concert ${randomId}`,
+        description: `A test music concert for normalization testing (${timestamp})`,
+        date: futureDate1.toISOString().split('T')[0],
         time: "7:00 PM",
         location: "Test Venue, Washington DC",
         category: "music",
         price: "$25",
       },
       {
-        title: "Test OpenWebNinja Event",
-        description: "A test event from OpenWebNinja format",
-        start_time: "2024-12-26 8:00 PM",
+        title: `Test OpenWebNinja Event ${randomId}`,
+        description: `A test event from OpenWebNinja format (${timestamp})`,
+        start_time: `${futureDate2.toISOString().split('T')[0]} 8:00 PM`,
         venue: {
           name: "Test OpenWebNinja Venue",
           address: "123 Test St, Washington DC",
         },
-        link: "https://test.com/event",
+        link: `https://test.com/event-${randomId}`,
         publisher: "Test Publisher",
       },
       {
-        title: "Test Crawler Event",
-        description: "A test event from crawler format",
-        start_date: "2024-12-27",
+        title: `Test Crawler Event ${randomId}`,
+        description: `A test event from crawler format (${timestamp})`,
+        start_date: futureDate3.toISOString().split('T')[0],
         start_time: "6:30 PM",
         location: "Test Crawler Location",
         venue: "Test Crawler Venue",

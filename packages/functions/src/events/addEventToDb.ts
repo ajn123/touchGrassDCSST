@@ -17,22 +17,82 @@ const client = new DynamoDBClient({
  */
 function getTableName(): string {
   try {
-    const tableName = Resource.Db?.name;
-    if (!tableName) {
-      throw new Error(
-        "DynamoDB table name is not available. Resource.Db.name is undefined. " +
-          "Make sure the function is properly linked to the db resource."
+    // Log what we're trying to access for debugging
+    console.log("🔍 Attempting to get table name from Resource.Db...");
+    console.log("   Resource.Db exists:", !!Resource.Db);
+
+    // Try to access the table name (use direct access like other functions)
+    let tableName: string | undefined;
+    try {
+      // Try direct access first (matching pattern in api.ts and openWeb.ts)
+      tableName = Resource.Db.name;
+    } catch (resourceError: any) {
+      console.error(
+        "❌ Error accessing Resource.Db.name:",
+        resourceError.message
       );
+      console.error("   Error type:", resourceError.name);
+      // Try optional chaining as fallback
+      try {
+        tableName = Resource.Db?.name;
+      } catch (fallbackError: any) {
+        console.error("❌ Fallback also failed:", fallbackError.message);
+      }
     }
+
+    // Also check environment variables as fallback
+    const envTableName =
+      process.env.SST_Resource_Db_name ||
+      process.env.DB_NAME ||
+      process.env.TABLE_NAME;
+
+    console.log("   Resource.Db?.name:", tableName);
+    console.log(
+      "   Environment variable (SST_Resource_Db_name):",
+      envTableName
+    );
+    console.log(
+      "   All DB-related env vars:",
+      Object.keys(process.env).filter(
+        (k) => k.includes("DB") || k.includes("TABLE")
+      )
+    );
+    // Log all SST-related env vars to see what SST injects
+    const sstEnvVars = Object.keys(process.env)
+      .filter((k) => k.startsWith("SST_") || k.includes("Resource"))
+      .reduce((acc, key) => {
+        acc[key] = process.env[key];
+        return acc;
+      }, {} as Record<string, string | undefined>);
+    console.log(
+      "   All SST-related env vars:",
+      JSON.stringify(sstEnvVars, null, 2)
+    );
+
+    if (!tableName && envTableName) {
+      console.log("⚠️  Using table name from environment variable as fallback");
+      tableName = envTableName;
+    }
+
+    if (!tableName) {
+      const errorMsg =
+        "DynamoDB table name is not available. Resource.Db.name is undefined. " +
+        "Make sure the function is properly linked to the db resource. " +
+        `Resource.Db exists: ${!!Resource.Db}, Env vars checked: ${!!envTableName}`;
+      console.error("❌", errorMsg);
+      throw new Error(errorMsg);
+    }
+
+    console.log("✅ Using table name:", tableName);
     return tableName;
   } catch (error: any) {
-    if (error.message?.includes("Resource.Db")) {
-      throw error;
-    }
-    throw new Error(
-      `Failed to access DynamoDB table name: ${error.message}. ` +
-        "Make sure the function is properly linked to the db resource."
-    );
+    console.error("❌ Failed to get table name:", error.message);
+    console.error("   Error details:", {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    });
+    throw error;
   }
 }
 
@@ -108,6 +168,12 @@ export async function saveEvent(
 
   try {
     const tableName = getTableName();
+    console.log(
+      `💾 Attempting to save event "${event.title}" to table: ${tableName}`
+    );
+    console.log(`   Region: ${process.env.AWS_REGION || "us-east-1"}`);
+    console.log(`   Event ID: ${eventId}`);
+
     const command = new PutItemCommand({
       TableName: tableName,
       Item: marshall(item, { removeUndefinedValues: true }),
@@ -130,7 +196,19 @@ export async function saveEvent(
         savedEvent: item,
       };
     } else {
-      console.error("Error saving normalized event:", error);
+      console.error("❌ Error saving normalized event:", error);
+      console.error("   Error name:", error.name);
+      console.error("   Error message:", error.message);
+      console.error("   Table name used:", tableName);
+      console.error("   Region:", process.env.AWS_REGION || "us-east-1");
+      console.error("   Event ID:", eventId);
+      console.error("   Event title:", event.title);
+      if (error.$metadata) {
+        console.error(
+          "   AWS Metadata:",
+          JSON.stringify(error.$metadata, null, 2)
+        );
+      }
       throw error;
     }
   }
@@ -226,6 +304,11 @@ async function saveGroup(group: any): Promise<{
 
   try {
     const tableName = getTableName();
+    console.log(
+      `💾 Attempting to save group "${group.title}" (${group.pk}/${group.sk}) to table: ${tableName}`
+    );
+    console.log(`   Region: ${process.env.AWS_REGION || "us-east-1"}`);
+
     const command = new PutItemCommand({
       TableName: tableName,
       Item: marshall(item, { removeUndefinedValues: true }),
@@ -264,7 +347,20 @@ async function saveGroup(group: any): Promise<{
         savedEvent: item,
       };
     } else {
-      console.error("Error saving group:", error);
+      console.error("❌ Error saving group:", error);
+      console.error("   Error name:", error.name);
+      console.error("   Error message:", error.message);
+      console.error("   Table name used:", tableName);
+      console.error("   Region:", process.env.AWS_REGION || "us-east-1");
+      console.error("   Group pk:", group.pk);
+      console.error("   Group sk:", group.sk);
+      console.error("   Group title:", group.title);
+      if (error.$metadata) {
+        console.error(
+          "   AWS Metadata:",
+          JSON.stringify(error.$metadata, null, 2)
+        );
+      }
       throw error;
     }
   }

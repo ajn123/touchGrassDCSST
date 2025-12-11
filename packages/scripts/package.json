@@ -7,10 +7,12 @@
     "@aws-sdk/client-cloudwatch-logs": "^3.0.0",
     "@aws-sdk/client-dynamodb": "^3.0.0",
     "@aws-sdk/client-glue": "^3.0.0",
+    "@aws-sdk/client-lambda": "^3.948.0",
     "@aws-sdk/client-sfn": "^3.917.0",
     "@aws-sdk/credential-provider-node": "^3.0.0",
     "@aws-sdk/util-dynamodb": "^3.0.0",
     "@opensearch-project/opensearch": "^2.4.0",
+    "@sparticuz/chromium": "^141.0.0",
     "@touchgrass/shared-utils": "*",
     "axios": "^1.6.0",
     "cheerio": "^1.0.0",
@@ -19,7 +21,6 @@
     "playwright": "^1.40.0",
     "puppeteer": "^24.15.0",
     "selenium-webdriver": "^4.15.0",
-    "@sparticuz/chromium": "^141.0.0",
     "sst": "*"
   },
   "scripts": {

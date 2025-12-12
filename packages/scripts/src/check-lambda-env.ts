@@ -107,6 +107,11 @@ async function checkLambdaEnv() {
               FunctionName: fn.FunctionName,
             });
             const funcResponse = await lambda.send(getCommand);
+            
+            if (funcResponse.Configuration) {
+              console.log(`     Last Modified: ${funcResponse.Configuration.LastModified}`);
+              console.log(`     Runtime: ${funcResponse.Configuration.Runtime}`);
+            }
 
             if (funcResponse.Configuration?.Environment?.Variables) {
               const env = funcResponse.Configuration.Environment.Variables;

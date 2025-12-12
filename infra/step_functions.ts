@@ -2,15 +2,29 @@ import { api } from "./api";
 import { db } from "./db";
 import { search } from "./opensearch";
 
+// Define functions separately to ensure environment variables are applied
+const normalizeEventFunction = new sst.aws.Function("normalizeEventFunction", {
+  handler: "packages/functions/src/events/normalizeEvents.handler",
+  link: [api, db],
+});
+
+const addEventToDBFunction = new sst.aws.Function("addEventToDBFunction", {
+  handler: "packages/functions/src/events/addEventToDb.handler",
+  link: [db],
+  // Note: Environment variables with db.name cause syntax errors during bundling
+  // The function should use Resource.Db.name or process.env.DB_NAME as fallback
+  // environment: {
+  //   DB_NAME: db.name,
+  //   SST_RESOURCE_Db_name: db.name,
+  // },
+});
+
 const normalize = sst.aws.StepFunctions.lambdaInvoke({
   name: "Normalize",
   payload: {
     body: "{% $states.input %}",
   },
-  function: new sst.aws.Function("normalizeEventFunction", {
-    handler: "packages/functions/src/events/normalizeEvents.handler",
-    link: [api],
-  }),
+  function: normalizeEventFunction,
 });
 
 const dbInsert = sst.aws.StepFunctions.lambdaInvoke({
@@ -18,16 +32,7 @@ const dbInsert = sst.aws.StepFunctions.lambdaInvoke({
   payload: {
     body: "{% $states.input %}",
   },
-  function: new sst.aws.Function("addEventToDBFunction", {
-    handler: "packages/functions/src/events/addEventToDb.handler",
-    link: [db],
-    environment: {
-      // Explicitly set table name as environment variable as workaround
-      // for SST resource injection issue in Step Functions
-      DB_NAME: db.name,
-      SST_RESOURCE_Db_name: db.name,
-    },
-  }),
+  function: addEventToDBFunction,
 });
 
 const reindexEvents = sst.aws.StepFunctions.lambdaInvoke({
@@ -60,4 +65,8 @@ const normalizeEventStepFunction = new sst.aws.StepFunctions(
   }
 );
 
-export { normalizeEventStepFunction };
+export {
+  addEventToDBFunction,
+  normalizeEventFunction,
+  normalizeEventStepFunction,
+};

@@ -11,12 +11,12 @@ const normalizeEventFunction = new sst.aws.Function("normalizeEventFunction", {
 const addEventToDBFunction = new sst.aws.Function("addEventToDBFunction", {
   handler: "packages/functions/src/events/addEventToDb.handler",
   link: [db],
-  // Note: Environment variables with db.name cause syntax errors during bundling
-  // The function should use Resource.Db.name or process.env.DB_NAME as fallback
-  // environment: {
-  //   DB_NAME: db.name,
-  //   SST_RESOURCE_Db_name: db.name,
-  // },
+  // Set environment variable using template string to avoid syntax errors
+  // The function will use this as fallback if Resource.Db.name is not available
+  environment: {
+    // Use template literal to ensure it's treated as a string value, not code
+    DB_NAME: `${db.name}`,
+  },
 });
 
 const normalize = sst.aws.StepFunctions.lambdaInvoke({

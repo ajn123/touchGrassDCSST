@@ -582,16 +582,31 @@ export class TouchGrassDynamoDB {
           if (key === "cost") {
             // Handle cost as a JSON object
             try {
-              const costObj = JSON.parse(stringValue);
-              item[key] = {
-                M: {
-                  type: { S: costObj.type },
-                  currency: { S: costObj.currency },
-                  amount: { N: costObj.amount.toString() },
-                },
-              };
+              // Validate that stringValue is not empty and looks like JSON
+              const trimmedValue = stringValue.trim();
+              if (
+                !trimmedValue ||
+                (!trimmedValue.startsWith("{") && !trimmedValue.startsWith("["))
+              ) {
+                // Not valid JSON format, store as string
+                item[key] = { S: stringValue };
+              } else {
+                const costObj = JSON.parse(trimmedValue);
+                item[key] = {
+                  M: {
+                    type: { S: costObj.type },
+                    currency: { S: costObj.currency },
+                    amount: { N: costObj.amount.toString() },
+                  },
+                };
+              }
             } catch (error) {
-              console.error("Error parsing cost JSON:", error);
+              console.error(
+                "Error parsing cost JSON:",
+                error,
+                "Value:",
+                stringValue
+              );
               item[key] = { S: stringValue };
             }
           } else if (key === "title") {
@@ -732,16 +747,31 @@ export class TouchGrassDynamoDB {
           if (key === "cost") {
             // Handle cost as a JSON object
             try {
-              const costObj = JSON.parse(stringValue);
-              item[key] = {
-                M: {
-                  type: { S: costObj.type },
-                  currency: { S: costObj.currency },
-                  amount: { N: costObj.amount.toString() },
-                },
-              };
+              // Validate that stringValue is not empty and looks like JSON
+              const trimmedValue = stringValue.trim();
+              if (
+                !trimmedValue ||
+                (!trimmedValue.startsWith("{") && !trimmedValue.startsWith("["))
+              ) {
+                // Not valid JSON format, store as string
+                item[key] = { S: stringValue };
+              } else {
+                const costObj = JSON.parse(trimmedValue);
+                item[key] = {
+                  M: {
+                    type: { S: costObj.type },
+                    currency: { S: costObj.currency },
+                    amount: { N: costObj.amount.toString() },
+                  },
+                };
+              }
             } catch (error) {
-              console.error("Error parsing cost JSON:", error);
+              console.error(
+                "Error parsing cost JSON:",
+                error,
+                "Value:",
+                stringValue
+              );
               item[key] = { S: stringValue };
             }
           } else if (key === "category") {

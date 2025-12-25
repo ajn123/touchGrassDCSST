@@ -190,29 +190,101 @@ export async function getGroupsByCategory(category: string) {
   }
 }
 
-// Get public groups only
+// Get public groups only (using GSI for efficiency instead of scanning entire table)
 export async function getPublicGroups() {
   try {
-    const command = new ScanCommand({
-      TableName: Resource.Db.name,
-      FilterExpression: "#sk = :groupInfo AND #isPublic = :isPublic",
-      ExpressionAttributeNames: {
-        "#sk": "sk",
-        "#isPublic": "isPublic",
-      },
-      ExpressionAttributeValues: {
-        ":groupInfo": { S: "GROUP_INFO" },
-        ":isPublic": { S: "true" },
-      },
-    });
+    const allGroups: Group[] = [];
+    let lastEvaluatedKey: any = undefined;
 
-    const result = await client.send(command);
+    // console.log("🔍 getPublicGroups called");
+    // console.log("🔍 Resource.Db.name:", Resource.Db.name);
+    // console.log("🔍 publicEventsIndex:", "publicEventsIndex");
+    // console.log("🔍 groupPrefix:", "GROUP#");
+    // console.log("🔍 groupInfo:", "GROUP_INFO");
+    // console.log("🔍 isPublic:", "true");
 
-    if (!result.Items) return [];
+    // Use Query with the publicEventsIndex GSI instead of Scan
+    // This is much more efficient - only reads items where isPublic = "true"
+    // instead of scanning the entire table
+    do {
+      const command = new QueryCommand({
+        TableName: Resource.Db.name,
+        IndexName: "publicEventsIndex", // Use the GSI with isPublic as hash key
+        KeyConditionExpression: "#isPublic = :isPublic",
+        FilterExpression: "begins_with(pk, :groupPrefix) AND #sk = :groupInfo",
+        ExpressionAttributeNames: {
+          "#isPublic": "isPublic",
+          "#sk": "sk",
+        },
+        ExpressionAttributeValues: {
+          ":isPublic": { S: "true" },
+          ":groupPrefix": { S: "GROUP#" },
+          ":groupInfo": { S: "GROUP_INFO" },
+        },
+        ExclusiveStartKey: lastEvaluatedKey,
+      });
 
-    return result.Items.map((item) => unmarshall(item) as Group);
+      const result = await client.send(command);
+
+      if (result.Items) {
+        const groups = result.Items.map((item) => unmarshall(item) as Group);
+        allGroups.push(...groups);
+      }
+
+      lastEvaluatedKey = result.LastEvaluatedKey;
+    } while (lastEvaluatedKey);
+
+    console.log(
+      `✅ Fetched ${allGroups.length} public groups (using GSI Query)`
+    );
+    return allGroups;
   } catch (error) {
     console.error("Error fetching public groups:", error);
+    // Fallback to scan if GSI query fails (e.g., if index doesn't exist)
+    console.log("⚠️ Falling back to Scan operation...");
+    return getPublicGroupsFallback();
+  }
+}
+
+// Fallback function using Scan (less efficient but works if GSI is unavailable)
+async function getPublicGroupsFallback() {
+  try {
+    const allGroups: Group[] = [];
+    let lastEvaluatedKey: any = undefined;
+
+    do {
+      const command = new ScanCommand({
+        TableName: Resource.Db.name,
+        FilterExpression:
+          "begins_with(pk, :groupPrefix) AND #sk = :groupInfo AND #isPublic = :isPublic",
+        ExpressionAttributeNames: {
+          "#sk": "sk",
+          "#isPublic": "isPublic",
+        },
+        ExpressionAttributeValues: {
+          ":groupPrefix": { S: "GROUP#" },
+          ":groupInfo": { S: "GROUP_INFO" },
+          ":isPublic": { S: "true" },
+        },
+        ExclusiveStartKey: lastEvaluatedKey,
+      });
+
+      const result = await client.send(command);
+
+      if (result.Items) {
+        const groups = result.Items.map((item) => unmarshall(item) as Group);
+        allGroups.push(...groups);
+      }
+
+      lastEvaluatedKey = result.LastEvaluatedKey;
+    } while (lastEvaluatedKey);
+
+    console.log(
+      `✅ Fetched ${allGroups.length} public groups (using Scan fallback)`
+    );
+    return allGroups;
+  } catch (error) {
+    console.error("Error fetching public groups (fallback):", error);
     return [];
   }
 }

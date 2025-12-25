@@ -163,19 +163,19 @@ export async function transformSchedulesForDisplay(schedules: GroupSchedule[]) {
   return Array.from(scheduleMap.values());
 }
 
-// Get groups by category
+// Get groups by category (case-insensitive)
 export async function getGroupsByCategory(category: string) {
   try {
+    // Fetch all groups and filter case-insensitively in application code
+    // since DynamoDB FilterExpressions don't support case-insensitive comparisons
     const command = new ScanCommand({
       TableName: Resource.Db.name,
-      FilterExpression: "#sk = :groupInfo AND contains(#category, :category)",
+      FilterExpression: "#sk = :groupInfo",
       ExpressionAttributeNames: {
         "#sk": "sk",
-        "#category": "category",
       },
       ExpressionAttributeValues: {
         ":groupInfo": { S: "GROUP_INFO" },
-        ":category": { S: category },
       },
     });
 
@@ -183,7 +183,19 @@ export async function getGroupsByCategory(category: string) {
 
     if (!result.Items) return [];
 
-    return result.Items.map((item) => unmarshall(item) as Group);
+    const allGroups = result.Items.map((item) => unmarshall(item) as Group);
+
+    // Filter case-insensitively
+    const normalizedSearchCategory = category.toLowerCase().trim();
+    return allGroups.filter((group) => {
+      if (!group.category) return false;
+
+      const groupCategories = group.category
+        .split(",")
+        .map((cat: string) => cat.toLowerCase().trim());
+
+      return groupCategories.includes(normalizedSearchCategory);
+    });
   } catch (error) {
     console.error("Error fetching groups by category:", error);
     return [];
@@ -329,17 +341,11 @@ export async function searchGroups(filters: {
       expressionAttributeValues[":query"] = { S: query };
     }
 
-    // Add category filter
-    if (filters.categories && filters.categories.length > 0) {
-      const categoryExpressions = filters.categories.map((_, index) => {
-        const nameKey = `#cat${index}`;
-        const valueKey = `:cat${index}`;
-        expressionAttributeNames[nameKey] = "category";
-        expressionAttributeValues[valueKey] = { S: filters.categories![index] };
-        return `contains(#cat${index}, :cat${index})`;
-      });
-      filterExpressions.push(`(${categoryExpressions.join(" OR ")})`);
-    }
+    // Note: Category filter will be applied case-insensitively in application code
+    // Store normalized categories for later filtering
+    const normalizedCategories = filters.categories
+      ? filters.categories.map((cat: string) => cat.toLowerCase().trim())
+      : [];
 
     // Add public/private filter
     if (filters.isPublic !== undefined) {
@@ -387,6 +393,22 @@ export async function searchGroups(filters: {
 
     let groups = result.Items.map((item) => unmarshall(item) as Group);
 
+    // Apply case-insensitive category filter if specified
+    if (normalizedCategories.length > 0) {
+      groups = groups.filter((group) => {
+        if (!group.category) return false;
+
+        const groupCategories = group.category
+          .split(",")
+          .map((cat: string) => cat.toLowerCase().trim());
+
+        // Check if any of the normalized search categories match any of the group's categories
+        return normalizedCategories.some((searchCat) =>
+          groupCategories.includes(searchCat)
+        );
+      });
+    }
+
     // Apply limit if specified
     if (filters.limit) {
       groups = groups.slice(0, filters.limit);
@@ -422,17 +444,34 @@ export async function searchGroupsSimple(filters: {
     const allGroups = await getGroups();
     console.log("🔍 Total groups available:", allGroups.length);
 
-    // Filter groups that match the query
+    // Filter groups that match the query (case-insensitive)
     const matchingGroups = allGroups.filter((group) => {
       const title = (group.title || "").toLowerCase();
       const description = (group.description || "").toLowerCase();
       const category = (group.category || "").toLowerCase();
 
-      return (
+      const matchesQuery =
         title.includes(query) ||
         description.includes(query) ||
-        category.includes(query)
-      );
+        category.includes(query);
+
+      // Also apply case-insensitive category filter if specified
+      if (filters.categories && filters.categories.length > 0) {
+        const normalizedSearchCategories = filters.categories.map(
+          (cat: string) => cat.toLowerCase().trim()
+        );
+        const groupCategories = category
+          .split(",")
+          .map((cat: string) => cat.trim());
+
+        const matchesCategory = normalizedSearchCategories.some((searchCat) =>
+          groupCategories.includes(searchCat)
+        );
+
+        return matchesQuery && matchesCategory;
+      }
+
+      return matchesQuery;
     });
 
     console.log("🔍 Matching groups found:", matchingGroups.length);
@@ -718,10 +757,10 @@ export async function getGroupCategories() {
         typeof unmarshalledItem.category === "string" &&
         unmarshalledItem.category.trim()
       ) {
-        // Split comma-separated categories and add each one
+        // Split comma-separated categories and add each one (normalized to lowercase)
         const categories = unmarshalledItem.category
           .split(",")
-          .map((cat) => cat.trim())
+          .map((cat) => cat.trim().toLowerCase())
           .filter((cat) => cat);
         categories.forEach((category) => {
           uniqueCategories.add(category);

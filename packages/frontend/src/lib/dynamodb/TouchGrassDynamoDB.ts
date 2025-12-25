@@ -455,18 +455,23 @@ export class TouchGrassDynamoDB {
         }) || [];
 
       // Filter events that have the specified category in their category array or comma-separated string
+      // Case-insensitive comparison
+      const normalizedSearchCategory = category.toLowerCase().trim();
       return events.filter((event) => {
         if (!event.category) return false;
 
         if (Array.isArray(event.category)) {
-          // If category is an array, check if the specified category is in the array
-          return event.category.includes(category);
+          // If category is an array, check if the specified category is in the array (case-insensitive)
+          return event.category.some(
+            (cat: string) =>
+              cat.toLowerCase().trim() === normalizedSearchCategory
+          );
         } else {
-          // If category is a comma-separated string, split it and check if the specified category is included
+          // If category is a comma-separated string, split it and check if the specified category is included (case-insensitive)
           const categories = event.category
             .split(",")
-            .map((cat: string) => cat.trim());
-          return categories.includes(category);
+            .map((cat: string) => cat.toLowerCase().trim());
+          return categories.includes(normalizedSearchCategory);
         }
       });
     } catch (error) {
@@ -491,17 +496,17 @@ export class TouchGrassDynamoDB {
         const unmarshalledItem = unmarshall(item);
 
         if (Array.isArray(unmarshalledItem.category)) {
-          // If category is an array, add each category to the set
+          // If category is an array, add each category to the set (normalized to lowercase)
           unmarshalledItem.category.forEach((category: string) => {
             if (category && category.trim()) {
-              uniqueCategories.add(category.trim());
+              uniqueCategories.add(category.trim().toLowerCase());
             }
           });
         } else if (unmarshalledItem.category) {
-          // If category is a comma-separated string, split it and add each part
+          // If category is a comma-separated string, split it and add each part (normalized to lowercase)
           const categories = unmarshalledItem.category
             .split(",")
-            .map((cat: string) => cat.trim());
+            .map((cat: string) => cat.trim().toLowerCase());
           categories.forEach((category: string) => {
             if (category && category.trim()) {
               uniqueCategories.add(category.trim());
@@ -1270,29 +1275,20 @@ export class TouchGrassDynamoDB {
         "(begins_with(#pk, :eventPrefixNew) OR begins_with(#pk, :eventPrefixOld))",
       ];
 
-      // Add category filter if specified
+      // Add category filter if specified (case-insensitive)
       if (filters.categories && filters.categories.length > 0) {
         console.log(
           "🏷️ Adding category filter to scan for:",
           filters.categories
         );
 
-        // Create OR expression for categories using DynamoDB FilterExpression
-        const categoryExpressions = filters.categories.map(
-          (category: string, index: number) => {
-            const nameKey = `#cat${index}`;
-            const valueKey = `:cat${index}`;
-            scanParams.ExpressionAttributeNames[nameKey] = "category";
-            scanParams.ExpressionAttributeValues[valueKey] = {
-              S: category,
-            };
-            // Use contains for array fields - this will check if the category array contains the specified value
-            // For DynamoDB, contains works with both strings and arrays
-            return `contains(#cat${index}, :cat${index})`;
-          }
+        // Note: DynamoDB FilterExpressions don't support case-insensitive comparisons directly
+        // We'll filter in application code after fetching for case-insensitive matching
+        // Store normalized categories for later filtering
+        const normalizedCategories = filters.categories.map((cat: string) =>
+          cat.toLowerCase().trim()
         );
-
-        filterExpressions.push(`(${categoryExpressions.join(" OR ")})`);
+        scanParams._normalizedCategories = normalizedCategories;
       }
 
       // Add isPublic filter
@@ -1337,6 +1333,35 @@ export class TouchGrassDynamoDB {
 
       let events = result.Items.map((item) => unmarshall(item) as Event);
       console.log(`🔄 Unmarshalled ${events.length} events from scan`);
+
+      // Apply case-insensitive category filter if specified
+      if (filters.categories && filters.categories.length > 0) {
+        const normalizedCategories = filters.categories.map((cat: string) =>
+          cat.toLowerCase().trim()
+        );
+        events = events.filter((event) => {
+          if (!event.category) return false;
+
+          let eventCategories: string[] = [];
+          if (Array.isArray(event.category)) {
+            eventCategories = event.category.map((cat: string) =>
+              cat.toLowerCase().trim()
+            );
+          } else {
+            eventCategories = event.category
+              .split(",")
+              .map((cat: string) => cat.toLowerCase().trim());
+          }
+
+          // Check if any of the normalized search categories match any of the event's categories
+          return normalizedCategories.some((searchCat) =>
+            eventCategories.includes(searchCat)
+          );
+        });
+        console.log(
+          `🏷️ After case-insensitive category filter: ${events.length} events`
+        );
+      }
 
       // Apply additional filters client-side (only if not already handled by scan)
       if (

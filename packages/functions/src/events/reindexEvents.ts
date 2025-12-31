@@ -1,4 +1,5 @@
-import { Client } from "@opensearch-project/opensearch";
+// OpenSearch indexing disabled - using DynamoDB with frontend filtering instead
+// import { Client } from "@opensearch-project/opensearch";
 import {
   parseCategories,
   parseCostAmount,
@@ -6,15 +7,16 @@ import {
 } from "@touchgrass/shared-utils";
 
 import { Handler } from "aws-lambda";
-import { Resource } from "sst";
+// import { Resource } from "sst";
 
-const openSearchClient = new Client({
-  node: Resource.MySearch.url,
-  auth: {
-    username: Resource.MySearch.username,
-    password: Resource.MySearch.password,
-  },
-});
+// OpenSearch client initialization disabled
+// const openSearchClient = new Client({
+//   node: Resource.MySearch.url,
+//   auth: {
+//     username: Resource.MySearch.username,
+//     password: Resource.MySearch.password,
+//   },
+// });
 
 // Transform DynamoDB group to OpenSearch format
 async function transformGroupForOpenSearch(group: any): Promise<any> {
@@ -65,8 +67,13 @@ async function transformEventForOpenSearch(event: any): Promise<any> {
   };
 }
 
-// Index a single item (event or group) to OpenSearch
+// Index a single item (event or group) to OpenSearch - DISABLED: Using DynamoDB with frontend filtering instead
 async function indexItemToOpenSearch(item: any): Promise<void> {
+  // OpenSearch indexing disabled
+  console.log(`⚠️ OpenSearch indexing disabled for item: ${item.title || item.pk}`);
+  return;
+  
+  /* OpenSearch indexing code commented out
   try {
     // Check if this is a group (has schedule fields or pk starts with GROUP#)
     const isGroup = item.isGroup || 
@@ -104,6 +111,7 @@ async function indexItemToOpenSearch(item: any): Promise<void> {
     );
     // Don't throw - we don't want OpenSearch errors to break the main flow
   }
+  */
 }
 
 export const handler: Handler = async (event: any) => {
@@ -114,15 +122,20 @@ export const handler: Handler = async (event: any) => {
 
   const { eventIds, savedEvents } = payload;
 
-  console.log("Items in reindexEvents:", savedEvents?.length || 0);
+  console.log("⚠️ OpenSearch indexing is disabled.");
+  console.log(`ℹ️ Items in reindexEvents: ${savedEvents?.length || 0}`);
+  console.log("ℹ️ Events are now searched directly from DynamoDB with frontend filtering.");
 
-  // Index all items (events and groups) in parallel but wait for completion
-  await Promise.all(
-    savedEvents.map((item: any) => indexItemToOpenSearch(item))
-  );
+  // OpenSearch indexing disabled - items are already saved to DynamoDB
+  // await Promise.all(
+  //   savedEvents.map((item: any) => indexItemToOpenSearch(item))
+  // );
 
   return {
     statusCode: 200,
-    body: JSON.stringify({ message: "Items reindexed successfully" }),
+    body: JSON.stringify({ 
+      message: "OpenSearch indexing disabled - items saved to DynamoDB only",
+      itemsProcessed: savedEvents?.length || 0
+    }),
   };
 };

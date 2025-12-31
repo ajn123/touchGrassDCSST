@@ -2,6 +2,7 @@
 
 import FeaturedEvent from "@/components/FeaturedEvent";
 import SearchFilters from "@/components/SearchFilters";
+import { filterEvents, FilterOptions, getCategoriesFromEvents } from "@/lib/filter-events";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
@@ -57,127 +58,54 @@ function SearchPageContent() {
     const loadData = async () => {
       try {
         setLoading(true);
-        // Build query string for the API
-        const queryParams = new URLSearchParams();
 
-        if (filters.query) queryParams.append("q", filters.query);
-        if (filters.categories.length > 0)
-          queryParams.append("categories", filters.categories.join(","));
-        if (filters.costRange.min !== undefined)
-          queryParams.append("costMin", filters.costRange.min.toString());
-        if (filters.costRange.max !== undefined)
-          queryParams.append("costMax", filters.costRange.max.toString());
-        if (filters.costRange.type)
-          queryParams.append("costType", filters.costRange.type);
-        if (filters.location.length > 0)
-          queryParams.append("location", filters.location.join(","));
-        // Always include dateStart if it's set (defaults to today if includePastEvents is false)
-        if (filters.dateRange.start)
-          queryParams.append("dateStart", filters.dateRange.start);
-        if (filters.dateRange.end)
-          queryParams.append("dateEnd", filters.dateRange.end);
-        if (filters.sortBy) queryParams.append("sortBy", filters.sortBy);
-        if (filters.sortOrder)
-          queryParams.append("sortOrder", filters.sortOrder);
-        if (filters.types) queryParams.append("types", filters.types);
-        if (filters.includePastEvents)
-          queryParams.append("includePastEvents", "true");
+        // Fetch events from DynamoDB (include past events if requested)
+        const apiUrl = filters.includePastEvents 
+          ? "/api/events/all?includePastEvents=true"
+          : "/api/events/all";
+        const response = await fetch(apiUrl);
 
-        // Try OpenSearch first, fallback to DynamoDB if it fails
-        let data: any = { events: [], groups: [] };
-        let useOpenSearch = false;
-
-        try {
-          // Use the types parameter from filters
-          const opensearchResponse = await fetch(
-            `/api/search-opensearch?${queryParams.toString()}`
-          );
-
-          if (opensearchResponse.ok) {
-            const opensearchData = await opensearchResponse.json();
-
-            // Validate that this is actually an OpenSearch response
-            // Check for error field or confirm searchMethod is opensearch
-            if (opensearchData.error) {
-              throw new Error(
-                opensearchData.error || "OpenSearch returned an error"
-              );
-            }
-
-            // Only use OpenSearch data if it's confirmed to be from OpenSearch
-            if (opensearchData.searchMethod === "opensearch") {
-              // Check if we got meaningful results
-              const hasResults =
-                (opensearchData.events && opensearchData.events.length > 0) ||
-                (opensearchData.groups && opensearchData.groups.length > 0) ||
-                (opensearchData.total && opensearchData.total > 0);
-
-              if (hasResults || !filters.query) {
-                // Use OpenSearch if we have results OR if there's no search query (browsing all)
-                data = opensearchData;
-                useOpenSearch = true;
-                console.log(
-                  "✅ Using OpenSearch results:",
-                  opensearchData.eventsCount || 0,
-                  "events,",
-                  opensearchData.groupsCount || 0,
-                  "groups (total:",
-                  opensearchData.total || 0,
-                  ")"
-                );
-              } else {
-                // OpenSearch returned no results but we had a query - might be stale index
-                console.warn(
-                  "⚠️ OpenSearch returned no results for query, falling back to DynamoDB",
-                  { query: filters.query, total: opensearchData.total }
-                );
-                throw new Error(
-                  "OpenSearch returned no results - possible stale index"
-                );
-              }
-            } else {
-              // Response looks invalid, fall back
-              throw new Error("OpenSearch response validation failed");
-            }
-          } else {
-            throw new Error(
-              `OpenSearch failed with status: ${opensearchResponse.status}`
-            );
-          }
-        } catch (opensearchError) {
-          console.warn(
-            "⚠️ OpenSearch failed or returned invalid data, falling back to DynamoDB:",
-            opensearchError
-          );
-
-          // Fallback to DynamoDB API for events
-          try {
-            const dynamoResponse = await fetch(
-              `/api/events?${queryParams.toString()}`
-            );
-
-            if (dynamoResponse.ok) {
-              const dynamoData = await dynamoResponse.json();
-              data.events = dynamoData.events || [];
-              data.groups = []; // DynamoDB fallback doesn't include groups
-              console.log(
-                "📦 Retrieved",
-                data.events.length,
-                "events from DynamoDB API (fallback)"
-              );
-            }
-          } catch (dynamoError) {
-            console.error("❌ DynamoDB fallback also failed:", dynamoError);
-          }
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        // Analytics handled centrally in middleware
-        setEvents(data.events || []);
-        setGroups(data.groups || []);
+        const data = await response.json();
+        const allEvents = data.events || [];
+
+        // Apply frontend filtering
+        const filterOptions: FilterOptions = {
+          query: filters.query || undefined,
+          categories: filters.categories.length > 0 ? filters.categories : undefined,
+          costRange: filters.costRange.min !== undefined || filters.costRange.max !== undefined || filters.costRange.type
+            ? filters.costRange
+            : undefined,
+          location: filters.location.length > 0 ? filters.location : undefined,
+          dateRange: filters.dateRange.start || filters.dateRange.end ? filters.dateRange : undefined,
+          sortBy: filters.sortBy,
+          sortOrder: filters.sortOrder,
+          limit: 1000, // Large limit, we'll paginate on frontend if needed
+        };
+
+        const filteredEvents = filterEvents(allEvents, filterOptions);
+
+        // For now, groups are empty (can be added later if needed)
+        const groups: any[] = [];
+
+        // Extract categories from current and future events only
+        const categoriesFromEvents = getCategoriesFromEvents(allEvents);
+        setAllCategories(categoriesFromEvents);
+
+        console.log(
+          `📦 Retrieved ${allEvents.length} events, filtered to ${filteredEvents.length} events`
+        );
+
+        setEvents(filteredEvents);
+        setGroups(groups);
       } catch (error) {
-        console.error("Error loading events and groups:", error);
+        console.error("Error loading events:", error);
         setEvents([]);
         setGroups([]);
+        setAllCategories([]);
       } finally {
         setLoading(false);
       }
@@ -185,26 +113,6 @@ function SearchPageContent() {
 
     loadData();
   }, [filters]); // Run whenever filters change
-
-  // Fetch all available categories when component mounts
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch("/api/categories");
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        const categoryNames = data.categories.map((cat: any) => cat.category);
-        setAllCategories(categoryNames);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-        setAllCategories([]);
-      }
-    };
-
-    fetchCategories();
-  }, []);
 
   // Simple function to handle automatic search updates
   const handleSearchUpdate = useCallback((searchFilters: any) => {

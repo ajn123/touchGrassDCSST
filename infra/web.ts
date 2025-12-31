@@ -2,7 +2,6 @@ import { api } from "./api";
 import { auth } from "./auth";
 import { db } from "./db";
 import { email } from "./email";
-import { search } from "./opensearch";
 import { queue } from "./queue";
 import { GOOGLE_MAPS_API_KEY } from "./secrets";
 import { normalizeEventStepFunction } from "./step_functions";
@@ -19,7 +18,6 @@ export const web = new sst.aws.Nextjs("Web", {
     GOOGLE_MAPS_API_KEY,
     auth,
     queue,
-    search,
     WashingtonianTask,
     normalizeEventStepFunction,
   ],

@@ -316,6 +316,38 @@ export class TouchGrassDynamoDB {
   }
 
   /**
+   * Get all current and future events from DynamoDB
+   * Filters out past events based on end_date or start_date
+   */
+  async getCurrentAndFutureEvents(): Promise<Event[]> {
+    try {
+      const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
+
+      // Get all events
+      const allEvents = await this.getEvents();
+
+      // Filter to only current and future events
+      const currentAndFutureEvents = allEvents.filter((event) => {
+        // Use end_date if available, otherwise use start_date
+        const eventDate = event.end_date || event.start_date;
+        
+        if (!eventDate) {
+          // If no date, include it (could be ongoing or date TBD)
+          return true;
+        }
+
+        // Compare dates (YYYY-MM-DD format allows string comparison)
+        return eventDate >= today;
+      });
+
+      return currentAndFutureEvents;
+    } catch (error) {
+      console.error("Error fetching current and future events:", error);
+      return [];
+    }
+  }
+
+  /**
    * Get a single event by ID
    */
   async getEvent(id: string): Promise<Event | null> {

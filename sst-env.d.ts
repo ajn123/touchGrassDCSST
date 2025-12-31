@@ -25,12 +25,6 @@ declare module "sst" {
       "name": string
       "type": "sst.aws.Bucket"
     }
-    "MySearch": {
-      "password": string
-      "type": "sst.aws.OpenSearch"
-      "url": string
-      "username": string
-    }
     "OPENWEBNINJA_API_KEY": {
       "type": "sst.sst.Secret"
       "value": string
@@ -79,10 +73,6 @@ declare module "sst" {
       "type": "sst.aws.StepFunctions"
     }
     "normalizeEventFunction": {
-      "name": string
-      "type": "sst.aws.Function"
-    }
-    "reindexEventsFunction": {
       "name": string
       "type": "sst.aws.Function"
     }

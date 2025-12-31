@@ -1,6 +1,5 @@
 import { api } from "./api";
 import { db } from "./db";
-import { search } from "./opensearch";
 
 // Define functions separately to ensure environment variables are applied
 const normalizeEventFunction = new sst.aws.Function("normalizeEventFunction", {
@@ -35,17 +34,6 @@ const dbInsert = sst.aws.StepFunctions.lambdaInvoke({
   function: addEventToDBFunction,
 });
 
-const reindexEvents = sst.aws.StepFunctions.lambdaInvoke({
-  name: "Reindex Events",
-  payload: {
-    body: "{% $states.input %}",
-  },
-  function: new sst.aws.Function("reindexEventsFunction", {
-    handler: "packages/functions/src/events/reindexEvents.handler",
-    link: [search],
-  }),
-});
-
 const eventInsertionSuccess = sst.aws.StepFunctions.succeed({ name: "Done" });
 
 const normalizeEventStepFunction = new sst.aws.StepFunctions(
@@ -60,7 +48,6 @@ const normalizeEventStepFunction = new sst.aws.StepFunctions(
     type: "standard",
     definition: normalize
       .next(dbInsert)
-      .next(reindexEvents)
       .next(eventInsertionSuccess),
   }
 );

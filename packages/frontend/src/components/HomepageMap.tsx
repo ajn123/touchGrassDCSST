@@ -32,10 +32,8 @@ export default function HomepageMap({ className = "" }: HomepageMapProps) {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        // Fetch only events with location data using OpenSearch for better performance
-        const response = await fetch(
-          "/api/search-opensearch?types=event&isPublic=true&limit=100"
-        );
+        // Fetch all current and future events from DynamoDB
+        const response = await fetch("/api/events/all");
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -44,9 +42,9 @@ export default function HomepageMap({ className = "" }: HomepageMapProps) {
         const data = await response.json();
 
         // Filter events that have either coordinates or location
-        const eventsWithLocation = data.events.filter(
+        const eventsWithLocation = (data.events || []).filter(
           (event: Event) => event.coordinates || event.location
-        );
+        ).slice(0, 100); // Limit to 100 for performance
 
         console.log(
           `📍 Found ${eventsWithLocation.length} events with location data`

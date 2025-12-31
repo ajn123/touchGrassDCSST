@@ -1,6 +1,6 @@
 import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
-import { Client } from "@opensearch-project/opensearch";
+// import { Client } from "@opensearch-project/opensearch";
 import { Resource } from "sst";
 
 interface SearchableEvent {
@@ -26,17 +26,18 @@ interface SearchableEvent {
 }
 
 class EventReindexer {
-  private client: Client;
+  // private client: Client;
   private db: DynamoDBClient;
 
   constructor() {
-    this.client = new Client({
-      node: Resource.MySearch.url,
-      auth: {
-        username: Resource.MySearch.username,
-        password: Resource.MySearch.password,
-      },
-    });
+    // OpenSearch indexing disabled - using DynamoDB with frontend filtering instead
+    // this.client = new Client({
+    //   node: Resource.MySearch.url,
+    //   auth: {
+    //     username: Resource.MySearch.username,
+    //     password: Resource.MySearch.password,
+    //   },
+    // });
 
     this.db = new DynamoDBClient({
       region: "us-east-1",
@@ -142,8 +143,13 @@ class EventReindexer {
     };
   }
 
-  // Index events into OpenSearch
+  // Index events into OpenSearch - DISABLED: Using DynamoDB with frontend filtering instead
   async indexEvents(events: any[]): Promise<void> {
+    console.log(`⚠️ OpenSearch indexing is disabled. Skipping indexing of ${events.length} events.`);
+    console.log(`ℹ️ Events are now searched directly from DynamoDB with frontend filtering.`);
+    return;
+    
+    /* OpenSearch indexing code commented out
     console.log(`📝 Indexing ${events.length} events into OpenSearch...`);
 
     const indexedIds = new Set<string>();
@@ -182,10 +188,15 @@ class EventReindexer {
     console.log(`✅ Indexing completed!`);
     console.log(`📊 Successfully indexed: ${successCount} events`);
     console.log(`⏭️ Skipped duplicates: ${skipCount} events`);
+    */
   }
 
-  // Check if index exists
+  // Check if index exists - DISABLED: OpenSearch indexing removed
   async indexExists(): Promise<boolean> {
+    // OpenSearch indexing disabled
+    return false;
+    
+    /* OpenSearch code commented out
     try {
       await this.client.indices.get({
         index: "events-groups-index",
@@ -197,10 +208,15 @@ class EventReindexer {
       }
       throw error;
     }
+    */
   }
 
-  // Create index if it doesn't exist
+  // Create index if it doesn't exist - DISABLED: OpenSearch indexing removed
   async ensureIndex(): Promise<void> {
+    console.log("⚠️ OpenSearch indexing is disabled. Skipping index creation.");
+    return;
+    
+    /* OpenSearch code commented out
     if (await this.indexExists()) {
       console.log("✅ OpenSearch index already exists");
       return;
@@ -276,20 +292,17 @@ class EventReindexer {
     });
 
     console.log("✅ OpenSearch index created successfully");
+    */
   }
 
-  // Main reindexing function
+  // Main reindexing function - DISABLED: OpenSearch indexing removed
   async reindex(): Promise<void> {
     try {
-      console.log("🚀 Starting OpenSearch reindexing...");
-      console.log(`📊 Endpoint: ${Resource.MySearch.url}`);
-      console.log(`📊 Index: events-groups-index`);
+      console.log("⚠️ OpenSearch reindexing is disabled.");
+      console.log("ℹ️ Events are now searched directly from DynamoDB with frontend filtering.");
       console.log(`📊 Table: ${Resource.Db.name}`);
 
-      // Ensure index exists
-      await this.ensureIndex();
-
-      // Fetch all events from DynamoDB
+      // Fetch all events from DynamoDB (for verification/debugging)
       const events = await this.fetchAllEvents();
 
       if (events.length === 0) {
@@ -297,11 +310,14 @@ class EventReindexer {
         return;
       }
 
-      // Index events into OpenSearch
-      await this.indexEvents(events);
+      console.log(`📊 Total events in DynamoDB: ${events.length}`);
+      console.log("ℹ️ OpenSearch indexing skipped - using DynamoDB with frontend filtering instead");
 
-      console.log("🎉 Reindexing completed successfully!");
-      console.log(`📊 Total events processed: ${events.length}`);
+      // OpenSearch indexing disabled
+      // await this.ensureIndex();
+      // await this.indexEvents(events);
+
+      console.log("✅ Event count verification completed!");
     } catch (error) {
       console.error("❌ Error during reindexing:", error);
       throw error;

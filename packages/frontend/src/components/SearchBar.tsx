@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchState } from "@/lib/hooks/useOpenSearch";
+import { useSearchState } from "@/lib/hooks/useSearch";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
@@ -23,7 +23,7 @@ export default function SearchBar() {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
-      // Use OpenSearch to get results (searches both events and groups)
+      // Search events using DynamoDB
       search();
       setShowResults(true);
     }
@@ -239,12 +239,12 @@ export default function SearchBar() {
                     router.push(
                       `/search?q=${encodeURIComponent(
                         query
-                      )}&types=event,group&sortBy=date&sortOrder=asc&searchMethod=opensearch`
+                      )}&types=event,group&sortBy=date&sortOrder=asc`
                     );
                   }}
                   className="w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium py-2 hover:bg-blue-50 rounded-md transition-colors"
                 >
-                  View all results (OpenSearch)
+                  View all results
                 </button>
               </div>
             </>

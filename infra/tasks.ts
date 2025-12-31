@@ -1,6 +1,5 @@
 import { api } from "./api";
 import { db } from "./db";
-import { search } from "./opensearch";
 import { normalizeEventStepFunction } from "./step_functions";
 
 const vpc = new sst.aws.Vpc("Vpc");
@@ -11,7 +10,7 @@ const cpu = "1 vCPU";
 
 const WashingtonianTask = new sst.aws.Task("washingtonianTask", {
   cluster,
-  link: [search, db, api, normalizeEventStepFunction],
+  link: [db, api, normalizeEventStepFunction],
   image: {
     context: ".", // Use project root as context
     dockerfile: "./packages/tasks/crawlers/Dockerfile",
@@ -26,7 +25,7 @@ const WashingtonianTask = new sst.aws.Task("washingtonianTask", {
 
 const ClockOutDCTask = new sst.aws.Task("clockoutdcTask", {
   cluster,
-  link: [search, db, api, normalizeEventStepFunction],
+  link: [db, api, normalizeEventStepFunction],
   image: {
     context: ".", // Use project root as context
     dockerfile: "./packages/tasks/crawlers/Dockerfile.clockoutdc",
@@ -41,7 +40,7 @@ const ClockOutDCTask = new sst.aws.Task("clockoutdcTask", {
 
 const EventbriteTask = new sst.aws.Task("eventbriteTask", {
   cluster,
-  link: [search, db, api, normalizeEventStepFunction],
+  link: [db, api, normalizeEventStepFunction],
   image: {
     context: ".", // Use project root as context
     dockerfile: "./packages/tasks/crawlers/Dockerfile.eventbrite",

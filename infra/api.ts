@@ -1,8 +1,7 @@
 import { db } from "./db";
-import { search } from "./opensearch";
 import { OPENWEBNINJA_API_KEY } from "./secrets";
 export const api = new sst.aws.ApiGatewayV2("Api", {
-  link: [db, search, OPENWEBNINJA_API_KEY],
+  link: [db, OPENWEBNINJA_API_KEY],
 });
 
 api.route("GET /events", "packages/functions/src/events/api.getEvents");

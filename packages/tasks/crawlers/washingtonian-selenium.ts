@@ -371,21 +371,147 @@ class WashingtonianPlaywrightCrawler {
         .toString(36)
         .substr(2, 9)}`;
 
+      // Sanitize events to ensure they're JSON-safe
+      const sanitizedEvents = events.map((event) => {
+        return {
+          title: event.title
+            ? String(event.title).replace(/\0/g, "")
+            : undefined,
+          date: event.date ? String(event.date) : undefined,
+          time: event.time ? String(event.time).replace(/\0/g, "") : undefined,
+          location: event.location
+            ? String(event.location).replace(/\0/g, "")
+            : undefined,
+          description: event.description
+            ? String(event.description).replace(/\0/g, "")
+            : undefined,
+          url: event.url ? String(event.url) : undefined,
+          category: event.category
+            ? String(event.category).replace(/\0/g, "")
+            : undefined,
+          price: event.price
+            ? String(event.price).replace(/\0/g, "")
+            : undefined,
+          venue: event.venue
+            ? String(event.venue).replace(/\0/g, "")
+            : undefined,
+        };
+      });
+
+      // Prepare the payload object
+      const payload = {
+        events: sanitizedEvents,
+        source: "washingtonian",
+        eventType: "washingtonian",
+      };
+
+      // Log the payload before stringifying
+      console.log("📦 [STEP FUNCTIONS DEBUG] Payload object:", {
+        eventCount: events.length,
+        source: payload.source,
+        eventType: payload.eventType,
+        firstEventSample: sanitizedEvents[0]
+          ? {
+              title: sanitizedEvents[0].title,
+              date: sanitizedEvents[0].date,
+              time: sanitizedEvents[0].time,
+            }
+          : null,
+      });
+
+      // Stringify the payload with error handling
+      let stringifiedInput: string;
+      try {
+        stringifiedInput = JSON.stringify(payload);
+      } catch (stringifyError) {
+        console.error("❌ [STEP FUNCTIONS DEBUG] JSON.stringify failed:", {
+          error:
+            stringifyError instanceof Error
+              ? stringifyError.message
+              : String(stringifyError),
+          errorName:
+            stringifyError instanceof Error ? stringifyError.name : "Unknown",
+          eventCount: events.length,
+        });
+
+        // Try to identify which event is causing the issue
+        for (let i = 0; i < sanitizedEvents.length; i++) {
+          try {
+            JSON.stringify(sanitizedEvents[i]);
+          } catch (eventError) {
+            console.error(
+              `❌ [STEP FUNCTIONS DEBUG] Problematic event at index ${i}:`,
+              {
+                event: sanitizedEvents[i],
+                error:
+                  eventError instanceof Error
+                    ? eventError.message
+                    : String(eventError),
+              }
+            );
+          }
+        }
+        throw stringifyError;
+      }
+
+      // Validate the JSON before sending
+      try {
+        const testParse = JSON.parse(stringifiedInput);
+        console.log("📦 [STEP FUNCTIONS DEBUG] JSON validation passed");
+      } catch (validationError) {
+        console.error(
+          "❌ [STEP FUNCTIONS DEBUG] JSON validation failed before sending:",
+          {
+            error:
+              validationError instanceof Error
+                ? validationError.message
+                : String(validationError),
+            errorPosition:
+              validationError instanceof SyntaxError &&
+              validationError.message.includes("position")
+                ? validationError.message.match(/position (\d+)/)?.[1]
+                : undefined,
+          }
+        );
+        throw validationError;
+      }
+
+      // Log stringified input details
+      console.log("📦 [STEP FUNCTIONS DEBUG] Stringified input:", {
+        length: stringifiedInput.length,
+        firstChars: stringifiedInput.substring(0, 300),
+        charsAround222: stringifiedInput.substring(
+          Math.max(0, 222 - 50),
+          Math.min(stringifiedInput.length, 222 + 50)
+        ),
+        lastChars: stringifiedInput.substring(
+          Math.max(0, stringifiedInput.length - 200)
+        ),
+        isValidJSON: true, // We already validated above
+      });
+
       const inputObject = {
         // StartExecutionInput
         stateMachineArn: Resource.normaizeEventStepFunction.arn, // corrected resource name
-        input: JSON.stringify({
-          events: events,
-          source: "washingtonian",
-          eventType: "washingtonian",
-        }),
+        input: stringifiedInput,
       };
+
+      console.log("📦 [STEP FUNCTIONS DEBUG] Input object structure:", {
+        hasStateMachineArn: !!inputObject.stateMachineArn,
+        hasInput: !!inputObject.input,
+        inputType: typeof inputObject.input,
+        inputLength: inputObject.input.length,
+      });
 
       const command = new StartExecutionCommand(inputObject);
       const response = await client.send(command);
 
       console.log("🚀 Step Functions test successful:", response);
       console.log(`✅ Successfully started normalization workflow`);
+      console.log(
+        "📦 [STEP FUNCTIONS DEBUG] Execution ARN:",
+        response.executionArn
+      );
     } catch (error) {
       console.error(`❌ Error saving events via Lambda:`, error);
       throw error;

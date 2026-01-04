@@ -1,7 +1,8 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { SFNClient, StartExecutionCommand } from "@aws-sdk/client-sfn";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
-import { Client } from "@opensearch-project/opensearch";
+// OpenSearch removed - using DynamoDB with frontend filtering instead
+// import { Client } from "@opensearch-project/opensearch";
 import axios from "axios";
 import { Resource } from "sst";
 
@@ -11,14 +12,7 @@ const client = new DynamoDBClient({
 });
 const docClient = DynamoDBDocumentClient.from(client);
 
-// Initialize OpenSearch client
-const openSearchClient = new Client({
-  node: Resource.MySearch.url,
-  auth: {
-    username: Resource.MySearch.username,
-    password: Resource.MySearch.password,
-  },
-});
+// OpenSearch client removed - no longer needed
 
 // OpenWebNinja API configuration
 const OPENWEBNINJA_CONFIG = {

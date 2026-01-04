@@ -1,120 +1,112 @@
 #!/usr/bin/env tsx
 /**
- * Script to find and check production function logs
+ * Find all CloudWatch log groups and search for the specific JSON parsing error
+ * Usage: tsx src/find-production-logs.ts
  */
 
-import {
-  CloudWatchLogsClient,
-  DescribeLogGroupsCommand,
-  FilterLogEventsCommand,
-} from "@aws-sdk/client-cloudwatch-logs";
+import { CloudWatchLogsClient, FilterLogEventsCommand, DescribeLogGroupsCommand } from "@aws-sdk/client-cloudwatch-logs";
 
 const cloudwatch = new CloudWatchLogsClient({ region: "us-east-1" });
 
-async function findProductionLogs() {
-  console.log("🔍 Finding production function log groups...\n");
-
-  try {
-    const listCommand = new DescribeLogGroupsCommand({
-      logGroupNamePrefix: "/aws/lambda/",
+async function findAllLogGroups() {
+  const logGroups: string[] = [];
+  let nextToken: string | undefined;
+  
+  do {
+    const command = new DescribeLogGroupsCommand({
+      nextToken,
+      limit: 50,
     });
-    const response = await cloudwatch.send(listCommand);
-
+    const response = await cloudwatch.send(command);
+    
     if (response.logGroups) {
-      const matching = response.logGroups.filter(
-        (lg) =>
-          lg.logGroupName?.includes("touchgrassdcsst-production") &&
-          (lg.logGroupName?.includes("addEventToDB") ||
-            lg.logGroupName?.includes("addEventToDb"))
-      );
+      logGroups.push(...(response.logGroups.map(lg => lg.logGroupName || "").filter(Boolean)));
+    }
+    
+    nextToken = response.nextToken;
+  } while (nextToken);
+  
+  return logGroups;
+}
 
-      console.log(`✅ Found ${matching.length} matching log group(s):\n`);
+async function searchLogGroupForError(logGroupName: string, days: number = 7) {
+  const startTime = Date.now() - days * 24 * 60 * 60 * 1000;
+  
+  try {
+    const command = new FilterLogEventsCommand({
+      logGroupName,
+      startTime,
+      filterPattern: "position 222",
+      limit: 5,
+    });
 
-      for (const logGroup of matching) {
-        console.log(`📋 ${logGroup.logGroupName}`);
-        if (logGroup.creationTime) {
-          console.log(
-            `   Created: ${new Date(logGroup.creationTime).toISOString()}`
-          );
-        }
-        if (logGroup.lastEventTime) {
-          console.log(
-            `   Last Event: ${new Date(logGroup.lastEventTime).toISOString()}`
-          );
-        }
-
-        // Check for recent errors
-        try {
-          const startTime = Date.now() - 24 * 60 * 60 * 1000; // Last 24 hours
-          const errorCommand = new FilterLogEventsCommand({
-            logGroupName: logGroup.logGroupName!,
-            startTime,
-            filterPattern:
-              "ERROR error Error exception Exception failed Failed ResourceNotFoundException",
-            limit: 20,
-          });
-
-          const errorResponse = await cloudwatch.send(errorCommand);
-          if (errorResponse.events && errorResponse.events.length > 0) {
-            console.log(
-              `   ❌ Found ${errorResponse.events.length} errors in last 24 hours`
-            );
-            console.log(`   Recent errors:`);
-            errorResponse.events.slice(0, 5).forEach((event) => {
-              const timestamp = new Date(event.timestamp || 0).toISOString();
-              const message = (event.message || "").substring(0, 200);
-              console.log(`      [${timestamp}] ${message}`);
-            });
-          } else {
-            console.log(`   ✅ No errors in last 24 hours`);
-          }
-
-          // Get all recent logs
-          const allLogsCommand = new FilterLogEventsCommand({
-            logGroupName: logGroup.logGroupName!,
-            startTime,
-            limit: 30,
-          });
-
-          const allLogs = await cloudwatch.send(allLogsCommand);
-          if (allLogs.events && allLogs.events.length > 0) {
-            console.log(`   📊 Recent logs (last ${allLogs.events.length}):`);
-            // Look for debug logs
-            const debugLogs = allLogs.events.filter(
-              (e) =>
-                e.message?.includes("🔍") ||
-                e.message?.includes("Attempting to get table name") ||
-                e.message?.includes("Using table name") ||
-                e.message?.includes("DB_NAME") ||
-                e.message?.includes("Resource.Db")
-            );
-            if (debugLogs.length > 0) {
-              console.log(`   🔍 Found ${debugLogs.length} debug log entries:`);
-              debugLogs.slice(-5).forEach((event) => {
-                const timestamp = new Date(event.timestamp || 0).toISOString();
-                const message = (event.message || "").substring(0, 300);
-                console.log(`      [${timestamp}] ${message}`);
-              });
-            }
-          }
-        } catch (err: any) {
-          console.log(`   ⚠️  Error checking logs: ${err.message}`);
-        }
-
-        console.log("");
-      }
+    const response = await cloudwatch.send(command);
+    
+    if (response.events && response.events.length > 0) {
+      return {
+        logGroupName,
+        events: response.events,
+      };
     }
   } catch (error: any) {
-    console.error(`❌ Error: ${error.message}`);
-    throw error;
+    // Ignore errors
   }
+  
+  return null;
 }
 
 async function main() {
-  await findProductionLogs();
+  console.log("🔍 Searching all CloudWatch log groups for 'position 222' error...\n");
+  console.log("This may take a few minutes...\n");
+
+  const allLogGroups = await findAllLogGroups();
+  console.log(`Found ${allLogGroups.length} total log groups\n`);
+  console.log("Searching for the specific error...\n");
+
+  const results: Array<{ logGroupName: string; events: any[] }> = [];
+  
+  // Search in batches
+  for (let i = 0; i < allLogGroups.length; i += 10) {
+    const batch = allLogGroups.slice(i, i + 10);
+    const batchResults = await Promise.all(
+      batch.map(lg => searchLogGroupForError(lg, 7))
+    );
+    
+    batchResults.forEach(result => {
+      if (result) {
+        results.push(result);
+      }
+    });
+    
+    if (i % 50 === 0) {
+      console.log(`   Checked ${Math.min(i + 10, allLogGroups.length)}/${allLogGroups.length} log groups...`);
+    }
+  }
+
+  console.log("\n" + "=".repeat(80));
+  
+  if (results.length > 0) {
+    console.log(`\n❌ FOUND ${results.length} log group(s) with 'position 222' errors:\n`);
+    
+    results.forEach((result, index) => {
+      console.log(`\n[${index + 1}] ${result.logGroupName}`);
+      console.log("   Errors found:");
+      result.events.forEach((event, idx) => {
+        const timestamp = new Date(event.timestamp || 0).toISOString();
+        console.log(`   [${idx + 1}] ${timestamp}`);
+        console.log(`      ${event.message}`);
+        console.log();
+      });
+    });
+  } else {
+    console.log("\n✅ No log groups found with 'position 222' error found.");
+    console.log("   The error might be in:");
+    console.log("   - Step Functions execution logs");
+    console.log("   - A log group with a different naming pattern");
+    console.log("   - An older time period (try --days 30)");
+  }
+
+  console.log("\n" + "=".repeat(80));
 }
 
 main().catch(console.error);
-
-
-

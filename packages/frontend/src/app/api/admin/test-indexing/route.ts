@@ -1,19 +1,21 @@
 import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
-import { searchOpenSearch } from "@/lib/opensearch-actions";
-import { Client } from "@opensearch-project/opensearch";
-import { transformEventForOpenSearch } from "@touchgrass/shared-utils";
+// OpenSearch removed - using DynamoDB with frontend filtering instead
+// import { searchOpenSearch } from "@/lib/opensearch-actions";
+// import { Client } from "@opensearch-project/opensearch";
+// import { transformEventForOpenSearch } from "@touchgrass/shared-utils";
 import { NextRequest, NextResponse } from "next/server";
 import { Resource } from "sst";
 
-const openSearchClient = new Client({
-  node: Resource.MySearch.url,
-  auth: {
-    username: Resource.MySearch.username,
-    password: Resource.MySearch.password,
-  },
-});
+// OpenSearch client removed
+// const openSearchClient = new Client({
+//   node: Resource.MySearch.url,
+//   auth: {
+//     username: Resource.MySearch.username,
+//     password: Resource.MySearch.password,
+//   },
+// });
 
-const INDEX_NAME = "events-groups-index";
+// const INDEX_NAME = "events-groups-index";
 
 export async function POST(request: NextRequest) {
   try {
@@ -94,6 +96,30 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // OpenSearch functionality removed - events are now searched directly from DynamoDB
+    results.steps.push({
+      step: "opensearch_removed",
+      status: "info",
+      message:
+        "OpenSearch has been removed. Events are now searched directly from DynamoDB with frontend filtering.",
+    });
+
+    // Verify event exists in DynamoDB
+    const documentId = event.pk || event.id;
+    results.steps.push({
+      step: "verify_dynamodb",
+      status: "success",
+      message: `Event verified in DynamoDB: ${event.title} (ID: ${documentId})`,
+    });
+
+    results.success = true;
+    results.searchResults = {
+      message:
+        "OpenSearch removed - use /api/events/all and frontend filtering instead",
+      eventId: documentId,
+    };
+
+    /* OpenSearch code commented out
     // Step 2: Transform event for OpenSearch
     results.steps.push({
       step: "transform_event",
@@ -294,6 +320,7 @@ export async function POST(request: NextRequest) {
         });
       }
     }
+    */
 
     return NextResponse.json(results, { status: 200 });
   } catch (error) {

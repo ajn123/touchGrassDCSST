@@ -25,21 +25,42 @@ export function middleware(request: NextRequest) {
     ) {
       const secret = process.env.NEXT_INTERNAL_API_SECRET;
       const analyticsUrl = new URL("/api/analytics/track", request.url);
+      
+      // Safely get header values and ensure they're valid strings
+      const userAgent = request.headers.get("user-agent");
+      const referer = request.headers.get("referer");
+      const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip");
+      
+      // Sanitize values to prevent JSON issues
+      const sanitizeString = (value: string | null | undefined): string | undefined => {
+        if (!value) return undefined;
+        // Remove any control characters and ensure valid UTF-8
+        return String(value)
+          .replace(/[\x00-\x1F\x7F-\x9F]/g, '') // Remove control characters
+          .trim() || undefined;
+      };
+      
       const body = {
         pk: "ANALYTICS#USER_VISIT",
         sk: `TIME#${Date.now()}`,
         properties: {
-          page: fullUrl,
+          page: sanitizeString(fullUrl) || "",
           timestamp: new Date().toISOString(),
-          userAgent: request.headers.get("user-agent") || undefined,
-          referer: request.headers.get("referer") || undefined,
-          ip:
-            request.headers.get("x-forwarded-for") ||
-            request.headers.get("x-real-ip") ||
-            undefined,
+          ...(userAgent ? { userAgent: sanitizeString(userAgent) } : {}),
+          ...(referer ? { referer: sanitizeString(referer) } : {}),
+          ...(ip ? { ip: sanitizeString(ip) } : {}),
         },
         action: pathname === "/" ? "USER_VISIT" : "USER_ACTION",
       };
+
+      // Validate JSON can be stringified before sending
+      let bodyString: string;
+      try {
+        bodyString = JSON.stringify(body);
+      } catch (stringifyError) {
+        console.error("Failed to stringify analytics body:", stringifyError, body);
+        return NextResponse.next();
+      }
 
       // Fire-and-forget; include internal secret if configured to bypass protection
       fetch(analyticsUrl.toString(), {
@@ -50,8 +71,11 @@ export function middleware(request: NextRequest) {
           "x-analytics-internal": "1",
           ...(secret ? { "x-internal-secret": secret } : {}),
         },
-        body: JSON.stringify(body),
-      }).catch(() => {});
+        body: bodyString,
+      }).catch((fetchError) => {
+        // Log fetch errors but don't throw
+        console.error("Failed to send analytics event:", fetchError);
+      });
     }
   } catch (_) {
     // swallow analytics errors to avoid impacting requests

@@ -403,7 +403,22 @@ export const handler: Handler = async (
       try {
         payload = JSON.parse(event.body);
       } catch (e) {
-        console.error("Failed to parse event.body as JSON:", e);
+        console.error("Failed to parse event.body as JSON:", {
+          error: e instanceof Error ? e.message : String(e),
+          bodyPreview: event.body.substring(0, 500),
+          bodyLength: event.body.length,
+          position: e instanceof SyntaxError && e.message.includes("position") 
+            ? e.message.match(/position (\d+)/)?.[1] 
+            : undefined,
+          bodyAroundPosition: e instanceof SyntaxError && e.message.includes("position")
+            ? (() => {
+                const pos = parseInt(e.message.match(/position (\d+)/)?.[1] || "0");
+                const start = Math.max(0, pos - 50);
+                const end = Math.min(event.body.length, pos + 50);
+                return event.body.substring(start, end);
+              })()
+            : undefined,
+        });
         // Try to parse as nested JSON (in case it's double-encoded)
         try {
           payload = JSON.parse(JSON.parse(event.body));
@@ -414,10 +429,21 @@ export const handler: Handler = async (
       }
     } else if (event.body.Payload) {
       // API Gateway format with Payload wrapper
-      payload =
-        typeof event.body.Payload === "string"
-          ? JSON.parse(event.body.Payload)
-          : event.body.Payload;
+      try {
+        payload =
+          typeof event.body.Payload === "string"
+            ? JSON.parse(event.body.Payload)
+            : event.body.Payload;
+      } catch (e) {
+        console.error("Failed to parse event.body.Payload as JSON:", {
+          error: e instanceof Error ? e.message : String(e),
+          payloadPreview: typeof event.body.Payload === "string" 
+            ? event.body.Payload.substring(0, 500) 
+            : String(event.body.Payload).substring(0, 500),
+          payloadType: typeof event.body.Payload,
+        });
+        throw e;
+      }
     } else {
       // Body is already the parsed object (Step Functions format)
       payload = event.body;

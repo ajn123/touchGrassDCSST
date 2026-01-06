@@ -228,6 +228,49 @@ export const callReindexEvents = async (events: NormalizedEvent[]) => {
   }
 };
 
+// Safe JSON stringify that handles circular references and non-serializable values
+function safeStringify(obj: any): string {
+  const seen = new WeakSet();
+  const result = JSON.stringify(obj, (key, value) => {
+    if (typeof value === "object" && value !== null) {
+      if (seen.has(value)) {
+        return "[Circular]";
+      }
+      seen.add(value);
+    }
+    // Handle non-serializable values
+    if (value === undefined) {
+      return null;
+    }
+    if (typeof value === "function") {
+      return "[Function]";
+    }
+    if (value instanceof Error) {
+      return { message: value.message, name: value.name, stack: value.stack };
+    }
+    return value;
+  });
+
+  // Validate the JSON is parseable
+  try {
+    JSON.parse(result);
+  } catch (parseError) {
+    console.error("❌ Generated JSON is invalid:", {
+      error:
+        parseError instanceof Error ? parseError.message : String(parseError),
+      jsonPreview: result.substring(0, 300),
+      jsonLength: result.length,
+    });
+    throw new Error(
+      `Failed to generate valid JSON: ${
+        parseError instanceof Error ? parseError.message : String(parseError)
+      }`
+    );
+  }
+
+  return result;
+}
+
 // Lambda handler for event normalization
 export const handler: Handler = async (event, context, callback) => {
   const startTime = Date.now();
@@ -248,75 +291,132 @@ export const handler: Handler = async (event, context, callback) => {
 
     // Log the raw event (truncated if too long)
     const eventString = JSON.stringify(event);
-    console.log("📦 [NORMALIZE DEBUG] Raw event (first 500 chars):", 
-      eventString.substring(0, 500));
+    console.log(
+      "📦 [NORMALIZE DEBUG] Raw event (first 500 chars):",
+      eventString.substring(0, 500)
+    );
     if (eventString.length > 500) {
-      console.log("📦 [NORMALIZE DEBUG] Raw event (last 200 chars):", 
-        eventString.substring(eventString.length - 200));
+      console.log(
+        "📦 [NORMALIZE DEBUG] Raw event (last 200 chars):",
+        eventString.substring(eventString.length - 200)
+      );
+    }
+
+    // Helper function to try to fix common JSON syntax errors
+    function tryFixJSON(jsonString: string): string {
+      // Remove trailing commas before } or ]
+      let fixed = jsonString.replace(/,(\s*[}\]])/g, "$1");
+      // Remove trailing commas in objects/arrays
+      fixed = fixed.replace(/,(\s*})/g, "$1");
+      fixed = fixed.replace(/,(\s*])/g, "$1");
+      return fixed;
     }
 
     // Parse the request body - handle both API Gateway and Step Functions formats
     let body;
     try {
       console.log("📦 [NORMALIZE DEBUG] Starting body parsing...");
-      
+
       if (event.body) {
-        console.log("📦 [NORMALIZE DEBUG] event.body exists, type:", typeof event.body);
-        
+        console.log(
+          "📦 [NORMALIZE DEBUG] event.body exists, type:",
+          typeof event.body
+        );
+
         // API Gateway format
         if (typeof event.body === "string") {
-          console.log("📦 [NORMALIZE DEBUG] event.body is a string, length:", event.body.length);
-          console.log("📦 [NORMALIZE DEBUG] event.body preview (first 300 chars):", 
-            event.body.substring(0, 300));
-          console.log("📦 [NORMALIZE DEBUG] event.body preview (last 200 chars):", 
-            event.body.substring(Math.max(0, event.body.length - 200)));
-          
+          console.log(
+            "📦 [NORMALIZE DEBUG] event.body is a string, length:",
+            event.body.length
+          );
+          console.log(
+            "📦 [NORMALIZE DEBUG] event.body preview (first 300 chars):",
+            event.body.substring(0, 300)
+          );
+          console.log(
+            "📦 [NORMALIZE DEBUG] event.body preview (last 200 chars):",
+            event.body.substring(Math.max(0, event.body.length - 200))
+          );
+
           // Check if it's double-stringified (starts with escaped quotes)
-          const isDoubleStringified = event.body.trim().startsWith('"') && 
+          const isDoubleStringified =
+            event.body.trim().startsWith('"') &&
             event.body.trim().endsWith('"') &&
             event.body.includes('\\"');
-          
+
           if (isDoubleStringified) {
-            console.log("📦 [NORMALIZE DEBUG] Detected potentially double-stringified JSON, attempting to parse twice");
+            console.log(
+              "📦 [NORMALIZE DEBUG] Detected potentially double-stringified JSON, attempting to parse twice"
+            );
             try {
               const firstParse = JSON.parse(event.body);
               if (typeof firstParse === "string") {
                 body = JSON.parse(firstParse);
-                console.log("📦 [NORMALIZE DEBUG] Successfully parsed double-stringified JSON");
+                console.log(
+                  "📦 [NORMALIZE DEBUG] Successfully parsed double-stringified JSON"
+                );
               } else {
                 body = firstParse;
-                console.log("📦 [NORMALIZE DEBUG] First parse was not a string, using it directly");
+                console.log(
+                  "📦 [NORMALIZE DEBUG] First parse was not a string, using it directly"
+                );
               }
             } catch (doubleParseError) {
-              console.log("📦 [NORMALIZE DEBUG] Double-stringified parse failed, trying normal parse");
-              body = JSON.parse(event.body);
+              console.log(
+                "📦 [NORMALIZE DEBUG] Double-stringified parse failed, trying normal parse"
+              );
+              // Try to fix common JSON issues before parsing
+              const fixed = tryFixJSON(event.body);
+              body = JSON.parse(fixed);
             }
           } else {
-            body = JSON.parse(event.body);
-            console.log("📦 [NORMALIZE DEBUG] Successfully parsed event.body as JSON");
+            try {
+              body = JSON.parse(event.body);
+              console.log(
+                "📦 [NORMALIZE DEBUG] Successfully parsed event.body as JSON"
+              );
+            } catch (initialParseError) {
+              // Try to fix common JSON syntax errors
+              console.log(
+                "📦 [NORMALIZE DEBUG] Initial parse failed, attempting to fix common JSON issues"
+              );
+              const fixed = tryFixJSON(event.body);
+              body = JSON.parse(fixed);
+              console.log(
+                "📦 [NORMALIZE DEBUG] Successfully parsed after fixing JSON syntax"
+              );
+            }
           }
-          
+
           console.log("📦 [NORMALIZE DEBUG] Parsed body structure:", {
             hasEvents: "events" in body,
             hasSource: "source" in body,
             hasEventType: "eventType" in body,
             bodyKeys: Object.keys(body),
             eventsIsArray: Array.isArray(body.events),
-            eventsLength: Array.isArray(body.events) ? body.events.length : "N/A",
+            eventsLength: Array.isArray(body.events)
+              ? body.events.length
+              : "N/A",
           });
         } else {
           // Body is not a string, use it directly
-          console.log("📦 [NORMALIZE DEBUG] event.body is not a string, using as-is");
+          console.log(
+            "📦 [NORMALIZE DEBUG] event.body is not a string, using as-is"
+          );
           body = event.body;
         }
       } else {
         // Step Functions format - data might be passed directly in the event
         // But Step Functions wraps it in a body field, so check if body exists but is an object
         if ((event as any).body && typeof (event as any).body === "object") {
-          console.log("📦 [NORMALIZE DEBUG] event.body exists as object (Step Functions format)");
+          console.log(
+            "📦 [NORMALIZE DEBUG] event.body exists as object (Step Functions format)"
+          );
           body = (event as any).body;
         } else {
-          console.log("📦 [NORMALIZE DEBUG] No event.body found, using event directly (Step Functions format)");
+          console.log(
+            "📦 [NORMALIZE DEBUG] No event.body found, using event directly (Step Functions format)"
+          );
           body = event;
         }
         console.log("📦 [NORMALIZE DEBUG] Direct event structure:", {
@@ -325,97 +425,80 @@ export const handler: Handler = async (event, context, callback) => {
           hasEventType: "eventType" in body,
           bodyKeys: Object.keys(body),
           eventsIsArray: Array.isArray((body as any).events),
-          eventsLength: Array.isArray((body as any).events) ? (body as any).events.length : "N/A",
+          eventsLength: Array.isArray((body as any).events)
+            ? (body as any).events.length
+            : "N/A",
         });
       }
     } catch (parseError) {
       // This catch block handles JSON parsing errors
       if (event.body && typeof event.body === "string") {
-            const errorPosition = parseError instanceof SyntaxError && parseError.message.includes("position") 
-              ? parseInt(parseError.message.match(/position (\d+)/)?.[1] || "0")
-              : 0;
-            
-            const start = Math.max(0, errorPosition - 100);
-            const end = Math.min(event.body.length, errorPosition + 100);
-            const context = event.body.substring(start, end);
-            
-            // Show the exact character at the error position
-            const charAtPosition = event.body[errorPosition];
-            const charCode = charAtPosition ? charAtPosition.charCodeAt(0) : null;
-            
-            console.error("📦 [NORMALIZE DEBUG] Failed to parse event.body as JSON:", {
-              error: parseError instanceof Error ? parseError.message : String(parseError),
-              errorName: parseError instanceof Error ? parseError.name : "Unknown",
-              bodyLength: event.body.length,
-              errorPosition: errorPosition,
-              charAtPosition: charAtPosition,
-              charCode: charCode,
-              charHex: charAtPosition ? `0x${charCode?.toString(16)}` : null,
-              contextAroundError: context,
-              contextWithMarkers: event.body.substring(Math.max(0, errorPosition - 20), Math.min(event.body.length, errorPosition + 20)),
-              bodyPreview: event.body.substring(0, Math.min(500, errorPosition + 50)),
-            });
-            
-            // Try to find the problematic character or structure
-            if (errorPosition > 0 && errorPosition < event.body.length) {
-              const beforeError = event.body.substring(Math.max(0, errorPosition - 10), errorPosition);
-              const atError = event.body[errorPosition];
-              const afterError = event.body.substring(errorPosition + 1, Math.min(event.body.length, errorPosition + 11));
-              console.error("📦 [NORMALIZE DEBUG] Character analysis:", {
-                before: beforeError,
-                atError: atError,
-                after: afterError,
-                beforeCharCodes: beforeError.split('').map(c => c.charCodeAt(0)),
-                atErrorCharCode: atError ? atError.charCodeAt(0) : null,
-                afterCharCodes: afterError.split('').map(c => c.charCodeAt(0)),
-              });
-            }
-            
-            throw parseError;
+        const errorPosition =
+          parseError instanceof SyntaxError &&
+          parseError.message.includes("position")
+            ? parseInt(parseError.message.match(/position (\d+)/)?.[1] || "0")
+            : 0;
+
+        const start = Math.max(0, errorPosition - 100);
+        const end = Math.min(event.body.length, errorPosition + 100);
+        const context = event.body.substring(start, end);
+
+        // Show the exact character at the error position
+        const charAtPosition = event.body[errorPosition];
+        const charCode = charAtPosition ? charAtPosition.charCodeAt(0) : null;
+
+        console.error(
+          "📦 [NORMALIZE DEBUG] Failed to parse event.body as JSON:",
+          {
+            error:
+              parseError instanceof Error
+                ? parseError.message
+                : String(parseError),
+            errorName:
+              parseError instanceof Error ? parseError.name : "Unknown",
+            bodyLength: event.body.length,
+            errorPosition: errorPosition,
+            charAtPosition: charAtPosition,
+            charCode: charCode,
+            charHex: charAtPosition ? `0x${charCode?.toString(16)}` : null,
+            contextAroundError: context,
+            contextWithMarkers: event.body.substring(
+              Math.max(0, errorPosition - 20),
+              Math.min(event.body.length, errorPosition + 20)
+            ),
+            bodyPreview: event.body.substring(
+              0,
+              Math.min(500, errorPosition + 50)
+            ),
           }
-        } else {
-          console.log("📦 [NORMALIZE DEBUG] event.body is not a string, using as-is");
-          body = event.body;
+        );
+
+        // Try to find the problematic character or structure
+        if (errorPosition > 0 && errorPosition < event.body.length) {
+          const beforeError = event.body.substring(
+            Math.max(0, errorPosition - 10),
+            errorPosition
+          );
+          const atError = event.body[errorPosition];
+          const afterError = event.body.substring(
+            errorPosition + 1,
+            Math.min(event.body.length, errorPosition + 11)
+          );
+          console.error("📦 [NORMALIZE DEBUG] Character analysis:", {
+            before: beforeError,
+            atError: atError,
+            after: afterError,
+            beforeCharCodes: beforeError
+              .split("")
+              .map((c: string) => c.charCodeAt(0)),
+            atErrorCharCode: atError ? atError.charCodeAt(0) : null,
+            afterCharCodes: afterError
+              .split("")
+              .map((c: string) => c.charCodeAt(0)),
+          });
         }
-      } else {
-        // Step Functions format - data might be passed directly in the event
-        // But Step Functions wraps it in a body field, so check if body exists but is an object
-        if ((event as any).body && typeof (event as any).body === "object") {
-          console.log("📦 [NORMALIZE DEBUG] event.body exists as object (Step Functions format)");
-          body = (event as any).body;
-        } else {
-          console.log("📦 [NORMALIZE DEBUG] No event.body found, using event directly (Step Functions format)");
-          body = event;
-        }
-        console.log("📦 [NORMALIZE DEBUG] Direct event structure:", {
-          hasEvents: "events" in body,
-          hasSource: "source" in body,
-          hasEventType: "eventType" in body,
-          bodyKeys: Object.keys(body),
-          eventsIsArray: Array.isArray((body as any).events),
-          eventsLength: Array.isArray((body as any).events) ? (body as any).events.length : "N/A",
-        });
       }
 
-      // Try to stringify to validate the body is serializable
-      try {
-        JSON.stringify(body);
-        console.log("📦 [NORMALIZE DEBUG] Body is JSON-serializable");
-      } catch (stringifyError) {
-        console.error("📦 [NORMALIZE DEBUG] Body contains non-serializable data:", {
-          error: stringifyError instanceof Error ? stringifyError.message : String(stringifyError),
-          bodyKeys: Object.keys(body || {}),
-        });
-      }
-      
-      console.log("📦 [NORMALIZE DEBUG] Body parsing completed successfully");
-    } catch (error) {
-      console.error("📦 [NORMALIZE DEBUG] Error parsing request body:", error);
-      console.error("📦 [NORMALIZE DEBUG] Error details:", {
-        name: error instanceof Error ? error.name : "Unknown",
-        message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-      });
       return {
         statusCode: 400,
         headers: {
@@ -424,12 +507,36 @@ export const handler: Handler = async (event, context, callback) => {
         },
         body: JSON.stringify({
           error: "Invalid request body format",
-          message: error instanceof Error ? error.message : String(error),
+          message:
+            parseError instanceof Error
+              ? parseError.message
+              : String(parseError),
         }),
       };
     }
 
-    console.log("📦 [NORMALIZE DEBUG] Extracting events, source, eventType from body...");
+    // Try to stringify to validate the body is serializable
+    try {
+      JSON.stringify(body);
+      console.log("📦 [NORMALIZE DEBUG] Body is JSON-serializable");
+    } catch (stringifyError) {
+      console.error(
+        "📦 [NORMALIZE DEBUG] Body contains non-serializable data:",
+        {
+          error:
+            stringifyError instanceof Error
+              ? stringifyError.message
+              : String(stringifyError),
+          bodyKeys: Object.keys(body || {}),
+        }
+      );
+    }
+
+    console.log("📦 [NORMALIZE DEBUG] Body parsing completed successfully");
+
+    console.log(
+      "📦 [NORMALIZE DEBUG] Extracting events, source, eventType from body..."
+    );
     const { events, source, eventType, testMode } = body;
 
     console.log("📦 [NORMALIZE DEBUG] Extracted values:", {
@@ -444,12 +551,15 @@ export const handler: Handler = async (event, context, callback) => {
 
     // Validate input
     if (!events || !Array.isArray(events)) {
-      console.error("📦 [NORMALIZE DEBUG] Validation failed - events is not an array:", {
-        events: events,
-        eventsType: typeof events,
-        eventsIsArray: Array.isArray(events),
-        bodyKeys: Object.keys(body),
-      });
+      console.error(
+        "📦 [NORMALIZE DEBUG] Validation failed - events is not an array:",
+        {
+          events: events,
+          eventsType: typeof events,
+          eventsIsArray: Array.isArray(events),
+          bodyKeys: Object.keys(body),
+        }
+      );
       return {
         statusCode: 400,
         headers: {
@@ -465,10 +575,16 @@ export const handler: Handler = async (event, context, callback) => {
       };
     }
 
-    console.log("📦 [NORMALIZE DEBUG] Validation passed - events is an array with", events.length, "items");
+    console.log(
+      "📦 [NORMALIZE DEBUG] Validation passed - events is an array with",
+      events.length,
+      "items"
+    );
 
     // Check if these are groups
-    const isGroup = eventType === "group" || events.some((item: any) => item.isGroup || item.type === "group");
+    const isGroup =
+      eventType === "group" ||
+      events.some((item: any) => item.isGroup || item.type === "group");
 
     if (isGroup) {
       // Groups don't need normalization, just pass them through
@@ -477,20 +593,43 @@ export const handler: Handler = async (event, context, callback) => {
           source || "unknown"
         }`
       );
-      
+
       // Log GROUP_INFO items to verify they're being passed through
-      const groupInfoItems = events.filter((item: any) => item.sk === "GROUP_INFO");
-      console.log(`🔍 Normalize step: ${groupInfoItems.length} GROUP_INFO items detected`);
+      const groupInfoItems = events.filter(
+        (item: any) => item.sk === "GROUP_INFO"
+      );
+      console.log(
+        `🔍 Normalize step: ${groupInfoItems.length} GROUP_INFO items detected`
+      );
       if (groupInfoItems.length > 0) {
-        console.log(`   - Sample GROUP_INFO: pk=${groupInfoItems[0].pk}, sk=${groupInfoItems[0].sk}`);
+        console.log(
+          `   - Sample GROUP_INFO: pk=${groupInfoItems[0].pk}, sk=${groupInfoItems[0].sk}`
+        );
       }
-      
-      return JSON.stringify({
-        success: true,
-        events: events, // Pass groups through as-is
-        source: source || "unknown",
-        eventType: "group",
-      });
+
+      try {
+        return safeStringify({
+          success: true,
+          events: events, // Pass groups through as-is
+          source: source || "unknown",
+          eventType: "group",
+        });
+      } catch (stringifyError) {
+        console.error("❌ Error stringifying groups response:", stringifyError);
+        // Fallback to basic stringify with error handling
+        return JSON.stringify({
+          success: true,
+          events: events.map((e: any) => {
+            try {
+              return JSON.parse(JSON.stringify(e));
+            } catch {
+              return { error: "Failed to serialize event" };
+            }
+          }),
+          source: source || "unknown",
+          eventType: "group",
+        });
+      }
     }
 
     console.log(
@@ -498,7 +637,7 @@ export const handler: Handler = async (event, context, callback) => {
         source || "unknown"
       }`
     );
-    
+
     // Log sample of first event to verify structure
     if (events.length > 0) {
       console.log("📦 [NORMALIZE DEBUG] Sample first event:", {
@@ -549,12 +688,32 @@ export const handler: Handler = async (event, context, callback) => {
 
     console.log(`✅ Successfully normalized ${normalizedEvents.length} events`);
 
-    return JSON.stringify({
-      success: true,
-      events: normalizedEvents,
-      source: source || "unknown",
-      eventType: eventType || "unknown",
-    });
+    try {
+      return safeStringify({
+        success: true,
+        events: normalizedEvents,
+        source: source || "unknown",
+        eventType: eventType || "unknown",
+      });
+    } catch (stringifyError) {
+      console.error(
+        "❌ Error stringifying normalized events response:",
+        stringifyError
+      );
+      // Fallback to basic stringify with error handling
+      return JSON.stringify({
+        success: true,
+        events: normalizedEvents.map((e) => {
+          try {
+            return JSON.parse(JSON.stringify(e));
+          } catch {
+            return { error: "Failed to serialize event" };
+          }
+        }),
+        source: source || "unknown",
+        eventType: eventType || "unknown",
+      });
+    }
   } catch (error) {
     const totalTime = Date.now() - startTime;
     console.error(

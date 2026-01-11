@@ -27,11 +27,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Log the received body for debugging (especially around position 222)
+    console.log("Received analytics body:", {
+      length: bodyText.length,
+      preview: bodyText.substring(0, Math.min(500, bodyText.length)),
+      charAt222: bodyText[222] || "N/A",
+      contextAround222: bodyText.length > 222 
+        ? bodyText.substring(Math.max(0, 222 - 50), Math.min(bodyText.length, 222 + 50))
+        : "N/A (body too short)",
+    });
+
+    // Helper function to try to fix common JSON syntax errors
+    function tryFixJSON(jsonString: string): string {
+      // Remove trailing commas before } or ]
+      let fixed = jsonString.replace(/,(\s*[}\]])/g, "$1");
+      // Remove trailing commas in objects/arrays
+      fixed = fixed.replace(/,(\s*})/g, "$1");
+      fixed = fixed.replace(/,(\s*])/g, "$1");
+      return fixed;
+    }
+
     // Parse JSON with comprehensive error handling
     let body: any;
     try {
       body = JSON.parse(bodyText);
     } catch (parseError) {
+      // Try to fix common JSON syntax errors before giving up
+      try {
+        const fixed = tryFixJSON(bodyText);
+        body = JSON.parse(fixed);
+        console.log("Successfully parsed JSON after fixing syntax errors");
+      } catch (fixError) {
+        // If fixing didn't work, log the original error
       // Extract position from error message if available
       const positionMatch = parseError instanceof SyntaxError && parseError.message.includes("position")
         ? parseError.message.match(/position (\d+)/)
@@ -68,16 +95,17 @@ export async function POST(request: NextRequest) {
         contentType: request.headers.get("content-type") || "none",
       };
 
-      console.error("Failed to parse JSON body in analytics track:", errorDetails);
-      
-      return NextResponse.json(
-        { 
-          error: "Invalid JSON format", 
-          message: parseError instanceof Error ? parseError.message : String(parseError),
-          ...(position !== null && { position }),
-        },
-        { status: 400 }
-      );
+        console.error("Failed to parse JSON body in analytics track (even after fixing):", errorDetails);
+        
+        return NextResponse.json(
+          { 
+            error: "Invalid JSON format", 
+            message: parseError instanceof Error ? parseError.message : String(parseError),
+            ...(position !== null && { position }),
+          },
+          { status: 400 }
+        );
+      }
     }
 
     // Validate parsed body structure

@@ -40,7 +40,7 @@ export function transformOpenWebNinjaEvent(event: any): NormalizedEvent {
     publisher: event.publisher,
     source: "openwebninja",
     external_id: event.event_id,
-    is_public: true,
+    isPublic: true,
   };
 }
 
@@ -59,7 +59,7 @@ export function transformWashingtonianEvent(event: any): NormalizedEvent {
     socials: event.url ? { website: event.url } : undefined,
     image_url: event.image_url,
     source: "washingtonian",
-    is_public: true,
+    isPublic: true,
   };
 }
 
@@ -114,7 +114,7 @@ export function transformClockOutEvent(event: any): NormalizedEvent {
     url: event.url,
     cost: normalizeCost(event.price),
     socials: event.url ? { website: event.url } : undefined,
-    is_public: true,
+    isPublic: true,
     source: "clockoutdc",
   };
 }
@@ -134,7 +134,8 @@ export function transformCrawlerEvent(event: any): NormalizedEvent {
     image_url: event.image_url,
     cost: normalizeCost(event.cost),
     socials: event.socials ?? (event.url ? { website: event.url } : undefined),
-    is_public: event.is_public ?? true,
+    // Always set to true for mined/crawled events - they should be public by default
+    isPublic: true,
     source: "crawler",
   };
 }
@@ -188,7 +189,7 @@ export function transformEventbriteEvent(event: any): NormalizedEvent {
     cost: normalizeCost(event.price),
     image_url: event.image_url,
     socials: event.url ? { website: event.url } : undefined,
-    is_public: true,
+    isPublic: true,
     source: "eventbrite",
   };
 }
@@ -676,7 +677,29 @@ export const handler: Handler = async (event, context, callback) => {
           default:
             // Assume it's already in normalized format
             normalizedEvent = rawEvent;
+            // Ensure isPublic is set for events that don't go through a transform
+            // Check both is_public (snake_case) and isPublic (camelCase) for backward compatibility
+            const rawEventAny = rawEvent as any;
+            if (
+              normalizedEvent.isPublic === undefined &&
+              rawEventAny.is_public === undefined
+            ) {
+              normalizedEvent.isPublic = true;
+            } else if (
+              rawEventAny.is_public !== undefined &&
+              normalizedEvent.isPublic === undefined
+            ) {
+              // Convert snake_case is_public to camelCase isPublic for backward compatibility
+              normalizedEvent.isPublic =
+                rawEventAny.is_public === true ||
+                rawEventAny.is_public === "true";
+            }
         }
+
+        // Log isPublic value for debugging
+        console.log(
+          `🔒 Normalized event "${normalizedEvent.title}": isPublic = ${normalizedEvent.isPublic}`
+        );
 
         normalizedEvents.push(normalizedEvent);
       } catch (transformError) {

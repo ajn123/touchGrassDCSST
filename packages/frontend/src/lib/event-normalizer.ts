@@ -40,7 +40,7 @@ export interface NormalizedEvent {
   // Metadata
   source?: string;
   external_id?: string;
-  is_public?: boolean;
+  isPublic?: boolean;
   is_virtual?: boolean;
 
   // Optional fields for specific sources
@@ -255,7 +255,7 @@ export class EventNormalizer {
       publisher: event.publisher,
       source: "openwebninja",
       external_id: event.event_id,
-      is_public: true,
+      isPublic: true,
     };
   }
 
@@ -273,7 +273,7 @@ export class EventNormalizer {
       url: event.url,
       image_url: event.image_url,
       source: "washingtonian",
-      is_public: true,
+      isPublic: true,
     };
   }
 
@@ -292,7 +292,7 @@ export class EventNormalizer {
       image_url: event.image_url,
       cost: this.normalizeCost(event.cost),
       socials: event.socials,
-      is_public: event.is_public ?? true,
+      isPublic: event.isPublic ?? true,
       source: "crawler",
     };
   }
@@ -325,7 +325,7 @@ export class EventNormalizer {
 
       // Categorization
       category: this.normalizeCategory(event.category),
-      isPublic: (event.is_public ?? true).toString(),
+      isPublic: (event.isPublic ?? true).toString(),
 
       // Media & Links
       image_url: event.image_url,

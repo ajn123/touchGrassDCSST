@@ -13,106 +13,16 @@ const client = new DynamoDBClient({
 });
 
 /**
- * Get the DynamoDB table name with validation
+ * Get the DynamoDB table name from Resource.Db
  */
 function getTableName(): string {
-  try {
-    // Log what we're trying to access for debugging
-    console.log("🔍 Attempting to get table name from Resource.Db...");
-    console.log("   Resource.Db exists:", !!Resource.Db);
-
-    // Try to access the table name (use direct access like other functions)
-    let tableName: string | undefined;
-    try {
-      // Try direct access first (matching pattern in api.ts and openWeb.ts)
-      tableName = Resource.Db.name;
-    } catch (resourceError: any) {
-      console.error(
-        "❌ Error accessing Resource.Db.name:",
-        resourceError.message
-      );
-      console.error("   Error type:", resourceError.name);
-      // Try optional chaining as fallback
-      try {
-        tableName = Resource.Db?.name;
-      } catch (fallbackError: any) {
-        console.error("❌ Fallback also failed:", fallbackError.message);
-      }
-    }
-
-    // Also check environment variables as fallback
-    const envTableName =
-      process.env.SST_Resource_Db_name ||
-      process.env.DB_NAME ||
-      process.env.TABLE_NAME;
-
-    console.log("   Resource.Db?.name:", tableName);
-    console.log(
-      "   Environment variable (SST_Resource_Db_name):",
-      envTableName
+  if (!Resource.Db?.name) {
+    throw new Error(
+      "DynamoDB table name is not available. Resource.Db.name is undefined. " +
+        "Make sure the function is properly linked to the db resource."
     );
-    console.log(
-      "   All DB-related env vars:",
-      Object.keys(process.env).filter(
-        (k) => k.includes("DB") || k.includes("TABLE")
-      )
-    );
-    // Log all SST-related env vars to see what SST injects
-    const sstEnvVars = Object.keys(process.env)
-      .filter((k) => k.startsWith("SST_") || k.includes("Resource"))
-      .reduce((acc, key) => {
-        acc[key] = process.env[key];
-        return acc;
-      }, {} as Record<string, string | undefined>);
-    console.log(
-      "   All SST-related env vars:",
-      JSON.stringify(sstEnvVars, null, 2)
-    );
-
-    if (!tableName && envTableName) {
-      console.log("⚠️  Using table name from environment variable as fallback");
-      tableName = envTableName;
-    }
-
-    // Hardcoded fallback for production table (last resort)
-    if (!tableName) {
-      const stage = process.env.SST_STAGE || process.env.STAGE || "production";
-      const region = process.env.AWS_REGION || "us-east-1";
-      
-      // Try to construct table name based on known pattern
-      // Production tables: touchgrassdcsst-production-DbTable-*
-      if (stage === "production" && region === "us-east-1") {
-        // Known production table names from earlier checks
-        const knownTables = [
-          "touchgrassdcsst-production-DbTable-bcabbfkm",
-          "touchgrassdcsst-production-DbTable-vzmrumed",
-        ];
-        // Use the first one as fallback (most recent)
-        tableName = knownTables[0];
-        console.log("⚠️  Using hardcoded production table name as last resort:", tableName);
-      }
-    }
-
-    if (!tableName) {
-      const errorMsg =
-        "DynamoDB table name is not available. Resource.Db.name is undefined. " +
-        "Make sure the function is properly linked to the db resource. " +
-        `Resource.Db exists: ${!!Resource.Db}, Env vars checked: ${!!envTableName}`;
-      console.error("❌", errorMsg);
-      throw new Error(errorMsg);
-    }
-
-    console.log("✅ Using table name:", tableName);
-    return tableName;
-  } catch (error: any) {
-    console.error("❌ Failed to get table name:", error.message);
-    console.error("   Error details:", {
-      name: error.name,
-      message: error.message,
-      stack: error.stack,
-    });
-    throw error;
   }
+  return Resource.Db.name;
 }
 
 /**
@@ -134,6 +44,14 @@ export async function saveEvent(
 
   const eventId = generateEventId(event, source);
   const timestamp = Date.now();
+
+  // Log isPublic values for debugging
+  console.log(`🔒 Event isPublic check for "${event.title}":`, {
+    isPublic: event.isPublic,
+    isPublicType: typeof event.isPublic,
+    source: source || event.source,
+  });
+
   const item = {
     pk: eventId,
     sk: eventId,
@@ -155,7 +73,29 @@ export async function saveEvent(
 
     // Categorization
     category: normalizeCategory(event.category),
-    isPublic: (event.is_public ?? true).toString(),
+    // Ensure isPublic is always set correctly - default to true for mined/crawled events
+    // Check both is_public (snake_case) and isPublic (camelCase) for backward compatibility
+    isPublic: (() => {
+      if (event.isPublic !== undefined) {
+        // Handle boolean or string "true"/"false"
+        if (typeof event.isPublic === "boolean") {
+          return event.isPublic.toString();
+        } else if (typeof event.isPublic === "string") {
+          return event.isPublic; // Already a string
+        }
+        return "true"; // Fallback for unexpected types
+      }
+      // Check for legacy is_public field
+      const legacyIsPublic = (event as any).is_public;
+      if (legacyIsPublic !== undefined) {
+        if (typeof legacyIsPublic === "boolean") {
+          return legacyIsPublic.toString();
+        } else if (typeof legacyIsPublic === "string") {
+          return legacyIsPublic;
+        }
+      }
+      return "true"; // Default to true
+    })(),
 
     // Media & Links
     image_url: event.image_url,
@@ -208,6 +148,7 @@ export async function saveEvent(
       savedEvent: item,
     };
   } catch (error: any) {
+    const tableName = getTableName();
     if (error.name === "ConditionalCheckFailedException") {
       console.log(`Event already exists: ${event.title}`);
       return {
@@ -357,6 +298,7 @@ async function saveGroup(group: any): Promise<{
       savedEvent: item,
     };
   } catch (error: any) {
+    const tableName = getTableName();
     if (error.name === "ConditionalCheckFailedException") {
       console.log(
         `Group item already exists: ${group.title} (${group.pk}/${group.sk})`
@@ -407,17 +349,21 @@ export const handler: Handler = async (
           error: e instanceof Error ? e.message : String(e),
           bodyPreview: event.body.substring(0, 500),
           bodyLength: event.body.length,
-          position: e instanceof SyntaxError && e.message.includes("position") 
-            ? e.message.match(/position (\d+)/)?.[1] 
-            : undefined,
-          bodyAroundPosition: e instanceof SyntaxError && e.message.includes("position")
-            ? (() => {
-                const pos = parseInt(e.message.match(/position (\d+)/)?.[1] || "0");
-                const start = Math.max(0, pos - 50);
-                const end = Math.min(event.body.length, pos + 50);
-                return event.body.substring(start, end);
-              })()
-            : undefined,
+          position:
+            e instanceof SyntaxError && e.message.includes("position")
+              ? e.message.match(/position (\d+)/)?.[1]
+              : undefined,
+          bodyAroundPosition:
+            e instanceof SyntaxError && e.message.includes("position")
+              ? (() => {
+                  const pos = parseInt(
+                    e.message.match(/position (\d+)/)?.[1] || "0"
+                  );
+                  const start = Math.max(0, pos - 50);
+                  const end = Math.min(event.body.length, pos + 50);
+                  return event.body.substring(start, end);
+                })()
+              : undefined,
         });
         // Try to parse as nested JSON (in case it's double-encoded)
         try {
@@ -437,9 +383,10 @@ export const handler: Handler = async (
       } catch (e) {
         console.error("Failed to parse event.body.Payload as JSON:", {
           error: e instanceof Error ? e.message : String(e),
-          payloadPreview: typeof event.body.Payload === "string" 
-            ? event.body.Payload.substring(0, 500) 
-            : String(event.body.Payload).substring(0, 500),
+          payloadPreview:
+            typeof event.body.Payload === "string"
+              ? event.body.Payload.substring(0, 500)
+              : String(event.body.Payload).substring(0, 500),
           payloadType: typeof event.body.Payload,
         });
         throw e;

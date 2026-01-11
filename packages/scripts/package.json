@@ -80,7 +80,13 @@
     "delete:duplicates": "tsx src/remove-duplicate-events.ts",
     "create:glue-connection": "tsx src/create-glue-connection.ts",
     "check:logs": "tsx src/check-cron-logs.ts",
-    "check:sfn": "tsx src/check-step-functions.ts"
+    "check:sfn": "tsx src/check-step-functions.ts",
+    "check:isPublic": "sst shell tsx src/check-events-isPublic.ts",
+    "check:isPublic:prod": "sst shell --stage production tsx src/check-events-isPublic.ts",
+    "update:isPublic": "sst shell tsx src/update-events-isPublic.ts",
+    "update:isPublic:all": "sst shell tsx src/update-events-isPublic.ts all",
+    "update:isPublic:prod": "sst shell --stage production tsx src/update-events-isPublic.ts",
+    "update:isPublic:prod:all": "sst shell --stage production tsx src/update-events-isPublic.ts all"
   },
   "devDependencies": {
     "@types/node": "^22",

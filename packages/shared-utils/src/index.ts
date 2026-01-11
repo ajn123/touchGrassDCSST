@@ -46,7 +46,7 @@ export interface NormalizedEvent {
   // Metadata
   source?: string;
   external_id?: string;
-  is_public?: boolean;
+  isPublic?: boolean;
   is_virtual?: boolean;
 
   // Optional fields for specific sources
@@ -457,7 +457,7 @@ export interface NormalizedEvent {
   // Metadata
   source?: string;
   external_id?: string;
-  is_public?: boolean;
+  isPublic?: boolean;
   is_virtual?: boolean;
 
   // Optional fields for specific sources
@@ -559,7 +559,7 @@ export function transformOpenWebNinjaEvent(event: any): NormalizedEvent {
     },
     source: "openwebninja",
     external_id: event.event_id,
-    is_public: true,
+    isPublic: true,
     is_virtual: event.is_virtual || false,
     publisher: event.publisher,
     ticket_links: event.ticket_links?.map((t: any) => t.link) || [],

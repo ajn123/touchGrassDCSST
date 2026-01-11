@@ -29,7 +29,7 @@ export interface NormalizedEvent {
     };
     source?: string;
     external_id?: string;
-    is_public?: boolean;
+    isPublic?: boolean;
     is_virtual?: boolean;
     publisher?: string;
     ticket_links?: string[];
@@ -104,7 +104,7 @@ export interface NormalizedEvent {
     };
     source?: string;
     external_id?: string;
-    is_public?: boolean;
+    isPublic?: boolean;
     is_virtual?: boolean;
     publisher?: string;
     ticket_links?: string[];

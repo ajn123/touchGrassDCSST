@@ -31,8 +31,9 @@ function generateEventId(event, source) {
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, "");
     const sourcePrefix = source ? `${source.toUpperCase()}-` : "";
-    // Deterministic ID based on source and title only (no timestamp)
-    return `EVENT-${sourcePrefix}${titleSlug}`;
+    // Use start_date as part of the deterministic ID, but don't use any timestamp
+    const startDatePart = event.start_date ? `-${event.start_date}` : "";
+    return `EVENT-${sourcePrefix}${titleSlug}${startDatePart}`;
 }
 /**
  * Normalize date strings to consistent format
@@ -427,7 +428,7 @@ function transformOpenWebNinjaEvent(event) {
         },
         source: "openwebninja",
         external_id: event.event_id,
-        is_public: true,
+        isPublic: true,
         is_virtual: event.is_virtual || false,
         publisher: event.publisher,
         ticket_links: event.ticket_links?.map((t) => t.link) || [],

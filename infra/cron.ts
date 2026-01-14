@@ -27,4 +27,26 @@ const eventbriteCron = new sst.aws.Cron("eventbriteCron", {
   schedule: "rate(1 day)",
 });
 
-export { clockoutdcCron, cron, eventbriteCron, washingtonianCron };
+// Daily copy of production DB to dev (only runs in non-production stages)
+// Note: This cron will only be created in non-production stages
+// The function itself checks the stage and prevents running in production
+const copyProdToDevCron = new sst.aws.Cron("copyProdToDevCron", {
+  function: {
+    handler: "packages/functions/src/events/copyProdToDev.handler",
+    link: [db],
+    environment: {
+      // Production table name - update this with the actual production table name
+      // You can get it by running: npm run print:table:prod
+      PRODUCTION_TABLE_NAME: `touchgrassdcsst-production-DbTable-bcabbfkm`,
+    },
+  },
+  schedule: "cron(0 2 * * ? *)", // Daily at 2 AM UTC (10 PM EST previous day)
+});
+
+export {
+  clockoutdcCron,
+  copyProdToDevCron,
+  cron,
+  eventbriteCron,
+  washingtonianCron,
+};

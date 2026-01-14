@@ -89,8 +89,9 @@ export default function MonthlyCalendar({
         Fri: 5,
         Sat: 6,
       };
-      const weekdayIndex = weekdayMap[map.weekday as keyof typeof weekdayMap] ?? 0;
-      
+      const weekdayIndex =
+        weekdayMap[map.weekday as keyof typeof weekdayMap] ?? 0;
+
       const daysToSunday = weekdayIndex;
       const alignedDate = new Date(today);
       alignedDate.setDate(alignedDate.getDate() - daysToSunday);
@@ -119,18 +120,18 @@ export default function MonthlyCalendar({
   // Generate calendar days (ET-based) using rolling window
   useEffect(() => {
     if (windowStartDate === null) return; // Wait for initialization
-    
+
     const generateCalendarDays = () => {
       const today = new Date();
       const todayYmd = getEtYmd(today);
 
       // windowStartDate is already aligned to Sunday, so use it directly
       const startDate = new Date(windowStartDate);
-      
+
       // Calculate end date: start from aligned startDate, add windowDays, then round up to end of week
       const endDate = new Date(startDate);
       endDate.setDate(endDate.getDate() + (windowDays - 1));
-      
+
       // Round up to Saturday to complete the week
       const endDateEt = getEtParts(endDate);
       const daysToSaturday = 6 - endDateEt.weekdayIndex;
@@ -360,7 +361,9 @@ export default function MonthlyCalendar({
               </button>
 
               <h2 className="text-2xl font-bold">
-                {windowStartDate ? formatEtRange(windowStartDate, windowDays) : "Loading..."}
+                {windowStartDate
+                  ? formatEtRange(windowStartDate, windowDays)
+                  : "Loading..."}
               </h2>
 
               <button
@@ -393,7 +396,9 @@ export default function MonthlyCalendar({
             </button>
 
             <h3 className="text-lg font-semibold text-gray-900">
-              {windowStartDate ? formatEtRange(windowStartDate, windowDays) : "Loading..."}
+              {windowStartDate
+                ? formatEtRange(windowStartDate, windowDays)
+                : "Loading..."}
             </h3>
 
             <button
@@ -512,7 +517,7 @@ export default function MonthlyCalendar({
         {isCompact && (
           <div className="p-3 bg-gray-50 text-center">
             <p className="text-xs text-gray-600">
-              {events.length} events this month • Click events for details
+              Click the day to see more events • Click events for details
             </p>
           </div>
         )}

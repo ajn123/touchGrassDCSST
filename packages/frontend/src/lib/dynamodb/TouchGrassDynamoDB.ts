@@ -222,6 +222,8 @@ export class TouchGrassDynamoDB {
 
   /**
    * Get all events from DynamoDB
+   * Uses QueryCommand with publicEventsIndex GSI for better performance
+   * Handles pagination to get all events (not just the first 1MB)
    */
   async getEvents(): Promise<Event[]> {
     try {
@@ -232,39 +234,62 @@ export class TouchGrassDynamoDB {
       //   process.env.AWS_REGION || "us-east-1"
       // );
 
-      // Handle both old EVENT# and new EVENT- prefixes during transition
-      // For Washingtonian events, don't require isPublic field since they don't have it
-      const command = new ScanCommand({
-        TableName: this.tableName,
-        FilterExpression:
-          "(begins_with(#pk, :eventPrefixNew) OR begins_with(#pk, :eventPrefixOld) OR begins_with(#pk, :washingtonianPrefixNew) OR begins_with(#pk, :washingtonianPrefixOld)) AND (#isPublic = :isPublic OR begins_with(#pk, :washingtonianPrefixNew) OR begins_with(#pk, :washingtonianPrefixOld))",
-        ExpressionAttributeNames: {
-          "#pk": "pk",
-          "#isPublic": "isPublic",
-        },
-        ExpressionAttributeValues: {
-          ":eventPrefixNew": { S: "EVENT-" },
-          ":eventPrefixOld": { S: "EVENT#" },
-          ":washingtonianPrefixNew": { S: "EVENT-WASHINGTONIAN-" },
-          ":washingtonianPrefixOld": { S: "EVENT#WASHINGTONIAN#" },
-          ":isPublic": { S: "true" },
-        },
-      });
+      const allEvents: Event[] = [];
+      let lastEvaluatedKey: any = undefined;
+      let queryCount = 0;
 
-      const result = await this.client.send(command);
-      console.log("🔍 getEvents: DynamoDB scan completed");
+      // Use QueryCommand with publicEventsIndex GSI for efficient querying
+      // This is much faster than Scan because it only looks at items with isPublic = "true"
+      do {
+        queryCount++;
+        console.log(`🔍 getEvents: Querying batch ${queryCount}...`);
+
+        // Query the publicEventsIndex GSI where isPublic = "true"
+        // Then filter for events (pk starts with EVENT- or EVENT#)
+        const command = new QueryCommand({
+          TableName: this.tableName,
+          IndexName: "publicEventsIndex",
+          KeyConditionExpression: "#isPublic = :isPublic",
+          FilterExpression:
+            "(begins_with(#pk, :eventPrefixNew) OR begins_with(#pk, :eventPrefixOld) OR begins_with(#pk, :washingtonianPrefixNew) OR begins_with(#pk, :washingtonianPrefixOld))",
+          ExpressionAttributeNames: {
+            "#isPublic": "isPublic",
+            "#pk": "pk",
+          },
+          ExpressionAttributeValues: {
+            ":isPublic": { S: "true" },
+            ":eventPrefixNew": { S: "EVENT-" },
+            ":eventPrefixOld": { S: "EVENT#" },
+            ":washingtonianPrefixNew": { S: "EVENT-WASHINGTONIAN-" },
+            ":washingtonianPrefixOld": { S: "EVENT#WASHINGTONIAN#" },
+          },
+          ExclusiveStartKey: lastEvaluatedKey,
+        });
+
+        const result = await this.client.send(command);
+
+        const batchEvents: Event[] =
+          result.Items?.map((item) => {
+            // Use AWS SDK's unmarshall utility to convert DynamoDB format to regular object
+            const unmarshalledItem = unmarshall(item) as Event;
+            // console.log("🔍 getEvents: Unmarshalled item:", unmarshalledItem);
+            return unmarshalledItem;
+          }) || [];
+
+        allEvents.push(...batchEvents);
+        console.log(
+          `🔍 getEvents: Batch ${queryCount} - Found ${batchEvents.length} events (total so far: ${allEvents.length})`
+        );
+
+        lastEvaluatedKey = result.LastEvaluatedKey;
+      } while (lastEvaluatedKey);
+
+      console.log("🔍 getEvents: DynamoDB query completed");
       console.log(
-        "🔍 getEvents: Raw DynamoDB result count:",
-        result.Items?.length || 0
+        `🔍 getEvents: Total events found: ${allEvents.length} (queried ${queryCount} batch(es))`
       );
 
-      let events: Event[] =
-        result.Items?.map((item) => {
-          // Use AWS SDK's unmarshall utility to convert DynamoDB format to regular object
-          const unmarshalledItem = unmarshall(item) as Event;
-          // console.log("🔍 getEvents: Unmarshalled item:", unmarshalledItem);
-          return unmarshalledItem;
-        }) || [];
+      let events = allEvents;
 
       // For Washingtonian events, derive start_date (and start_time) from url or pk when missing
       events = events.map((ev: any) => {
@@ -330,7 +355,7 @@ export class TouchGrassDynamoDB {
       const currentAndFutureEvents = allEvents.filter((event) => {
         // Use end_date if available, otherwise use start_date
         const eventDate = event.end_date || event.start_date;
-        
+
         if (!eventDate) {
           // If no date, include it (could be ongoing or date TBD)
           return true;
@@ -413,17 +438,14 @@ export class TouchGrassDynamoDB {
       console.log("Searching for event with title:", title);
       console.log("Using table:", this.tableName);
 
-      const command = new ScanCommand({
-        TableName: this.tableName,
-        FilterExpression:
-          "#title = :title AND (begins_with(#pk, :eventPrefixNew) OR begins_with(#pk, :eventPrefixOld))",
+      const command = new QueryCommand({
+        TableName: Resource.Db.name,
+        IndexName: "eventTitleIndex",
+        KeyConditionExpression: "#title = :title",
         ExpressionAttributeNames: {
-          "#pk": "pk",
           "#title": "title",
         },
         ExpressionAttributeValues: {
-          ":eventPrefixNew": { S: "EVENT-" },
-          ":eventPrefixOld": { S: "EVENT#" },
           ":title": { S: title },
         },
       });
@@ -467,16 +489,15 @@ export class TouchGrassDynamoDB {
    */
   async getEventsByCategory(category: string): Promise<Event[]> {
     try {
-      const command = new ScanCommand({
-        TableName: this.tableName,
-        FilterExpression:
-          "(begins_with(#pk, :eventPrefixNew) OR begins_with(#pk, :eventPrefixOld))",
+      const command = new QueryCommand({
+        TableName: Resource.Db.name,
+        IndexName: "eventCategoryIndex",
+        KeyConditionExpression: "#category = :category",
         ExpressionAttributeNames: {
-          "#pk": "pk",
+          "#category": "category",
         },
         ExpressionAttributeValues: {
-          ":eventPrefixNew": { S: "EVENT-" },
-          ":eventPrefixOld": { S: "EVENT#" },
+          ":category": { S: category },
         },
       });
 

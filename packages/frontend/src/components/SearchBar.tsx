@@ -42,6 +42,8 @@ export default function SearchBar() {
     // Navigate to the appropriate page based on type
     if (type === "event") {
       const eventId = cleanId(item.pk || item.id);
+      console.log("Navigating to event:", eventId);
+      console.log("Item:", item);
       router.push(`/events/${eventId}`);
     } else if (type === "group") {
       const groupId = cleanId(item.pk || item.id);

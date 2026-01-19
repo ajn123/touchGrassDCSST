@@ -549,17 +549,23 @@ export class TouchGrassDynamoDB {
         const unmarshalledItem = unmarshall(item);
 
         if (Array.isArray(unmarshalledItem.category)) {
-          // If category is an array, add each category to the set (normalized to lowercase)
+          // If category is an array, split each category by comma and slash, then add to the set (normalized to lowercase)
           unmarshalledItem.category.forEach((category: string) => {
             if (category && category.trim()) {
-              uniqueCategories.add(category.trim().toLowerCase());
+              // Split by both comma and slash to handle "christmas/novelty" or "christmas,novelty"
+              const splitCategories = category
+                .split(/[,\/]/)
+                .map((c) => c.trim().toLowerCase())
+                .filter((c) => c.length > 0);
+              splitCategories.forEach((c) => uniqueCategories.add(c));
             }
           });
         } else if (unmarshalledItem.category) {
-          // If category is a comma-separated string, split it and add each part (normalized to lowercase)
+          // If category is a string, split by comma and slash, then add each part (normalized to lowercase)
           const categories = unmarshalledItem.category
-            .split(",")
-            .map((cat: string) => cat.trim().toLowerCase());
+            .split(/[,\/]/)
+            .map((cat: string) => cat.trim().toLowerCase())
+            .filter((cat: string) => cat.length > 0);
           categories.forEach((category: string) => {
             if (category && category.trim()) {
               uniqueCategories.add(category.trim());

@@ -72,6 +72,27 @@ function SearchPageContent() {
         const data = await response.json();
         const allEvents = data.events || [];
 
+        // Filter out past events if not including them
+        // The API should already filter, but we do it here too to be safe
+        let eventsToUse = allEvents;
+        if (!filters.includePastEvents) {
+          const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
+          const beforeCount = allEvents.length;
+          eventsToUse = allEvents.filter((event: any) => {
+            const eventDate = event.end_date || event.start_date;
+            // Exclude events without dates when filtering out past events
+            // (they might be past events with missing date info)
+            if (!eventDate) return false;
+            return eventDate >= today;
+          });
+          const afterCount = eventsToUse.length;
+          if (beforeCount !== afterCount) {
+            console.log(
+              `📅 Filtered out ${beforeCount - afterCount} past events (${beforeCount} → ${afterCount})`
+            );
+          }
+        }
+
         // Apply frontend filtering
         const filterOptions: FilterOptions = {
           query: filters.query || undefined,
@@ -86,13 +107,14 @@ function SearchPageContent() {
           limit: 1000, // Large limit, we'll paginate on frontend if needed
         };
 
-        const filteredEvents = filterEvents(allEvents, filterOptions);
+        const filteredEvents = filterEvents(eventsToUse, filterOptions);
 
         // For now, groups are empty (can be added later if needed)
         const groups: any[] = [];
 
-        // Extract categories from current and future events only
-        const categoriesFromEvents = getCategoriesFromEvents(allEvents);
+        // Extract categories from current and future events only (not past events)
+        // Use the same filtered events to ensure categories match available events
+        const categoriesFromEvents = getCategoriesFromEvents(eventsToUse);
         setAllCategories(categoriesFromEvents);
 
         console.log(

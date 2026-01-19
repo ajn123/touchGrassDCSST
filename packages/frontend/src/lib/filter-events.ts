@@ -45,19 +45,30 @@ function filterByQuery(events: Event[], query: string): Event[] {
 
 /**
  * Filter events by categories
+ * Handles categories that may be separated by comma or slash
  */
 function filterByCategories(events: Event[], categories: string[]): Event[] {
   if (!categories || categories.length === 0) return events;
 
   return events.filter((event) => {
-    const eventCategories = Array.isArray(event.category)
-      ? event.category.map((c) => c.toLowerCase().trim())
-      : event.category
-      ? [event.category.toLowerCase().trim()]
-      : [];
+    // Extract all individual categories from the event, splitting by comma and slash
+    let eventCategories: string[] = [];
+    
+    if (Array.isArray(event.category)) {
+      eventCategories = event.category
+        .flatMap((c) => c.split(/[,\/]/))
+        .map((c) => c.toLowerCase().trim())
+        .filter((c) => c.length > 0);
+    } else if (event.category) {
+      eventCategories = event.category
+        .split(/[,\/]/)
+        .map((c) => c.toLowerCase().trim())
+        .filter((c) => c.length > 0);
+    }
 
+    // Check if any of the selected categories match any of the event's categories
     return categories.some((cat) =>
-      eventCategories.some((ec) => ec.includes(cat.toLowerCase().trim()))
+      eventCategories.some((ec) => ec === cat.toLowerCase().trim())
     );
   });
 }
@@ -245,6 +256,7 @@ export function filterEvents(
 
 /**
  * Get unique categories from events
+ * Splits categories by comma and slash to create individual category entries
  */
 export function getCategoriesFromEvents(events: Event[]): string[] {
   const categorySet = new Set<string>();
@@ -253,11 +265,21 @@ export function getCategoriesFromEvents(events: Event[]): string[] {
     if (Array.isArray(event.category)) {
       event.category.forEach((cat) => {
         if (cat && cat.trim()) {
-          categorySet.add(cat.trim());
+          // Split by both comma and slash to handle "christmas/novelty" or "christmas,novelty"
+          const splitCategories = cat
+            .split(/[,\/]/)
+            .map((c) => c.trim())
+            .filter((c) => c.length > 0);
+          splitCategories.forEach((c) => categorySet.add(c));
         }
       });
     } else if (event.category && event.category.trim()) {
-      categorySet.add(event.category.trim());
+      // Split by both comma and slash to handle "christmas/novelty" or "christmas,novelty"
+      const splitCategories = event.category
+        .split(/[,\/]/)
+        .map((c) => c.trim())
+        .filter((c) => c.length > 0);
+      splitCategories.forEach((c) => categorySet.add(c));
     }
   });
 

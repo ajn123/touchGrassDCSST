@@ -2,6 +2,7 @@ import Categories from "@/components/Categories";
 import FeaturedGroups from "@/components/FeaturedGroups";
 import MonthlyCalendar from "@/components/MonthlyCalendar";
 import SearchBar from "@/components/SearchBar";
+import { getCategoriesFromEvents } from "@/lib/filter-events";
 import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
 import { revalidatePath } from "next/cache";
 import Image from "next/image";
@@ -27,7 +28,16 @@ async function submitForm(formData: FormData) {
 export default async function Home() {
   // This runs on the server during rendering (like useEffect but server-side)
   const db = new TouchGrassDynamoDB(Resource.Db.name);
-  const categories = await db.getCategories();
+  
+  // Fetch current and future events only (not past events)
+  const events = await db.getCurrentAndFutureEvents();
+  
+  // Extract categories from events that actually exist
+  // This ensures we only show categories that will return results
+  const categoryStrings = getCategoriesFromEvents(events);
+  
+  // Convert to the format expected by Categories component
+  const categories: Category[] = categoryStrings.map((cat) => ({ category: cat }));
 
   return (
     <main className="min-h-screen">

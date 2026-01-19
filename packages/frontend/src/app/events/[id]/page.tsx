@@ -111,7 +111,7 @@ export default async function ItemPage({
         rightActionNode={
           <ReportWrongInfoButton eventTitle={item.title} eventId={item.pk} />
         }
-        imageUrl={resolveImageUrl(item.image_url) || undefined}
+        imageUrl={resolveImageUrl(item.image_url)}
         cost={item.cost}
         socials={item.socials ? item.socials : { website: item.url }}
         date={item.start_date as any}

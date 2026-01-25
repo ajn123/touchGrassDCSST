@@ -45,32 +45,66 @@ export function middleware(request: NextRequest) {
         request.headers.get("x-real-ip");
 
       // Sanitize values to prevent JSON issues
+      // This function ensures strings are safe for JSON serialization
       const sanitizeString = (
         value: string | null | undefined
       ): string | undefined => {
         if (!value) return undefined;
-        // Remove any control characters and ensure valid UTF-8
-        return (
-          String(value)
+        try {
+          // Convert to string and remove control characters
+          let sanitized = String(value)
             .replace(/[\x00-\x1F\x7F-\x9F]/g, "") // Remove control characters
-            .trim() || undefined
-        );
+            .trim();
+          
+          // If empty after trimming, return undefined
+          if (!sanitized) return undefined;
+          
+          // Validate it can be JSON stringified (this will throw if invalid)
+          // We stringify and parse to ensure it's valid JSON
+          JSON.parse(JSON.stringify({ test: sanitized }));
+          
+          return sanitized;
+        } catch {
+          // If stringification fails, return undefined to exclude the field
+          return undefined;
+        }
       };
 
       // Use pathname instead of fullUrl to avoid issues with query params and special chars
       const pageUrl = pathname || "/";
 
+      // Build properties object safely
+      const properties: Record<string, string> = {
+        page: sanitizeString(pageUrl) || "/",
+        timestamp: new Date().toISOString(),
+      };
+
+      // Only add fullUrl if it's different from pageUrl and can be safely sanitized
+      const sanitizedFullUrl = sanitizeString(fullUrl);
+      if (sanitizedFullUrl && sanitizedFullUrl !== pageUrl) {
+        properties.fullUrl = sanitizedFullUrl;
+      }
+
+      // Add optional fields only if they exist and can be sanitized
+      const sanitizedUserAgent = sanitizeString(userAgent);
+      if (sanitizedUserAgent) {
+        properties.userAgent = sanitizedUserAgent;
+      }
+
+      const sanitizedReferer = sanitizeString(referer);
+      if (sanitizedReferer) {
+        properties.referer = sanitizedReferer;
+      }
+
+      const sanitizedIp = sanitizeString(ip);
+      if (sanitizedIp) {
+        properties.ip = sanitizedIp;
+      }
+
       const body = {
         pk: "ANALYTICS#USER_VISIT",
         sk: `TIME#${Date.now()}`,
-        properties: {
-          page: sanitizeString(pageUrl) || "/",
-          fullUrl: sanitizeString(fullUrl) || pageUrl, // Keep fullUrl separate for reference
-          timestamp: new Date().toISOString(),
-          ...(userAgent ? { userAgent: sanitizeString(userAgent) } : {}),
-          ...(referer ? { referer: sanitizeString(referer) } : {}),
-          ...(ip ? { ip: sanitizeString(ip) } : {}),
-        },
+        properties,
         action: pathname === "/" ? "USER_VISIT" : "USER_ACTION",
       };
 

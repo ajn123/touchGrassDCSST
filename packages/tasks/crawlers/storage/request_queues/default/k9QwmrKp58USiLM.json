@@ -1,0 +1,9 @@
+{
+	"id": "k9QwmrKp58USiLM",
+	"json": "{\"id\":\"k9QwmrKp58USiLM\",\"url\":\"http://www.dcimprov.com/shows/off-site\",\"loadedUrl\":\"https://www.dcimprov.com/shows/off-site\",\"uniqueKey\":\"http://www.dcimprov.com/shows/off-site\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-01-25T19:26:18.313Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "http://www.dcimprov.com/shows/off-site",
+	"url": "http://www.dcimprov.com/shows/off-site"
+}

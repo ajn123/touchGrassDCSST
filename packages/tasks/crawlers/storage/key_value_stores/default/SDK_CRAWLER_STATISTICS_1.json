@@ -1,0 +1,40 @@
+{
+  "requestsFinished": 37,
+  "requestsFailed": 0,
+  "requestsRetries": 1,
+  "requestsFailedPerMinute": 0,
+  "requestsFinishedPerMinute": 32,
+  "requestMinDurationMillis": 2689,
+  "requestMaxDurationMillis": 9629,
+  "requestTotalFailedDurationMillis": 0,
+  "requestTotalFinishedDurationMillis": 190138,
+  "crawlerStartedAt": "2026-01-25T19:25:52.576Z",
+  "crawlerFinishedAt": "2026-01-25T19:27:01.172Z",
+  "statsPersistedAt": "2026-01-25T19:27:01.172Z",
+  "crawlerRuntimeMillis": 68673,
+  "crawlerLastStartTimestamp": 1769369152499,
+  "requestRetryHistogram": [
+    36,
+    1
+  ],
+  "statsId": 1,
+  "requestAvgFailedDurationMillis": null,
+  "requestAvgFinishedDurationMillis": 5139,
+  "requestTotalDurationMillis": 190138,
+  "requestsTotal": 37,
+  "requestsWithStatusCode": {
+    "200": 37
+  },
+  "errors": {},
+  "retryErrors": {
+    "/Users/alexandernorton/projects/touchGrassDCSST/packages/tasks/crawlers/node_modules/@crawlee/src/internals/utils/playwright-utils.ts:241:17": {
+      "missing error code": {
+        "Error": {
+          "page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.dcimprov.com/shows/main-showroom/atwhs": {
+            "count": 1
+          }
+        }
+      }
+    }
+  }
+}

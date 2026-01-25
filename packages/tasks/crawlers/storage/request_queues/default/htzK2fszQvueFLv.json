@@ -1,0 +1,9 @@
+{
+	"id": "htzK2fszQvueFLv",
+	"json": "{\"id\":\"htzK2fszQvueFLv\",\"url\":\"http://www.dcimprov.com/shows/main-showroom/drag-show\",\"loadedUrl\":\"https://www.dcimprov.com/shows/main-showroom/drag-show\",\"uniqueKey\":\"http://www.dcimprov.com/shows/main-showroom/drag-show\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-01-25T19:26:59.224Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "http://www.dcimprov.com/shows/main-showroom/drag-show",
+	"url": "http://www.dcimprov.com/shows/main-showroom/drag-show"
+}

@@ -53,4 +53,23 @@ const EventbriteTask = new sst.aws.Task("eventbriteTask", {
   dev: false,
 });
 
-export { ClockOutDCTask, EventbriteTask, WashingtonianTask };
+const DCImprovTask = new sst.aws.Task("dcimprovTask", {
+  cluster,
+  link: [db, api, normalizeEventStepFunction],
+  image: {
+    context: ".", // Use project root as context
+    dockerfile: "./packages/tasks/crawlers/Dockerfile.dcimprov",
+  },
+});
+
+const DCComedyLoftTask = new sst.aws.Task("dccomedyloftTask", {
+  cluster,
+  link: [db, api, normalizeEventStepFunction],
+  image: {
+    context: ".", // Use project root as context
+    dockerfile: "./packages/tasks/crawlers/Dockerfile.dccomedyloft",
+  },
+});
+
+export { ClockOutDCTask, DCComedyLoftTask, DCImprovTask, EventbriteTask, WashingtonianTask };
+

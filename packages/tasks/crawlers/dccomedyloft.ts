@@ -1,0 +1,864 @@
+import { SFNClient, StartExecutionCommand } from "@aws-sdk/client-sfn";
+import { PlaywrightCrawler } from "crawlee";
+import { Resource } from "sst";
+
+class ComedyLoftEvent {
+  title: string;
+  date: string;
+  time?: string;
+  location?: string;
+  description?: string;
+  url?: string;
+  category?: string;
+  price?: string;
+  venue?: string;
+  start_date?: string;
+  end_date?: string;
+
+  constructor(
+    title: string,
+    date: string,
+    time?: string,
+    location?: string,
+    description?: string,
+    url?: string,
+    category?: string,
+    price?: string,
+    venue?: string,
+    start_date?: string,
+    end_date?: string
+  ) {
+    this.title = title;
+    this.date = date;
+    this.time = time;
+    this.location = location;
+    this.description = description;
+    this.url = url;
+    this.category = category;
+    this.price = price;
+    this.venue = venue;
+    this.start_date = start_date;
+    this.end_date = end_date;
+  }
+}
+
+class ComedyLoftCrawler {
+  private events: ComedyLoftEvent[] = [];
+  private showUrls: string[] = [];
+
+  // Parse date from various formats like "Sun, Feb 22, 2026", "February 22 - March 22", etc.
+  private parseDate(dateStr: string): string {
+    try {
+      if (!dateStr) return "";
+
+      const cleaned = dateStr.trim();
+
+      // Handle date ranges like "February 22 - March 22"
+      const rangeMatch = cleaned.match(
+        /([A-Za-z]+)\s+(\d{1,2})\s*-\s*([A-Za-z]+)\s+(\d{1,2})/i
+      );
+      if (rangeMatch) {
+        // Use the start date
+        const monthName = rangeMatch[1];
+        const day = rangeMatch[2];
+        return this.parseMonthDayToISO(monthName, day);
+      }
+
+      // Handle single dates like "Sun, Feb 22, 2026"
+      const singleDateMatch = cleaned.match(
+        /([A-Za-z]+),\s*([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})/i
+      );
+      if (singleDateMatch) {
+        const monthName = singleDateMatch[2];
+        const day = singleDateMatch[3];
+        const year = singleDateMatch[4];
+        return this.parseMonthDayYearToISO(monthName, day, year);
+      }
+
+      // Handle dates like "Fri, Jan 30, 2026"
+      const shortDateMatch = cleaned.match(
+        /([A-Za-z]+),\s*([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})/i
+      );
+      if (shortDateMatch) {
+        const monthName = shortDateMatch[2];
+        const day = shortDateMatch[3];
+        const year = shortDateMatch[4];
+        return this.parseMonthDayYearToISO(monthName, day, year);
+      }
+
+      // Handle dates like "Thu Jan 29 2026, 7:30 PM"
+      const noCommaMatch = cleaned.match(
+        /([A-Za-z]+)\s+([A-Za-z]+)\s+(\d{1,2})\s+(\d{4})/i
+      );
+      if (noCommaMatch) {
+        const monthName = noCommaMatch[2];
+        const day = noCommaMatch[3];
+        const year = noCommaMatch[4];
+        return this.parseMonthDayYearToISO(monthName, day, year);
+      }
+
+      return "";
+    } catch (error) {
+      console.error("Error parsing date:", error);
+      return "";
+    }
+  }
+
+  // Helper to convert month name and day to ISO date (current year assumed)
+  private parseMonthDayToISO(monthName: string, day: string): string {
+    const monthMap: { [key: string]: number } = {
+      january: 1,
+      jan: 1,
+      february: 2,
+      feb: 2,
+      march: 3,
+      mar: 3,
+      april: 4,
+      apr: 4,
+      may: 5,
+      june: 6,
+      jun: 6,
+      july: 7,
+      jul: 7,
+      august: 8,
+      aug: 8,
+      september: 9,
+      sep: 9,
+      october: 10,
+      oct: 10,
+      november: 11,
+      nov: 11,
+      december: 12,
+      dec: 12,
+    };
+
+    const monthLower = monthName.toLowerCase();
+    const monthNum = monthMap[monthLower];
+    if (!monthNum) return "";
+
+    const today = new Date();
+    let year = today.getFullYear();
+    const dayNum = parseInt(day);
+
+    // Create date and check if it's in the past
+    let date = new Date(year, monthNum - 1, dayNum);
+
+    // If the date is more than 6 months in the past, assume it's next year
+    const sixMonthsAgo = new Date(today);
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    if (date < sixMonthsAgo) {
+      date.setFullYear(year + 1);
+      year = year + 1;
+    }
+
+    const yearStr = date.getFullYear();
+    const monthStr = String(date.getMonth() + 1).padStart(2, "0");
+    const dayStr = String(date.getDate()).padStart(2, "0");
+    return `${yearStr}-${monthStr}-${dayStr}`;
+  }
+
+  // Helper to convert month name, day, and year to ISO date
+  private parseMonthDayYearToISO(
+    monthName: string,
+    day: string,
+    year: string
+  ): string {
+    const monthMap: { [key: string]: number } = {
+      january: 1,
+      jan: 1,
+      february: 2,
+      feb: 2,
+      march: 3,
+      mar: 3,
+      april: 4,
+      apr: 4,
+      may: 5,
+      june: 6,
+      jun: 6,
+      july: 7,
+      jul: 7,
+      august: 8,
+      aug: 8,
+      september: 9,
+      sep: 9,
+      october: 10,
+      oct: 10,
+      november: 11,
+      nov: 11,
+      december: 12,
+      dec: 12,
+    };
+
+    const monthLower = monthName.toLowerCase();
+    const monthNum = monthMap[monthLower];
+    if (!monthNum) return "";
+
+    const yearNum = parseInt(year);
+    const dayNum = parseInt(day);
+
+    const monthStr = String(monthNum).padStart(2, "0");
+    const dayStr = String(dayNum).padStart(2, "0");
+    return `${yearNum}-${monthStr}-${dayStr}`;
+  }
+
+  // Parse time from formats like "7:00 PM", "7:30 PM - 9:45 PM", etc.
+  private parseTime(timeStr: string): string | undefined {
+    if (!timeStr) return undefined;
+
+    const cleaned = timeStr.trim().replace(/\s+/g, " ");
+
+    // Handle time ranges like "7:30 PM - 9:45 PM"
+    const rangeMatch = cleaned.match(
+      /(\d{1,2}:\d{2}\s*[ap]m)\s*-\s*(\d{1,2}:\d{2}\s*[ap]m)/i
+    );
+    if (rangeMatch) {
+      return `${rangeMatch[1].toLowerCase()}-${rangeMatch[2].toLowerCase()}`;
+    }
+
+    // Handle single times like "7:00 PM"
+    const singleTimeMatch = cleaned.match(/(\d{1,2}:\d{2}\s*[ap]m)/i);
+    if (singleTimeMatch) {
+      return singleTimeMatch[1].toLowerCase();
+    }
+
+    // Handle times without colons like "7 PM"
+    const noColonMatch = cleaned.match(/(\d{1,2}\s*[ap]m)/i);
+    if (noColonMatch) {
+      return noColonMatch[1].toLowerCase();
+    }
+
+    return cleaned || undefined;
+  }
+
+  // Parse price from text
+  private parsePrice(text: string): string | undefined {
+    if (!text) return undefined;
+    const lower = text.toLowerCase().trim();
+    if (/(^|\b)free(\b|$)/.test(lower)) return "free";
+    const money = text.match(/\$\s*([0-9]+(?:\.[0-9]{2})?)/);
+    if (money) return money[1];
+    const bare = text.match(/\b([0-9]+(?:\.[0-9]{2})?)\b/);
+    if (bare) return bare[1];
+    return undefined;
+  }
+
+  // First pass: collect all show URLs from the events page
+  async collectShowUrls(): Promise<string[]> {
+    console.log("🔍 Collecting show URLs from events page...");
+
+    const crawler = new PlaywrightCrawler({
+      maxRequestsPerCrawl: 1,
+      maxConcurrency: 1,
+      minConcurrency: 1,
+      requestHandlerTimeoutSecs: 60,
+      requestHandler: async ({ page, request }) => {
+        console.log(`🔗 Processing events page: ${request.url}`);
+
+        try {
+          await page.goto(request.url, {
+            waitUntil: "domcontentloaded",
+            timeout: 30000,
+          });
+
+          await page.waitForTimeout(2000);
+
+          // Extract all show links and basic event info
+          const eventInfo = await page.evaluate(() => {
+            const links: string[] = [];
+            const eventData: Array<{ url: string; title: string; dateText: string }> = [];
+            
+            // Look for links that go to /shows/ or event detail pages
+            const linkElements = document.querySelectorAll("a[href*='/shows/']");
+            linkElements.forEach((link) => {
+              const href = link.getAttribute("href");
+              if (href && !links.includes(href)) {
+                links.push(href);
+                
+                // Try to extract title and date from nearby elements
+                let title = "";
+                let dateText = "";
+                
+                // Look for title in parent or nearby elements
+                const parent = link.closest("article, .event, [class*='event']");
+                if (parent) {
+                  const titleEl = parent.querySelector("h2, h3, h4, [class*='title']");
+                  if (titleEl) {
+                    title = titleEl.textContent?.trim() || "";
+                  }
+                  
+                  // Look for date
+                  const dateEl = parent.querySelector("time, [class*='date'], [class*='Date']");
+                  if (dateEl) {
+                    dateText = dateEl.textContent?.trim() || "";
+                  }
+                }
+                
+                // If no title found, try to get from link text or nearby
+                if (!title) {
+                  title = link.textContent?.trim() || "";
+                }
+                
+                eventData.push({ url: href, title, dateText });
+              }
+            });
+            
+            return { links, eventData };
+          });
+
+          // Convert relative URLs to absolute
+          const baseUrl = "https://www.dccomedyloft.com";
+          this.showUrls = eventInfo.links.map((url) => {
+            if (url.startsWith("http")) return url;
+            return `${baseUrl}${url}`;
+          });
+
+          console.log(`✅ Found ${this.showUrls.length} show URLs`);
+          if (eventInfo.eventData.length > 0) {
+            console.log(`📋 Found ${eventInfo.eventData.length} events with metadata`);
+          }
+        } catch (error) {
+          console.error(`❌ Error collecting show URLs:`, error);
+        }
+      },
+      launchContext: {
+        launchOptions: {
+          headless: true,
+          args: [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-gpu",
+            "--window-size=1280,720",
+          ],
+        },
+      },
+    });
+
+    try {
+      await crawler.run(["https://www.dccomedyloft.com/events"]);
+      return this.showUrls;
+    } catch (error) {
+      console.error("❌ Failed to collect show URLs:", error);
+      return [];
+    }
+  }
+
+  // Second pass: crawl each show page to extract details
+  async crawlShowPages(showUrls: string[]): Promise<ComedyLoftEvent[]> {
+    console.log(`🕷️ Starting Comedy Loft show crawl for ${showUrls.length} shows...`);
+
+    this.events = [];
+
+    const crawler = new PlaywrightCrawler({
+      maxRequestsPerCrawl: showUrls.length,
+      maxConcurrency: 3,
+      minConcurrency: 1,
+      requestHandlerTimeoutSecs: 60,
+      requestHandler: async ({ page, request }) => {
+        console.log(`🔗 Processing show: ${request.url}`);
+
+        try {
+          await page.goto(request.url, {
+            waitUntil: "domcontentloaded",
+            timeout: 30000,
+          });
+
+          await page.waitForTimeout(2000);
+
+          // Extract event details from the show page
+          const eventData = await page.evaluate(() => {
+            // Extract title
+            const titleEl =
+              document.querySelector("h1") ||
+              document.querySelector("h2") ||
+              document.querySelector(".event-title") ||
+              document.querySelector("title");
+            const title = titleEl?.textContent?.trim() || "";
+
+            // Extract description
+            const descriptionEl =
+              document.querySelector(".event-description") ||
+              document.querySelector('[class*="description"]') ||
+              document.querySelector("p");
+            const description = descriptionEl?.textContent?.trim() || "";
+
+            // Extract dates - look for date text in various places
+            const dateTexts: string[] = [];
+            
+            // Look for date elements
+            const dateElements = document.querySelectorAll(
+              "time, [class*='date'], [class*='Date'], [datetime]"
+            );
+            dateElements.forEach((el) => {
+              // Check datetime attribute first
+              const datetime = el.getAttribute("datetime");
+              if (datetime) {
+                dateTexts.push(datetime);
+              }
+              // Then check text content
+              const text = el.textContent?.trim();
+              if (text && !dateTexts.includes(text)) {
+                dateTexts.push(text);
+              }
+            });
+
+            // Look for date patterns in the page text (various formats)
+            const bodyText = document.body.textContent || "";
+            
+            // Format: "Sun, Feb 22, 2026" or "Fri, Jan 30, 2026"
+            const fullDatePatterns = bodyText.match(
+              /([A-Za-z]+),\s*([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})/g
+            );
+            if (fullDatePatterns) {
+              fullDatePatterns.forEach((pattern) => {
+                if (!dateTexts.includes(pattern)) {
+                  dateTexts.push(pattern);
+                }
+              });
+            }
+            
+            // Format: "Thu Jan 29 2026, 7:30 PM"
+            const noCommaDatePatterns = bodyText.match(
+              /([A-Za-z]+)\s+([A-Za-z]+)\s+(\d{1,2})\s+(\d{4})/g
+            );
+            if (noCommaDatePatterns) {
+              noCommaDatePatterns.forEach((pattern) => {
+                if (!dateTexts.includes(pattern)) {
+                  dateTexts.push(pattern);
+                }
+              });
+            }
+            
+            // Format: "February 22 - March 22" (date ranges)
+            const dateRangePatterns = bodyText.match(
+              /([A-Za-z]+)\s+(\d{1,2})\s*-\s*([A-Za-z]+)\s+(\d{1,2})/g
+            );
+            if (dateRangePatterns) {
+              dateRangePatterns.forEach((pattern) => {
+                if (!dateTexts.includes(pattern)) {
+                  dateTexts.push(pattern);
+                }
+              });
+            }
+
+            // Extract times from event-list-button-group
+            // Structure: <div class="event-list-button-group">
+            //   <div class="event-divider">
+            //     <a class="event-btn-inline" href="/shows/350790"> 7:00 PM</a>
+            //   </div>
+            // </div>
+            const times: string[] = [];
+            const timeGroups = document.querySelectorAll(".event-list-button-group");
+            timeGroups.forEach((group) => {
+              const timeButtons = group.querySelectorAll(".event-btn-inline");
+              timeButtons.forEach((btn) => {
+                const timeText = btn.textContent?.trim();
+                if (timeText && /(\d{1,2}:\d{2}\s*[ap]m|\d{1,2}\s*[ap]m)/i.test(timeText)) {
+                  times.push(timeText);
+                }
+              });
+            });
+            
+            // Also check for times in other common locations
+            if (times.length === 0) {
+              const allTimeElements = document.querySelectorAll(
+                "time, [class*='time'], [class*='Time']"
+              );
+              allTimeElements.forEach((el) => {
+                const timeText = el.textContent?.trim();
+                if (timeText && /(\d{1,2}:\d{2}\s*[ap]m|\d{1,2}\s*[ap]m)/i.test(timeText)) {
+                  times.push(timeText);
+                }
+              });
+            }
+
+            // Extract price information
+            const priceTexts: string[] = [];
+            const priceElements = document.querySelectorAll(
+              "[class*='price'], [class*='Price'], [class*='cost'], [class*='Cost']"
+            );
+            priceElements.forEach((el) => {
+              const text = el.textContent?.trim();
+              if (text && (text.includes("$") || text.toLowerCase().includes("free"))) {
+                priceTexts.push(text);
+              }
+            });
+
+            // Extract venue (should be "The Comedy Loft of DC" or similar)
+            const venue = "The Comedy Loft of DC";
+            const location = "1523 22nd St NW, Washington DC 20037";
+
+            return {
+              title,
+              description,
+              dates: dateTexts,
+              times,
+              prices: priceTexts,
+              venue,
+              location,
+            };
+          });
+
+          // Process the extracted data
+          if (!eventData.title) {
+            console.log(`⚠️ Skipping show with no title: ${request.url}`);
+            return;
+          }
+
+          // Parse dates
+          const parsedDates: string[] = [];
+          if (eventData.dates && eventData.dates.length > 0) {
+            eventData.dates.forEach((dateStr) => {
+              const parsed = this.parseDate(dateStr);
+              if (parsed) parsedDates.push(parsed);
+            });
+          }
+
+          // If no dates found, try to extract from URL or page
+          if (parsedDates.length === 0) {
+            // Try to find dates in the page content
+            const pageContent = await page.textContent("body");
+            if (pageContent) {
+              const dateMatch = pageContent.match(
+                /([A-Za-z]+,\s*[A-Za-z]+\s+\d{1,2},?\s+\d{4})/g
+              );
+              if (dateMatch) {
+                dateMatch.forEach((dateStr) => {
+                  const parsed = this.parseDate(dateStr);
+                  if (parsed) parsedDates.push(parsed);
+                });
+              }
+            }
+          }
+
+          // If still no dates, use today's date as fallback
+          if (parsedDates.length === 0) {
+            const today = new Date();
+            const yearStr = today.getFullYear();
+            const monthStr = String(today.getMonth() + 1).padStart(2, "0");
+            const dayStr = String(today.getDate()).padStart(2, "0");
+            parsedDates.push(`${yearStr}-${monthStr}-${dayStr}`);
+          }
+
+          // Parse times
+          const parsedTimes: string[] = [];
+          if (eventData.times && eventData.times.length > 0) {
+            eventData.times.forEach((timeStr) => {
+              const parsed = this.parseTime(timeStr);
+              if (parsed) parsedTimes.push(parsed);
+            });
+          }
+
+          // Parse price
+          let parsedPrice: string | undefined = undefined;
+          if (eventData.prices && eventData.prices.length > 0) {
+            parsedPrice = this.parsePrice(eventData.prices[0]);
+          }
+
+          // Create events - one per date/time combination
+          if (parsedDates.length > 0 && parsedTimes.length > 0) {
+            // Multiple dates and times - create events for each combination
+            parsedDates.forEach((date) => {
+              parsedTimes.forEach((time) => {
+                const event = new ComedyLoftEvent(
+                  eventData.title,
+                  date,
+                  time,
+                  eventData.location,
+                  eventData.description,
+                  request.url,
+                  "comedy",
+                  parsedPrice,
+                  eventData.venue
+                );
+                this.events.push(event);
+              });
+            });
+          } else if (parsedDates.length > 0) {
+            // Multiple dates - create one event per date
+            parsedDates.forEach((date) => {
+              const event = new ComedyLoftEvent(
+                eventData.title,
+                date,
+                parsedTimes[0],
+                eventData.location,
+                eventData.description,
+                request.url,
+                "comedy",
+                parsedPrice,
+                eventData.venue
+              );
+              this.events.push(event);
+            });
+          } else {
+            // Fallback: create single event
+            const event = new ComedyLoftEvent(
+              eventData.title,
+              parsedDates[0] || "",
+              parsedTimes[0],
+              eventData.location,
+              eventData.description,
+              request.url,
+              "comedy",
+              parsedPrice,
+              eventData.venue
+            );
+            this.events.push(event);
+          }
+
+          console.log(`✅ Extracted event from: ${request.url}`);
+        } catch (error) {
+          console.error(`❌ Error extracting event from ${request.url}:`, error);
+        }
+      },
+      launchContext: {
+        launchOptions: {
+          headless: true,
+          args: [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-gpu",
+            "--window-size=1280,720",
+          ],
+        },
+      },
+    });
+
+    try {
+      await crawler.run(showUrls);
+      console.log(`🎉 Total events found: ${this.events.length}`);
+      return this.events;
+    } catch (error) {
+      console.error("❌ Crawler failed:", error);
+      return [];
+    }
+  }
+
+  async crawlEvents(): Promise<ComedyLoftEvent[]> {
+    console.log("🕷️ Starting Comedy Loft event crawl with Playwright...");
+
+    // Step 1: Collect all show URLs
+    const showUrls = await this.collectShowUrls();
+
+    if (showUrls.length === 0) {
+      console.log("⚠️ No show URLs found");
+      return [];
+    }
+
+    // Step 2: Crawl each show page
+    const events = await this.crawlShowPages(showUrls);
+
+    return events;
+  }
+
+  async saveEvents(events: ComedyLoftEvent[]): Promise<void> {
+    console.log(
+      `💾 Saving ${events.length} events using Lambda normalization...`
+    );
+
+    try {
+      const config = {};
+      const client = new SFNClient(config);
+
+      // Generate unique execution name with timestamp
+      const executionName = `dccomedyloft-crawler-${Date.now()}-${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
+
+      // Sanitize events to ensure they're JSON-safe
+      const sanitizedEvents = events.map((event) => {
+        return {
+          title: event.title ? String(event.title).replace(/\0/g, "") : undefined,
+          date: event.date ? String(event.date) : undefined,
+          time: event.time ? String(event.time).replace(/\0/g, "") : undefined,
+          location: event.location
+            ? String(event.location).replace(/\0/g, "")
+            : undefined,
+          description: event.description
+            ? String(event.description).replace(/\0/g, "")
+            : undefined,
+          url: event.url ? String(event.url) : undefined,
+          category: event.category
+            ? String(event.category).replace(/\0/g, "")
+            : undefined,
+          price: event.price ? String(event.price).replace(/\0/g, "") : undefined,
+          venue: event.venue ? String(event.venue).replace(/\0/g, "") : undefined,
+          start_date: event.start_date ? String(event.start_date) : undefined,
+          end_date: event.end_date ? String(event.end_date) : undefined,
+        };
+      });
+
+      // Prepare the payload object
+      const payload = {
+        events: sanitizedEvents,
+        source: "dccomedyloft",
+        eventType: "dccomedyloft",
+      };
+
+      // Log the payload before stringifying
+      console.log("📦 [STEP FUNCTIONS DEBUG] Payload object:", {
+        eventCount: events.length,
+        source: payload.source,
+        eventType: payload.eventType,
+        firstEventSample: sanitizedEvents[0]
+          ? {
+              title: sanitizedEvents[0].title,
+              date: sanitizedEvents[0].date,
+              time: sanitizedEvents[0].time,
+            }
+          : null,
+      });
+
+      // Stringify the payload with error handling
+      let stringifiedInput: string;
+      try {
+        stringifiedInput = JSON.stringify(payload);
+      } catch (stringifyError) {
+        console.error("❌ [STEP FUNCTIONS DEBUG] JSON.stringify failed:", {
+          error:
+            stringifyError instanceof Error
+              ? stringifyError.message
+              : String(stringifyError),
+          errorName:
+            stringifyError instanceof Error ? stringifyError.name : "Unknown",
+          eventCount: events.length,
+        });
+
+        // Try to identify which event is causing the issue
+        for (let i = 0; i < sanitizedEvents.length; i++) {
+          try {
+            JSON.stringify(sanitizedEvents[i]);
+          } catch (eventError) {
+            console.error(
+              `❌ [STEP FUNCTIONS DEBUG] Problematic event at index ${i}:`,
+              {
+                event: sanitizedEvents[i],
+                error:
+                  eventError instanceof Error
+                    ? eventError.message
+                    : String(eventError),
+              }
+            );
+          }
+        }
+        throw stringifyError;
+      }
+
+      // Validate the JSON before sending
+      try {
+        const testParse = JSON.parse(stringifiedInput);
+        console.log("📦 [STEP FUNCTIONS DEBUG] JSON validation passed");
+      } catch (validationError) {
+        console.error(
+          "❌ [STEP FUNCTIONS DEBUG] JSON validation failed before sending:",
+          {
+            error:
+              validationError instanceof Error
+                ? validationError.message
+                : String(validationError),
+            errorPosition:
+              validationError instanceof SyntaxError &&
+              validationError.message.includes("position")
+                ? validationError.message.match(/position (\d+)/)?.[1]
+                : undefined,
+          }
+        );
+        throw validationError;
+      }
+
+      // Log stringified input details
+      console.log("📦 [STEP FUNCTIONS DEBUG] Stringified input:", {
+        length: stringifiedInput.length,
+        firstChars: stringifiedInput.substring(0, 300),
+        charsAround222: stringifiedInput.substring(
+          Math.max(0, 222 - 50),
+          Math.min(stringifiedInput.length, 222 + 50)
+        ),
+        lastChars: stringifiedInput.substring(
+          Math.max(0, stringifiedInput.length - 200)
+        ),
+        isValidJSON: true, // We already validated above
+      });
+
+      const inputObject = {
+        stateMachineArn: Resource.normaizeEventStepFunction.arn,
+        input: stringifiedInput,
+        name: executionName,
+      };
+
+      console.log("📦 [STEP FUNCTIONS DEBUG] Input object structure:", {
+        hasStateMachineArn: !!inputObject.stateMachineArn,
+        hasInput: !!inputObject.input,
+        inputType: typeof inputObject.input,
+        inputLength: inputObject.input.length,
+      });
+
+      const command = new StartExecutionCommand(inputObject);
+      const response = await client.send(command);
+
+      console.log("🚀 Step Functions execution successful:", response);
+      console.log(`✅ Successfully started normalization workflow`);
+      console.log(
+        "📦 [STEP FUNCTIONS DEBUG] Execution ARN:",
+        response.executionArn
+      );
+    } catch (error) {
+      console.error(`❌ Error saving events via Lambda:`, error);
+      throw error;
+    }
+  }
+
+  async run(): Promise<void> {
+    console.log("🚀 Starting Comedy Loft DC Crawler...");
+
+    try {
+      const events = await this.crawlEvents();
+
+      if (events.length > 0) {
+        console.log("\n📊 SUMMARY OF PARSED EVENTS:");
+        console.log("=".repeat(80));
+        events.forEach((event, index) => {
+          console.log(`\nEvent ${index + 1}:`);
+          console.log(`  Title: ${event.title}`);
+          console.log(`  Date: ${event.date}`);
+          if (event.time) console.log(`  Time: ${event.time}`);
+          if (event.venue) console.log(`  Venue: ${event.venue}`);
+          if (event.price) console.log(`  Price: ${event.price}`);
+          if (event.url) console.log(`  URL: ${event.url}`);
+        });
+        console.log("=".repeat(80));
+        console.log(
+          `\n✅ Successfully parsed ${events.length} events from Comedy Loft DC`
+        );
+
+        await this.saveEvents(events);
+        console.log("✅ Comedy Loft DC crawler completed successfully!");
+      } else {
+        console.log("⚠️ No events found to save");
+      }
+    } catch (error) {
+      console.error("❌ Comedy Loft DC crawler failed:", error);
+      throw error;
+    }
+  }
+}
+
+// Main execution
+async function main() {
+  console.log("🎬 Starting Comedy Loft DC Crawler...");
+
+  const crawler = new ComedyLoftCrawler();
+
+  try {
+    await crawler.run();
+    console.log("🎉 Comedy Loft DC Crawler completed successfully!");
+    process.exit(0);
+  } catch (error) {
+    console.error("💥 Comedy Loft DC Crawler failed:", error);
+    process.exit(1);
+  }
+}
+
+// Run the crawler
+main();

@@ -1,0 +1,9 @@
+{
+	"id": "CH9m00wNnLrBOzA",
+	"json": "{\"id\":\"CH9m00wNnLrBOzA\",\"url\":\"http://www.dcimprov.com/shows/online-showroom\",\"loadedUrl\":\"https://www.dcimprov.com/shows/online-showroom\",\"uniqueKey\":\"http://www.dcimprov.com/shows/online-showroom\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-01-25T19:26:11.555Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "http://www.dcimprov.com/shows/online-showroom",
+	"url": "http://www.dcimprov.com/shows/online-showroom"
+}

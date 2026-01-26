@@ -2,7 +2,7 @@ import { api } from "./api";
 import { db } from "./db";
 import { OPENWEBNINJA_API_KEY } from "./secrets";
 import { normalizeEventStepFunction } from "./step_functions";
-import { ClockOutDCTask, EventbriteTask, WashingtonianTask } from "./tasks";
+import { ClockOutDCTask, DCComedyLoftTask, DCImprovTask, EventbriteTask, WashingtonianTask } from "./tasks";
 
 const cron = new sst.aws.Cron("cron", {
   function: {
@@ -27,6 +27,16 @@ const eventbriteCron = new sst.aws.Cron("eventbriteCron", {
   schedule: "rate(1 day)",
 });
 
+const dcimprovCron = new sst.aws.Cron("dcimprovCron", {
+  task: DCImprovTask,
+  schedule: "rate(7 days)",
+});
+
+const dccomedyloftCron = new sst.aws.Cron("dccomedyloftCron", {
+  task: DCComedyLoftTask,
+  schedule: "rate(7 days)",
+});
+
 // Daily copy of production DB to dev (only runs in non-production stages)
 // Note: This cron will only be created in non-production stages
 // The function itself checks the stage and prevents running in production
@@ -46,7 +56,7 @@ const copyProdToDevCron = new sst.aws.Cron("copyProdToDevCron", {
 export {
   clockoutdcCron,
   copyProdToDevCron,
-  cron,
-  eventbriteCron,
-  washingtonianCron,
+  cron, dccomedyloftCron, dcimprovCron, eventbriteCron,
+  washingtonianCron
 };
+

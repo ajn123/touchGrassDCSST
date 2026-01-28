@@ -1,40 +1,29 @@
 {
-  "requestsFinished": 37,
+  "requestsFinished": 274,
   "requestsFailed": 0,
-  "requestsRetries": 1,
+  "requestsRetries": 0,
   "requestsFailedPerMinute": 0,
-  "requestsFinishedPerMinute": 32,
-  "requestMinDurationMillis": 2689,
-  "requestMaxDurationMillis": 9629,
+  "requestsFinishedPerMinute": 62,
+  "requestMinDurationMillis": 2605,
+  "requestMaxDurationMillis": 4759,
   "requestTotalFailedDurationMillis": 0,
-  "requestTotalFinishedDurationMillis": 190138,
-  "crawlerStartedAt": "2026-01-25T19:25:52.576Z",
-  "crawlerFinishedAt": "2026-01-25T19:27:01.172Z",
-  "statsPersistedAt": "2026-01-25T19:27:01.172Z",
-  "crawlerRuntimeMillis": 68673,
-  "crawlerLastStartTimestamp": 1769369152499,
+  "requestTotalFinishedDurationMillis": 783982,
+  "crawlerStartedAt": "2026-01-28T04:44:48.402Z",
+  "crawlerFinishedAt": "2026-01-28T04:49:13.820Z",
+  "statsPersistedAt": "2026-01-28T04:49:13.820Z",
+  "crawlerRuntimeMillis": 265548,
+  "crawlerLastStartTimestamp": 1769575488272,
   "requestRetryHistogram": [
-    36,
-    1
+    274
   ],
   "statsId": 1,
   "requestAvgFailedDurationMillis": null,
-  "requestAvgFinishedDurationMillis": 5139,
-  "requestTotalDurationMillis": 190138,
-  "requestsTotal": 37,
+  "requestAvgFinishedDurationMillis": 2861,
+  "requestTotalDurationMillis": 783982,
+  "requestsTotal": 274,
   "requestsWithStatusCode": {
-    "200": 37
+    "200": 274
   },
   "errors": {},
-  "retryErrors": {
-    "/Users/alexandernorton/projects/touchGrassDCSST/packages/tasks/crawlers/node_modules/@crawlee/src/internals/utils/playwright-utils.ts:241:17": {
-      "missing error code": {
-        "Error": {
-          "page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.dcimprov.com/shows/main-showroom/atwhs": {
-            "count": 1
-          }
-        }
-      }
-    }
-  }
+  "retryErrors": {}
 }

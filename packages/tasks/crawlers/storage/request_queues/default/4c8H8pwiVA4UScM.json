@@ -1,9 +1,0 @@
-{
-	"id": "4c8H8pwiVA4UScM",
-	"json": "{\"id\":\"4c8H8pwiVA4UScM\",\"url\":\"http://www.dcimprov.com/shows/main-showroom/adele-givens\",\"loadedUrl\":\"https://www.dcimprov.com/shows/main-showroom/adele-givens\",\"uniqueKey\":\"http://www.dcimprov.com/shows/main-showroom/adele-givens\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-01-25T19:26:26.143Z\"}",
-	"method": "GET",
-	"orderNo": null,
-	"retryCount": 0,
-	"uniqueKey": "http://www.dcimprov.com/shows/main-showroom/adele-givens",
-	"url": "http://www.dcimprov.com/shows/main-showroom/adele-givens"
-}

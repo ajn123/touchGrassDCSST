@@ -767,19 +767,103 @@ class ComedyLoftCrawler {
         throw validationError;
       }
 
-      // Log stringified input details
+      // Check payload size (Step Functions limit is 262144 bytes / 256 KB)
+      const AWS_LIMIT = 262144; // AWS Step Functions hard limit
+      const MAX_PAYLOAD_SIZE = 260000; // Leave small buffer (260 KB) to account for any encoding differences
+      const payloadSizeBytes = Buffer.from(stringifiedInput, 'utf8').length;
+      
+      console.log("📦 [STEP FUNCTIONS DEBUG] Payload size check:", {
+        payloadSizeBytes,
+        maxPayloadSize: MAX_PAYLOAD_SIZE,
+        awsLimit: AWS_LIMIT,
+        willBatch: payloadSizeBytes > MAX_PAYLOAD_SIZE,
+      });
+
       console.log("📦 [STEP FUNCTIONS DEBUG] Stringified input:", {
         length: stringifiedInput.length,
+        sizeBytes: payloadSizeBytes,
+        maxSizeBytes: MAX_PAYLOAD_SIZE,
         firstChars: stringifiedInput.substring(0, 300),
-        charsAround222: stringifiedInput.substring(
-          Math.max(0, 222 - 50),
-          Math.min(stringifiedInput.length, 222 + 50)
-        ),
-        lastChars: stringifiedInput.substring(
-          Math.max(0, stringifiedInput.length - 200)
-        ),
-        isValidJSON: true, // We already validated above
+        isValidJSON: true,
       });
+
+      // If payload is too large, split into batches
+      if (payloadSizeBytes > MAX_PAYLOAD_SIZE) {
+        console.log(`⚠️ Payload size (${payloadSizeBytes} bytes) exceeds limit. Splitting into batches...`);
+        
+        // Calculate average event size
+        const avgEventSize = payloadSizeBytes / sanitizedEvents.length;
+        // Calculate safe batch size (leave 20% buffer for JSON structure overhead)
+        const BATCH_SIZE = Math.max(1, Math.floor((MAX_PAYLOAD_SIZE * 0.8) / avgEventSize));
+        
+        console.log(`📦 Average event size: ${Math.round(avgEventSize)} bytes, Batch size: ${BATCH_SIZE} events`);
+
+        // Helper function to send a batch with size validation
+        let subBatchCounter = 0;
+        const sendBatch = async (batch: any[], batchNumber: number, depth: number = 0): Promise<void> => {
+          const batchPayload = {
+            events: batch,
+            source: "dccomedyloft",
+            eventType: "dccomedyloft",
+          };
+
+          const batchStringified = JSON.stringify(batchPayload);
+          const batchSizeBytes = Buffer.from(batchStringified, 'utf8').length;
+
+          if (batchSizeBytes > AWS_LIMIT) {
+            // Still too large, split in half
+            console.error(`❌ Batch still too large (${batchSizeBytes} bytes). Splitting further...`);
+            if (batch.length === 1) {
+              // Single event is too large - this is a problem
+              throw new Error(`Single event is too large (${batchSizeBytes} bytes). Cannot split further. Event: ${JSON.stringify(batch[0]).substring(0, 200)}...`);
+            }
+            const mid = Math.floor(batch.length / 2);
+            await sendBatch(batch.slice(0, mid), batchNumber, depth + 1);
+            await sendBatch(batch.slice(mid), batchNumber, depth + 1);
+            return;
+          }
+
+          // Generate unique execution name with timestamp and counter to avoid collisions
+          subBatchCounter++;
+          const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).substr(2, 6)}-${subBatchCounter}`;
+          const batchExecutionName = depth > 0
+            ? `${executionName}-batch-${batchNumber}-sub-${uniqueSuffix}`
+            : `${executionName}-batch-${batchNumber}-${uniqueSuffix}`;
+          
+          const batchInputObject = {
+            stateMachineArn: Resource.normaizeEventStepFunction.arn,
+            input: batchStringified,
+            name: batchExecutionName,
+          };
+
+          // Final safety check before sending - use actual AWS limit (262144)
+          if (batchSizeBytes > 262144) {
+            throw new Error(`Batch ${batchExecutionName} is still too large (${batchSizeBytes} bytes) even after splitting. AWS limit: 262144 bytes.`);
+          }
+
+          const batchCommand = new StartExecutionCommand(batchInputObject);
+          const batchResponse = await client.send(batchCommand);
+          console.log(`🚀 Step Functions execution ${batchExecutionName} started (${batchSizeBytes} bytes):`, batchResponse.executionArn);
+        };
+
+        // Split into batches and send
+        let batchNumber = 1;
+        for (let i = 0; i < sanitizedEvents.length; i += BATCH_SIZE) {
+          const batch = sanitizedEvents.slice(i, i + BATCH_SIZE);
+          await sendBatch(batch, batchNumber);
+          batchNumber++;
+        }
+
+        console.log(`✅ Successfully started normalization workflows`);
+        return;
+      }
+
+      // Payload is within limit, send normally
+      // Final safety check - double verify size
+      if (payloadSizeBytes > AWS_LIMIT) {
+        console.error(`❌ CRITICAL: Payload size check failed! Size: ${payloadSizeBytes} bytes, AWS Limit: ${AWS_LIMIT} bytes`);
+        throw new Error(`Payload size (${payloadSizeBytes} bytes) exceeds AWS limit (${AWS_LIMIT} bytes) but batching logic was not triggered. This is a bug.`);
+      }
 
       const inputObject = {
         stateMachineArn: Resource.normaizeEventStepFunction.arn,
@@ -792,7 +876,14 @@ class ComedyLoftCrawler {
         hasInput: !!inputObject.input,
         inputType: typeof inputObject.input,
         inputLength: inputObject.input.length,
+        inputSizeBytes: Buffer.from(inputObject.input, 'utf8').length,
       });
+
+      // One more check right before sending - use AWS limit
+      const finalSizeCheck = Buffer.from(inputObject.input, 'utf8').length;
+      if (finalSizeCheck > AWS_LIMIT) {
+        throw new Error(`Final size check failed: ${finalSizeCheck} bytes exceeds AWS limit of ${AWS_LIMIT} bytes`);
+      }
 
       const command = new StartExecutionCommand(inputObject);
       const response = await client.send(command);

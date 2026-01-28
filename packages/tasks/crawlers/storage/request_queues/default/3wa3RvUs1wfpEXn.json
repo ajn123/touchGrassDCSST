@@ -1,9 +1,0 @@
-{
-	"id": "3wa3RvUs1wfpEXn",
-	"json": "{\"id\":\"3wa3RvUs1wfpEXn\",\"url\":\"https://www.dcimprov.com/\",\"loadedUrl\":\"https://www.dcimprov.com/\",\"uniqueKey\":\"https://www.dcimprov.com\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-01-25T19:25:52.419Z\"}",
-	"method": "GET",
-	"orderNo": null,
-	"retryCount": 0,
-	"uniqueKey": "https://www.dcimprov.com",
-	"url": "https://www.dcimprov.com/"
-}

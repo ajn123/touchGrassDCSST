@@ -126,12 +126,31 @@ export default function Header() {
             </svg>
             Calendar
           </Link>
+          <Link
+            href="/comedy"
+            className="header-link px-10 py-2 flex items-center"
+          >
+            <svg
+              className="w-4 h-4 mr-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            Comedy
+          </Link>
           <Link href="/add-event" className="header-link px-10 py-2">
             Add Event
           </Link>
-          <Link href="/signup-emails" className="header-link px-10 py-2">
+          {/* <Link href="/signup-emails" className="header-link px-10 py-2">
             Sign Up For Emails
-          </Link>
+          </Link> */}
           <Link href="/about" className="header-link px-10 py-2">
             Contact
           </Link>
@@ -294,19 +313,41 @@ export default function Header() {
               </div>
             </Link>
             <Link
+              href="/comedy"
+              className="block px-3 py-2 text-base font-medium header-link rounded-md"
+              onClick={closeMenu}
+            >
+              <div className="flex items-center">
+                <svg
+                  className="w-4 h-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Comedy
+              </div>
+            </Link>
+            <Link
               href="/add-event"
               className="block px-3 py-2 text-base font-medium header-link rounded-md"
               onClick={closeMenu}
             >
               Add Event
             </Link>
-            <Link
+            {/* <Link
               href="/signup-emails"
               className="block px-3 py-2 text-base font-medium header-link rounded-md"
               onClick={closeMenu}
             >
               Sign Up For Emails
-            </Link>
+            </Link> */}
             <Link
               href="/about"
               className="block px-3 py-2 text-base font-medium header-link rounded-md"

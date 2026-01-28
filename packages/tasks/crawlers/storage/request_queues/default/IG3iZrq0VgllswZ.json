@@ -1,9 +1,0 @@
-{
-	"id": "IG3iZrq0VgllswZ",
-	"json": "{\"id\":\"IG3iZrq0VgllswZ\",\"url\":\"http://www.dcimprov.com/shows/lounge-showroom\",\"loadedUrl\":\"https://www.dcimprov.com/shows/lounge-showroom\",\"uniqueKey\":\"http://www.dcimprov.com/shows/lounge-showroom\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-01-25T19:26:11.147Z\"}",
-	"method": "GET",
-	"orderNo": null,
-	"retryCount": 0,
-	"uniqueKey": "http://www.dcimprov.com/shows/lounge-showroom",
-	"url": "http://www.dcimprov.com/shows/lounge-showroom"
-}

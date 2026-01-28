@@ -1,9 +1,0 @@
-{
-	"id": "kzOo3MBBx1rzAym",
-	"json": "{\"id\":\"kzOo3MBBx1rzAym\",\"url\":\"https://dcimprov-com.seatengine.com/events/124175\",\"loadedUrl\":\"https://dcimprov-com.seatengine.com/events/124175\",\"uniqueKey\":\"https://dcimprov-com.seatengine.com/events/124175\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-01-25T19:26:30.047Z\"}",
-	"method": "GET",
-	"orderNo": null,
-	"retryCount": 0,
-	"uniqueKey": "https://dcimprov-com.seatengine.com/events/124175",
-	"url": "https://dcimprov-com.seatengine.com/events/124175"
-}

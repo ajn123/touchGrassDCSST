@@ -70,6 +70,7 @@ function GroupImage({ imageUrl, title }: { imageUrl: string; title?: string }) {
             className="object-cover rounded-lg"
             onLoad={handleImageLoad}
             onError={handleImageError}
+            unoptimized={imageUrl.startsWith('http://') || imageUrl.startsWith('https://')}
           />
           {imageLoading && (
             <div className="absolute inset-0 bg-gray-200 rounded-lg flex items-center justify-center">

@@ -40,15 +40,20 @@ function GroupImage({
   onLoad: () => void;
   onError: () => void;
 }) {
+  const resolvedUrl = resolveImageUrl(imageUrl) || "/images/placeholder.jpg";
+  // Use unoptimized for external images to avoid 404 errors in Next.js image optimization
+  const isExternal = resolvedUrl.startsWith('http://') || resolvedUrl.startsWith('https://');
+  
   return (
     <Image
-      src={resolveImageUrl(imageUrl) || "/images/placeholder.jpg"}
+      src={resolvedUrl}
       alt={title || "Group"}
       fill
       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
       className="object-cover"
       onLoad={onLoad}
       onError={onError}
+      unoptimized={isExternal}
     />
   );
 }

@@ -45,6 +45,7 @@ class DCImprovEvent {
 class DCImprovCrawler {
   private events: DCImprovEvent[] = [];
   private ticketUrls: string[] = [];
+  private skippedEventsCount: number = 0;
 
   // Parse date from various formats
   private parseDate(dateStr: string): string {
@@ -434,13 +435,32 @@ class DCImprovCrawler {
 
           // Extract event details
           const eventData = await page.evaluate(() => {
-            // Extract title
-            const titleEl =
-              document.querySelector("h1") ||
-              document.querySelector("h2") ||
-              document.querySelector(".event-title, [class*='title']") ||
-              document.querySelector("title");
-            const title = titleEl?.textContent?.trim() || "";
+            // Extract title - prioritize specific selectors
+            let title = "";
+            
+            // Priority 1: Try the specific field-entry title-link structure
+            const titleLinkEl = document.querySelector("dd.field-entry.title-link.titlelink a");
+            if (titleLinkEl) {
+              title = titleLinkEl.textContent?.trim() || "";
+            }
+            
+            // Priority 2: Try h1 with event-header class
+            if (!title) {
+              const eventHeaderEl = document.querySelector("h1.event-header");
+              if (eventHeaderEl) {
+                title = eventHeaderEl.textContent?.trim() || "";
+              }
+            }
+            
+            // Fallback to other selectors if not found
+            if (!title) {
+              const titleEl =
+                document.querySelector("h1") ||
+                document.querySelector("h2") ||
+                document.querySelector(".event-title, [class*='title']") ||
+                document.querySelector("title");
+              title = titleEl?.textContent?.trim() || "";
+            }
 
             // Extract description
             const descriptionEl =
@@ -595,6 +615,12 @@ class DCImprovCrawler {
               ? this.parsePrice(eventData.prices[0])
               : undefined;
 
+            if (!eventData.title || eventData.title.trim() === "") {
+              console.log(`⚠️ Skipping event with no title from checkout page: ${request.url}`);
+              this.skippedEventsCount++;
+              return;
+            }
+
             const event = new DCImprovEvent(
               eventData.title,
               parsedDate,
@@ -612,8 +638,15 @@ class DCImprovCrawler {
           }
 
           // If we're on an event detail page, extract all dates/times
-          if (!eventData.title) {
+          if (!eventData.title || eventData.title.trim() === "") {
             console.log(`⚠️ Skipping page with no title: ${request.url}`);
+            return;
+          }
+          
+          // Skip if title is "About The Show" or similar
+          if (eventData.title.toLowerCase().includes("about the show")) {
+            console.log(`⚠️ Skipping page with invalid title "${eventData.title}": ${request.url}`);
+            this.skippedEventsCount++;
             return;
           }
 
@@ -646,6 +679,12 @@ class DCImprovCrawler {
                   const parsedPrice = eventData.prices && eventData.prices.length > 0
                     ? this.parsePrice(eventData.prices[0])
                     : undefined;
+
+                  if (!eventData.title || eventData.title.trim() === "") {
+                    console.log(`⚠️ Skipping event with no title from showDates: ${request.url}`);
+                    this.skippedEventsCount++;
+                    return; // Use return instead of continue in forEach
+                  }
 
                   const event = new DCImprovEvent(
                     eventData.title,
@@ -698,6 +737,12 @@ class DCImprovCrawler {
                 if (parsedTimes.length > 0) {
                   // Create event for each time
                   parsedTimes.forEach((time) => {
+                    if (!eventData.title || eventData.title.trim() === "") {
+                      console.log(`⚠️ Skipping event with no title from date range: ${request.url}`);
+                      this.skippedEventsCount++;
+                      return;
+                    }
+
                     const event = new DCImprovEvent(
                       eventData.title,
                       dateStr,
@@ -715,6 +760,12 @@ class DCImprovCrawler {
                   });
                 } else {
                   // Create event without time
+                  if (!eventData.title || eventData.title.trim() === "") {
+                    console.log(`⚠️ Skipping event with no title from date range: ${request.url}`);
+                    this.skippedEventsCount++;
+                    return;
+                  }
+
                   const event = new DCImprovEvent(
                     eventData.title,
                     dateStr,
@@ -740,6 +791,12 @@ class DCImprovCrawler {
               if (parsedTimes.length > 0) {
                 // Create event for each time
                 parsedTimes.forEach((time) => {
+                  if (!eventData.title || eventData.title.trim() === "") {
+                    console.log(`⚠️ Skipping event with no title from parsed dates: ${request.url}`);
+                    this.skippedEventsCount++;
+                    return;
+                  }
+
                   const event = new DCImprovEvent(
                     eventData.title,
                     date,
@@ -755,6 +812,12 @@ class DCImprovCrawler {
                 });
               } else {
                 // Create event without time
+                if (!eventData.title || eventData.title.trim() === "") {
+                  console.log(`⚠️ Skipping event with no title from parsed dates: ${request.url}`);
+                  this.skippedEventsCount++;
+                  return;
+                }
+
                 const event = new DCImprovEvent(
                   eventData.title,
                   date,
@@ -776,6 +839,12 @@ class DCImprovCrawler {
             const monthStr = String(today.getMonth() + 1).padStart(2, "0");
             const dayStr = String(today.getDate()).padStart(2, "0");
             const fallbackDate = `${yearStr}-${monthStr}-${dayStr}`;
+
+            if (!eventData.title || eventData.title.trim() === "") {
+              console.log(`⚠️ Skipping event with no title from fallback: ${request.url}`);
+              this.skippedEventsCount++;
+              return;
+            }
 
             const event = new DCImprovEvent(
               eventData.title,
@@ -813,6 +882,9 @@ class DCImprovCrawler {
     try {
       await crawler.run(ticketUrls);
       console.log(`🎉 Total events found: ${this.events.length}`);
+      if (this.skippedEventsCount > 0) {
+        console.log(`⚠️ Skipped ${this.skippedEventsCount} events due to missing titles`);
+      }
       return this.events;
     } catch (error) {
       console.error("❌ Crawler failed:", error);
@@ -1092,9 +1164,15 @@ class DCImprovCrawler {
       const events = await this.crawlEvents();
 
       if (events.length > 0) {
+        // Limit to first 50 events
+        const limitedEvents = events.slice(0, 50);
+        if (events.length > 50) {
+          console.log(`⚠️ Limiting events from ${events.length} to 50`);
+        }
+
         console.log("\n📊 SUMMARY OF PARSED EVENTS:");
         console.log("=".repeat(80));
-        events.forEach((event, index) => {
+        limitedEvents.forEach((event, index) => {
           console.log(`\nEvent ${index + 1}:`);
           console.log(`  Title: ${event.title}`);
           console.log(`  Date: ${event.date}`);
@@ -1105,10 +1183,10 @@ class DCImprovCrawler {
         });
         console.log("=".repeat(80));
         console.log(
-          `\n✅ Successfully parsed ${events.length} events from DC Improv`
+          `\n✅ Successfully parsed ${limitedEvents.length} events from DC Improv`
         );
 
-        await this.saveEvents(events);
+        await this.saveEvents(limitedEvents);
         console.log("✅ DC Improv crawler completed successfully!");
       } else {
         console.log("⚠️ No events found to save");

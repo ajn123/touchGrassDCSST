@@ -45,6 +45,7 @@ class ComedyLoftEvent {
 class ComedyLoftCrawler {
   private events: ComedyLoftEvent[] = [];
   private showUrls: string[] = [];
+  private skippedEventsCount: number = 0;
 
   // Parse date from various formats like "Sun, Feb 22, 2026", "February 22 - March 22", etc.
   private parseDate(dateStr: string): string {
@@ -560,6 +561,12 @@ class ComedyLoftCrawler {
             // Multiple dates and times - create events for each combination
             parsedDates.forEach((date) => {
               parsedTimes.forEach((time) => {
+                if (!eventData.title || eventData.title.trim() === "") {
+                  console.log(`⚠️ Skipping event with no title from date/time combination: ${request.url}`);
+                  this.skippedEventsCount++;
+                  return;
+                }
+
                 const event = new ComedyLoftEvent(
                   eventData.title,
                   date,
@@ -577,6 +584,12 @@ class ComedyLoftCrawler {
           } else if (parsedDates.length > 0) {
             // Multiple dates - create one event per date
             parsedDates.forEach((date) => {
+              if (!eventData.title || eventData.title.trim() === "") {
+                console.log(`⚠️ Skipping event with no title from parsed dates: ${request.url}`);
+                this.skippedEventsCount++;
+                return;
+              }
+
               const event = new ComedyLoftEvent(
                 eventData.title,
                 date,
@@ -592,6 +605,12 @@ class ComedyLoftCrawler {
             });
           } else {
             // Fallback: create single event
+            if (!eventData.title || eventData.title.trim() === "") {
+              console.log(`⚠️ Skipping event with no title from fallback: ${request.url}`);
+              this.skippedEventsCount++;
+              return;
+            }
+
             const event = new ComedyLoftEvent(
               eventData.title,
               parsedDates[0] || "",
@@ -628,6 +647,9 @@ class ComedyLoftCrawler {
     try {
       await crawler.run(showUrls);
       console.log(`🎉 Total events found: ${this.events.length}`);
+      if (this.skippedEventsCount > 0) {
+        console.log(`⚠️ Skipped ${this.skippedEventsCount} events due to missing titles`);
+      }
       return this.events;
     } catch (error) {
       console.error("❌ Crawler failed:", error);
@@ -907,9 +929,15 @@ class ComedyLoftCrawler {
       const events = await this.crawlEvents();
 
       if (events.length > 0) {
+        // Limit to first 50 events
+        const limitedEvents = events.slice(0, 50);
+        if (events.length > 50) {
+          console.log(`⚠️ Limiting events from ${events.length} to 50`);
+        }
+
         console.log("\n📊 SUMMARY OF PARSED EVENTS:");
         console.log("=".repeat(80));
-        events.forEach((event, index) => {
+        limitedEvents.forEach((event, index) => {
           console.log(`\nEvent ${index + 1}:`);
           console.log(`  Title: ${event.title}`);
           console.log(`  Date: ${event.date}`);
@@ -920,10 +948,10 @@ class ComedyLoftCrawler {
         });
         console.log("=".repeat(80));
         console.log(
-          `\n✅ Successfully parsed ${events.length} events from Comedy Loft DC`
+          `\n✅ Successfully parsed ${limitedEvents.length} events from Comedy Loft DC`
         );
 
-        await this.saveEvents(events);
+        await this.saveEvents(limitedEvents);
         console.log("✅ Comedy Loft DC crawler completed successfully!");
       } else {
         console.log("⚠️ No events found to save");

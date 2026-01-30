@@ -12,7 +12,11 @@
     "diff": "sst diff",
     "remove": "sst remove",
     "script:seed": "sst run packages/scripts/src/seed-data.ts",
-    "test": "sst test"
+    "test": "sst test",
+    "crawl:dcimprov": "cd packages/tasks/crawlers && sst shell tsx dcimprov.ts",
+    "crawl:dcimprov:prod": "cd packages/tasks/crawlers && sst shell --stage production tsx dcimprov.ts",
+    "crawl:dccomedyloft": "cd packages/tasks/crawlers && sst shell tsx dccomedyloft.ts",
+    "crawl:dccomedyloft:prod": "cd packages/tasks/crawlers && sst shell --stage production tsx dccomedyloft.ts"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22",

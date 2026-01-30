@@ -17,5 +17,4 @@ node_modules
 # misc
 .DS_Store
 
-
 packages/tasks/crawlers/storage/*

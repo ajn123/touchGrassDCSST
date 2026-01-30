@@ -60,6 +60,12 @@ const DCImprovTask = new sst.aws.Task("dcimprovTask", {
     context: ".", // Use project root as context
     dockerfile: "./packages/tasks/crawlers/Dockerfile.dcimprov",
   },
+  memory: memory, // 2 GB
+  cpu: cpu, // 1 vCPU
+  environment: {
+    NODE_OPTIONS: "--max-old-space-size=1536", // Allow Node.js to use up to 1.5 GB (leaving ~500 MB for system/Playwright)
+  },
+  dev: false,
 });
 
 const DCComedyLoftTask = new sst.aws.Task("dccomedyloftTask", {
@@ -69,6 +75,12 @@ const DCComedyLoftTask = new sst.aws.Task("dccomedyloftTask", {
     context: ".", // Use project root as context
     dockerfile: "./packages/tasks/crawlers/Dockerfile.dccomedyloft",
   },
+  memory: memory, // 2 GB
+  cpu: cpu, // 1 vCPU
+  environment: {
+    NODE_OPTIONS: "--max-old-space-size=1536", // Allow Node.js to use up to 1.5 GB (leaving ~500 MB for system/Playwright)
+  },
+  dev: false,
 });
 
 export { ClockOutDCTask, DCComedyLoftTask, DCImprovTask, EventbriteTask, WashingtonianTask };

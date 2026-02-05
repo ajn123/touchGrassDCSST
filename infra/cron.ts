@@ -2,14 +2,20 @@ import { api } from "./api";
 import { db } from "./db";
 import { OPENWEBNINJA_API_KEY } from "./secrets";
 import { normalizeEventStepFunction } from "./step_functions";
-import { ClockOutDCTask, DCComedyLoftTask, DCImprovTask, EventbriteTask, WashingtonianTask } from "./tasks";
+import {
+  ClockOutDCTask,
+  DCComedyLoftTask,
+  DCImprovTask,
+  EventbriteTask,
+  WashingtonianTask,
+} from "./tasks";
 
 const cron = new sst.aws.Cron("cron", {
   function: {
     handler: "packages/functions/src/events/openWeb.handler",
     link: [db, OPENWEBNINJA_API_KEY, api, normalizeEventStepFunction],
   },
-  schedule: "rate(1 day)",
+  schedule: "rate(3 days)",
 });
 
 const washingtonianCron = new sst.aws.Cron("washingtonianCron", {
@@ -56,7 +62,9 @@ const copyProdToDevCron = new sst.aws.Cron("copyProdToDevCron", {
 export {
   clockoutdcCron,
   copyProdToDevCron,
-  cron, dccomedyloftCron, dcimprovCron, eventbriteCron,
-  washingtonianCron
+  cron,
+  dccomedyloftCron,
+  dcimprovCron,
+  eventbriteCron,
+  washingtonianCron,
 };
-

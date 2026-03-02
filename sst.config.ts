@@ -19,7 +19,7 @@ export default $config({
     const { email } = await import("./infra/email");
     const { auth } = await import("./infra/auth");
     const { queue } = await import("./infra/queue");
-    const { cron, washingtonianCron, copyProdToDevCron } = await import("./infra/cron");
+    const { cron, washingtonianCron, copyProdToDevCron, newsletterCron } = await import("./infra/cron");
     const { WashingtonianTask, ClockOutDCTask, EventbriteTask } = await import(
       "./infra/tasks"
     );
@@ -31,6 +31,7 @@ export default $config({
       Cron: cron,
       washingtonianCron: washingtonianCron,
       ...(copyProdToDevCron && { copyProdToDevCron }),
+      newsletterCron: newsletterCron,
       Api: api,
       Bucket: bucket,
       Web: web,

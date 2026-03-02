@@ -1,6 +1,7 @@
 import { api } from "./api";
 import { db } from "./db";
-import { OPENWEBNINJA_API_KEY } from "./secrets";
+import { EmailConfig } from "./email";
+import { OPENROUTER_API_KEY, OPENWEBNINJA_API_KEY } from "./secrets";
 import { normalizeEventStepFunction } from "./step_functions";
 import {
   ClockOutDCTask,
@@ -59,6 +60,15 @@ const copyProdToDevCron = new sst.aws.Cron("copyProdToDevCron", {
   schedule: "cron(0 2 * * ? *)", // Daily at 2 AM UTC (10 PM EST previous day)
 });
 
+const newsletterCron = new sst.aws.Cron("newsletterCron", {
+  function: {
+    handler: "packages/functions/src/newsletter/sendNewsletter.handler",
+    link: [db, OPENROUTER_API_KEY, EmailConfig],
+    timeout: "5 minutes",
+  },
+  schedule: "cron(0 14 ? * THU *)", // Every Thursday at 10 AM EST (14:00 UTC)
+});
+
 export {
   clockoutdcCron,
   copyProdToDevCron,
@@ -66,5 +76,6 @@ export {
   dccomedyloftCron,
   dcimprovCron,
   eventbriteCron,
+  newsletterCron,
   washingtonianCron,
 };

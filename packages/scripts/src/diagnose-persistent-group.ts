@@ -36,7 +36,7 @@ async function findPersistentGroups() {
 
   // Step 1: Find all groups in the database
   console.log("\n📋 Step 1: Scanning for all GROUP# items...");
-  let allGroupItems: any[] = [];
+  const allGroupItems: any[] = [];
   let lastKey: any = undefined;
 
   do {

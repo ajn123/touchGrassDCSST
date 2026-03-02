@@ -52,7 +52,8 @@ export function middleware(request: NextRequest) {
         if (!value) return undefined;
         try {
           // Convert to string and remove control characters
-          let sanitized = String(value)
+          const sanitized = String(value)
+            // eslint-disable-next-line no-control-regex
             .replace(/[\x00-\x1F\x7F-\x9F]/g, "") // Remove control characters
             .trim();
           

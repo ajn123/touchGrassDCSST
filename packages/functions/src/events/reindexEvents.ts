@@ -115,7 +115,7 @@ async function indexItemToOpenSearch(item: any): Promise<void> {
 }
 
 export const handler: Handler = async (event: any) => {
-  let payload =
+  const payload =
     typeof event.body.Payload === "object"
       ? JSON.parse(event.body.Payload.body)
       : event.body.Payload;

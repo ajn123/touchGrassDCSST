@@ -90,6 +90,7 @@ export async function POST(request: NextRequest) {
         hasUnclosedString: (bodyText.match(/"/g) || []).length % 2 !== 0,
         hasUnclosedBrace: (bodyText.match(/{/g) || []).length !== (bodyText.match(/}/g) || []).length,
         hasUnclosedBracket: (bodyText.match(/\[/g) || []).length !== (bodyText.match(/\]/g) || []).length,
+        // eslint-disable-next-line no-control-regex
         hasControlCharacters: /[\x00-\x1F\x7F-\x9F]/.test(bodyText),
         encoding: request.headers.get("content-encoding") || "none",
         contentType: request.headers.get("content-type") || "none",

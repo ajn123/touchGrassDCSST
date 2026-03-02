@@ -53,7 +53,7 @@ async function getStepFunctionExecutions(days: number = 7, executionName?: strin
     }
 
     // Filter by date and optional name
-    let executions = response.executions.filter((exec) => {
+    const executions = response.executions.filter((exec) => {
       const matchesDate = exec.startDate && exec.startDate.getTime() >= startTime;
       const matchesName = !executionName || exec.name?.includes(executionName);
       return matchesDate && matchesName;

@@ -122,7 +122,7 @@ export async function getFilteredEvents(userId: string, filters: {
   limit?: number;
 }) {
   let keyConditionExpression = "pk = :pk";
-  let expressionAttributeValues: any = {
+  const expressionAttributeValues: any = {
     ":pk": { S: `USER#${userId}` }
   };
   let filterExpression: string | undefined;

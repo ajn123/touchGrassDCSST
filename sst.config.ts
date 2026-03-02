@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference path="./.sst/platform/config.d.ts" />
 
 export default $config({
@@ -19,10 +20,27 @@ export default $config({
     const { email } = await import("./infra/email");
     const { auth } = await import("./infra/auth");
     const { queue } = await import("./infra/queue");
-    const { cron, washingtonianCron, copyProdToDevCron } = await import("./infra/cron");
-    const { WashingtonianTask, ClockOutDCTask, EventbriteTask } = await import(
-      "./infra/tasks"
-    );
+    const {
+      cron,
+      washingtonianCron,
+      copyProdToDevCron,
+      kennedycenterCron,
+      ninethirtyclubCron,
+      smithsonianCron,
+      meetupdcCron,
+      dcsportsCron,
+      generateMissingImagesCron,
+    } = await import("./infra/cron");
+    const {
+      WashingtonianTask,
+      ClockOutDCTask,
+      EventbriteTask,
+      KennedyCenterTask,
+      NineThirtyClubTask,
+      SmithsonianTask,
+      MeetupDCTask,
+      DCSportsTask,
+    } = await import("./infra/tasks");
     const { normalizeEventStepFunction } = await import(
       "./infra/step_functions"
     );
@@ -40,6 +58,17 @@ export default $config({
       WashingtonianTask: WashingtonianTask,
       ClockOutDCTask: ClockOutDCTask,
       EventbriteTask: EventbriteTask,
+      KennedyCenterTask: KennedyCenterTask,
+      NineThirtyClubTask: NineThirtyClubTask,
+      SmithsonianTask: SmithsonianTask,
+      MeetupDCTask: MeetupDCTask,
+      DCSportsTask: DCSportsTask,
+      kennedycenterCron: kennedycenterCron,
+      ninethirtyclubCron: ninethirtyclubCron,
+      smithsonianCron: smithsonianCron,
+      meetupdcCron: meetupdcCron,
+      dcsportsCron: dcsportsCron,
+      generateMissingImagesCron: generateMissingImagesCron,
       NormalizeEventStepFunction: normalizeEventStepFunction,
     };
   },

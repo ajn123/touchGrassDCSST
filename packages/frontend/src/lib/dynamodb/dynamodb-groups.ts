@@ -312,11 +312,11 @@ export async function searchGroups(filters: {
   limit?: number;
 }) {
   try {
-    let filterExpressions: string[] = ["#sk = :groupInfo"];
-    let expressionAttributeNames: { [key: string]: string } = {
+    const filterExpressions: string[] = ["#sk = :groupInfo"];
+    const expressionAttributeNames: { [key: string]: string } = {
       "#sk": "sk",
     };
-    let expressionAttributeValues: { [key: string]: any } = {
+    const expressionAttributeValues: { [key: string]: any } = {
       ":groupInfo": { S: "GROUP_INFO" },
     };
 

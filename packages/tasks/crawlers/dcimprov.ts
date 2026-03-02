@@ -182,7 +182,7 @@ class DCImprovCrawler {
     const dayNum = parseInt(day);
 
     // Create date and check if it's in the past
-    let date = new Date(year, monthNum - 1, dayNum);
+    const date = new Date(year, monthNum - 1, dayNum);
 
     // If the date is more than 6 months in the past, assume it's next year
     const sixMonthsAgo = new Date(today);

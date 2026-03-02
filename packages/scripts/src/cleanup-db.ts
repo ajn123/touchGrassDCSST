@@ -182,7 +182,7 @@ async function cleanupDatabase(confirmed: boolean) {
 
     // First, scan to find all groups and log them
     console.log(`   First, scanning to find all GROUP# items...`);
-    let allGroupItems: any[] = [];
+    const allGroupItems: any[] = [];
     let lastKey: any = undefined;
     
     do {
@@ -231,7 +231,7 @@ async function cleanupDatabase(confirmed: boolean) {
     
     // Verify no groups remain - do a full scan, not just limit 10
     console.log(`\n🔍 Verifying all groups are deleted (full scan)...`);
-    let remainingGroups: any[] = [];
+    const remainingGroups: any[] = [];
     lastKey = undefined;
     
     do {

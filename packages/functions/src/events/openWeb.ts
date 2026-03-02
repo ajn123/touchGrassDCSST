@@ -98,7 +98,7 @@ export const handler = async (event: any, context: any, callback: any) => {
       "Special events DC festivals concerts cultural exhibitions",
     ];
 
-    let allEvents: OpenWebNinjaEvent[] = [];
+    const allEvents: OpenWebNinjaEvent[] = [];
 
     for (const query of queries) {
       console.log(`Making API call for: "${query}"`);
@@ -133,8 +133,8 @@ export const handler = async (event: any, context: any, callback: any) => {
     );
     const events = uniqueEvents;
 
-    let totalEventsProcessed = events.length;
-    let totalEventsInserted = 0;
+    const totalEventsProcessed = events.length;
+    const totalEventsInserted = 0;
 
     // Use Lambda normalization for batch processing
     console.log(

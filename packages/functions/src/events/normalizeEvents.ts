@@ -194,6 +194,111 @@ export function transformEventbriteEvent(event: any): NormalizedEvent {
   };
 }
 
+/**
+ * Transform Kennedy Center event to normalized format
+ */
+export function transformKennedyCenterEvent(event: any): NormalizedEvent {
+  return {
+    title: event.title,
+    description: event.description,
+    start_date: normalizeDate(event.date),
+    start_time: normalizeTime(event.time),
+    location: event.location || "2700 F Street NW, Washington, DC 20566",
+    venue: event.venue || "Kennedy Center",
+    category: normalizeCategory(event.category),
+    url: event.url,
+    cost: normalizeCost(event.price),
+    image_url: event.image_url,
+    socials: event.url ? { website: event.url } : undefined,
+    isPublic: true,
+    source: "kennedycenter",
+  };
+}
+
+/**
+ * Transform 9:30 Club / The Anthem event to normalized format
+ */
+export function transformNineThirtyClubEvent(event: any): NormalizedEvent {
+  return {
+    title: event.title,
+    description: event.description,
+    start_date: normalizeDate(event.date),
+    start_time: normalizeTime(event.time),
+    location: event.location,
+    venue: event.venue,
+    category: normalizeCategory(event.category || "Music"),
+    url: event.url,
+    cost: normalizeCost(event.price),
+    image_url: event.image_url,
+    socials: event.url ? { website: event.url } : undefined,
+    isPublic: true,
+    source: "ninethirtyclub",
+  };
+}
+
+/**
+ * Transform Smithsonian event to normalized format
+ */
+export function transformSmithsonianEvent(event: any): NormalizedEvent {
+  return {
+    title: event.title,
+    description: event.description,
+    start_date: normalizeDate(event.date),
+    start_time: normalizeTime(event.time),
+    location: event.location || "National Mall, Washington, DC",
+    venue: event.venue || "Smithsonian Institution",
+    category: normalizeCategory(event.category || "Free"),
+    url: event.url,
+    cost: normalizeCost(event.price || "free"),
+    image_url: event.image_url,
+    socials: event.url ? { website: event.url } : undefined,
+    isPublic: true,
+    source: "smithsonian",
+  };
+}
+
+/**
+ * Transform Meetup DC event to normalized format
+ */
+export function transformMeetupDCEvent(event: any): NormalizedEvent {
+  return {
+    title: event.title,
+    description: event.description,
+    start_date: normalizeDate(event.date),
+    start_time: normalizeTime(event.time),
+    location: event.location,
+    venue: event.venue,
+    category: normalizeCategory(event.category),
+    url: event.url,
+    cost: normalizeCost(event.price),
+    image_url: event.image_url,
+    socials: event.url ? { website: event.url } : undefined,
+    isPublic: true,
+    source: "meetupdc",
+  };
+}
+
+/**
+ * Transform DC Sports event to normalized format
+ */
+export function transformDCSportsEvent(event: any): NormalizedEvent {
+  return {
+    title: event.title,
+    description: event.description,
+    start_date: normalizeDate(event.date),
+    start_time: normalizeTime(event.time),
+    location: event.location,
+    venue: event.venue,
+    category: normalizeCategory(event.category || "Sports"),
+    url: event.url,
+    cost: normalizeCost(event.price),
+    image_url: event.image_url,
+    socials: event.url ? { website: event.url } : undefined,
+    isPublic: true,
+    source: "dcsports",
+  };
+}
+
 // Dummy saveEvents function to mimic member function, you will need to implement it or import if defined elsewhere.
 export async function saveEvents(
   normalizedEvents: NormalizedEvent[],
@@ -674,7 +779,22 @@ export const handler: Handler = async (event, context, callback) => {
           case "eventbrite":
             normalizedEvent = transformEventbriteEvent(rawEvent);
             break;
-          default:
+          case "kennedycenter":
+            normalizedEvent = transformKennedyCenterEvent(rawEvent);
+            break;
+          case "ninethirtyclub":
+            normalizedEvent = transformNineThirtyClubEvent(rawEvent);
+            break;
+          case "smithsonian":
+            normalizedEvent = transformSmithsonianEvent(rawEvent);
+            break;
+          case "meetupdc":
+            normalizedEvent = transformMeetupDCEvent(rawEvent);
+            break;
+          case "dcsports":
+            normalizedEvent = transformDCSportsEvent(rawEvent);
+            break;
+          default: {
             // Assume it's already in normalized format
             normalizedEvent = rawEvent;
             // Ensure isPublic is set for events that don't go through a transform
@@ -694,6 +814,7 @@ export const handler: Handler = async (event, context, callback) => {
                 rawEventAny.is_public === true ||
                 rawEventAny.is_public === "true";
             }
+          }
         }
 
         // Log isPublic value for debugging

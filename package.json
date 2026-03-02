@@ -22,13 +22,17 @@
     "crawl:kennedycenter": "cd packages/tasks/crawlers && sst shell tsx kennedycenter.ts",
     "crawl:kennedycenter:prod": "cd packages/tasks/crawlers && sst shell --stage production tsx kennedycenter.ts",
     "crawl:meetupdc": "cd packages/tasks/crawlers && sst shell tsx meetupdc.ts",
-    "crawl:meetupdc:prod": "cd packages/tasks/crawlers && sst shell --stage production tsx meetupdc.ts"
+    "crawl:meetupdc:prod": "cd packages/tasks/crawlers && sst shell --stage production tsx meetupdc.ts",
+    "lint": "eslint ."
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.3",
     "@tsconfig/node22": "^22",
     "@types/aws-lambda": "8.10.158",
+    "eslint": "^9.39.3",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5",
+    "typescript-eslint": "^8.56.1",
     "vitest": "^3.2.4"
   },
   "dependencies": {

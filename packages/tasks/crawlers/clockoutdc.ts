@@ -52,7 +52,7 @@ class ClockOutCrawler {
       const year = today.getFullYear();
 
       // Create date and check if it's in the past
-      let date = new Date(year, parseInt(month) - 1, parseInt(day));
+      const date = new Date(year, parseInt(month) - 1, parseInt(day));
 
       // If the date is more than 6 months in the past, assume it's next year
       const sixMonthsAgo = new Date(today);
@@ -150,7 +150,7 @@ class ClockOutCrawler {
 
                 const match = dateText.match(/(\d{1,2}\/\d{1,2})/);
                 const today = new Date();
-                let yyyy = today.getFullYear();
+                const yyyy = today.getFullYear();
                 let mm = "01";
                 let dd = "01";
                 if (match) {

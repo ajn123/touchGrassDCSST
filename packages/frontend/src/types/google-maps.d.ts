@@ -21,7 +21,7 @@ declare namespace google {
     
     class Marker {
       constructor(options: MarkerOptions);
-      addListener(event: string, handler: Function): void;
+      addListener(event: string, handler: (...args: any[]) => void): void;
     }
     
     class InfoWindow {

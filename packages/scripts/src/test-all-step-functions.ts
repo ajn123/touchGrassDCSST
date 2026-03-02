@@ -55,7 +55,7 @@ async function testStepFunction(
   console.log(`${"=".repeat(80)}\n`);
 
   // Create test input based on state machine name
-  let testInput: any = {
+  const testInput: any = {
     events: [
       {
         title: `Test Event - ${stateMachineName}`,

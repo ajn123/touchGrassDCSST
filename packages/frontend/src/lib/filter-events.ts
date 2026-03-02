@@ -56,12 +56,12 @@ function filterByCategories(events: Event[], categories: string[]): Event[] {
     
     if (Array.isArray(event.category)) {
       eventCategories = event.category
-        .flatMap((c) => c.split(/[,\/]/))
+        .flatMap((c) => c.split(/[,/]/))
         .map((c) => c.toLowerCase().trim())
         .filter((c) => c.length > 0);
     } else if (event.category) {
       eventCategories = event.category
-        .split(/[,\/]/)
+        .split(/[,/]/)
         .map((c) => c.toLowerCase().trim())
         .filter((c) => c.length > 0);
     }
@@ -175,23 +175,24 @@ function sortEvents(
     let comparison = 0;
 
     switch (sortBy) {
-      case "date":
+      case "date": {
         const dateA = a.start_date || "";
         const dateB = b.start_date || "";
         comparison = dateA.localeCompare(dateB);
         break;
-
-      case "title":
+      }
+      case "title": {
         const titleA = (a.title || "").toLowerCase();
         const titleB = (b.title || "").toLowerCase();
         comparison = titleA.localeCompare(titleB);
         break;
-
-      case "created":
+      }
+      case "created": {
         const createdA = a.createdAt || 0;
         const createdB = b.createdAt || 0;
         comparison = createdA - createdB;
         break;
+      }
 
       default:
         comparison = 0;
@@ -267,7 +268,7 @@ export function getCategoriesFromEvents(events: Event[]): string[] {
         if (cat && cat.trim()) {
           // Split by both comma and slash to handle "christmas/novelty" or "christmas,novelty"
           const splitCategories = cat
-            .split(/[,\/]/)
+            .split(/[,/]/)
             .map((c) => c.trim())
             .filter((c) => c.length > 0);
           splitCategories.forEach((c) => categorySet.add(c));
@@ -276,7 +277,7 @@ export function getCategoriesFromEvents(events: Event[]): string[] {
     } else if (event.category && event.category.trim()) {
       // Split by both comma and slash to handle "christmas/novelty" or "christmas,novelty"
       const splitCategories = event.category
-        .split(/[,\/]/)
+        .split(/[,/]/)
         .map((c) => c.trim())
         .filter((c) => c.length > 0);
       splitCategories.forEach((c) => categorySet.add(c));

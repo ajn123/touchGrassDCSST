@@ -53,23 +53,23 @@ export function DateDisplay({ date, format = 'long', className = '' }: DateDispl
           day: 'numeric'
         });
       
-      case 'relative':
+      case 'relative': {
         const now = new Date();
         const diffInMs = now.getTime() - dateObj.getTime();
         const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-        
+
         if (diffInDays === 0) return 'Today';
         if (diffInDays === 1) return 'Yesterday';
         if (diffInDays === -1) return 'Tomorrow';
         if (diffInDays > 0 && diffInDays < 7) return `${diffInDays} days ago`;
         if (diffInDays < 0 && diffInDays > -7) return `In ${Math.abs(diffInDays)} days`;
-        
+
         return dateObj.toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
           year: 'numeric'
         });
-      
+      }
       default:
         return dateObj.toLocaleDateString();
     }

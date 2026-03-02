@@ -41,7 +41,7 @@ async function verifyDatabaseEmpty() {
 
   // Scan entire table
   console.log("\n📊 Scanning entire table...");
-  let allItems: any[] = [];
+  const allItems: any[] = [];
   let lastKey: any = undefined;
   let scanCount = 0;
 

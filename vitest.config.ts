@@ -6,7 +6,7 @@ export default defineConfig({
     globals: true,
     environment: "node",
     include: ["**/*.test.ts"],
-    exclude: ["**/node_modules/**", "**/.sst/**"],
+    exclude: ["**/node_modules/**", "**/.sst/**", "**/.claude/**"],
   },
   resolve: {
     alias: {

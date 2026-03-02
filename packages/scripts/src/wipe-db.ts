@@ -97,7 +97,7 @@ async function wipeDatabase(confirmed: boolean) {
     console.log("-".repeat(80));
 
     // First, scan to get all items and categorize them
-    let allItems: any[] = [];
+    const allItems: any[] = [];
     let lastEvaluatedKey: any = undefined;
     let scanCount = 0;
 
@@ -208,7 +208,7 @@ async function wipeDatabase(confirmed: boolean) {
     console.log("\n🔍 Step 3: Verifying deletion...");
     console.log("-".repeat(80));
 
-    let remainingItems: any[] = [];
+    const remainingItems: any[] = [];
     lastEvaluatedKey = undefined;
 
     do {

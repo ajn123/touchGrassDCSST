@@ -402,7 +402,7 @@ export const handler: Handler = async (
 
   // The normalize step returns: { success: true, events: [...], source: "...", eventType: "group" }
   // Extract events array and metadata
-  let items = payload.events || payload;
+  const items = payload.events || payload;
   const eventType = payload.eventType;
   const source = payload.source || "unknown";
 

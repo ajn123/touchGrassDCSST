@@ -405,7 +405,7 @@ class EventbriteCrawler {
                     // Check if the text contains both date and time separated by bullet (•) or other separators
                     if (dateTimeText) {
                       // Split by bullet, dash, or pipe
-                      const separators = /[•·\-\|]/;
+                      const separators = /[•·\-|]/;
                       const parts = dateTimeText
                         .split(separators)
                         .map((p) => p.trim())
@@ -532,14 +532,14 @@ class EventbriteCrawler {
                       dateText = dateText.replace(timePattern, "").trim();
                       // Also remove any remaining separators
                       dateText = dateText
-                        .replace(/^[•·\-\|]\s*|\s*[•·\-\|]\s*$/g, "")
+                        .replace(/^[•·\-|]\s*|\s*[•·\-|]\s*$/g, "")
                         .trim();
                     }
                   }
 
                   // Clean up dateText - remove any remaining separators at the end
                   if (dateText) {
-                    dateText = dateText.replace(/\s*[•·\-\|]\s*$/, "").trim();
+                    dateText = dateText.replace(/\s*[•·\-|]\s*$/, "").trim();
                   }
 
                   // Extract location/venue
@@ -755,7 +755,7 @@ class EventbriteCrawler {
 
             // Extract venue from location if it contains a venue name
             let venue = e.venue;
-            let location = e.location;
+            const location = e.location;
             if (!venue && location) {
               // Try to extract venue name (usually before a comma or specific patterns)
               const venueMatch = location.match(/^([^,]+)/);

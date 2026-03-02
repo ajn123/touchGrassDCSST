@@ -114,7 +114,7 @@ export class TouchGrassDynamoDB {
       }
 
       // Try both environment variable names
-      let apiKey =
+      const apiKey =
         process.env.GOOGLE_MAPS_API_KEY ||
         process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
       if (!apiKey) {
@@ -554,7 +554,7 @@ export class TouchGrassDynamoDB {
             if (category && category.trim()) {
               // Split by both comma and slash to handle "christmas/novelty" or "christmas,novelty"
               const splitCategories = category
-                .split(/[,\/]/)
+                .split(/[,/]/)
                 .map((c) => c.trim().toLowerCase())
                 .filter((c) => c.length > 0);
               splitCategories.forEach((c) => uniqueCategories.add(c));
@@ -563,7 +563,7 @@ export class TouchGrassDynamoDB {
         } else if (unmarshalledItem.category) {
           // If category is a string, split by comma and slash, then add each part (normalized to lowercase)
           const categories = unmarshalledItem.category
-            .split(/[,\/]/)
+            .split(/[,/]/)
             .map((cat: string) => cat.trim().toLowerCase())
             .filter((cat: string) => cat.length > 0);
           categories.forEach((category: string) => {
@@ -1330,7 +1330,7 @@ export class TouchGrassDynamoDB {
       }
 
       // Build the complete filter expression - handle both old and new prefixes
-      let filterExpressions = [
+      const filterExpressions = [
         "(begins_with(#pk, :eventPrefixNew) OR begins_with(#pk, :eventPrefixOld))",
       ];
 
@@ -1516,6 +1516,83 @@ export class TouchGrassDynamoDB {
     }
 
     return events;
+  }
+
+  // ============================================================================
+  // RECOMMENDATION SYSTEM METHODS
+  // ============================================================================
+
+  /**
+   * Get analytics records for a specific user (for recommendation scoring)
+   */
+  async getUserAnalytics(
+    userId: string,
+    actionType?: string
+  ): Promise<any[]> {
+    try {
+      const pk = actionType
+        ? `ANALYTICS#${actionType}`
+        : "ANALYTICS#EVENT_CLICK";
+
+      const result = await this.client.send(
+        new QueryCommand({
+          TableName: this.tableName,
+          KeyConditionExpression: "pk = :pk",
+          FilterExpression: "userId = :userId",
+          ExpressionAttributeValues: {
+            ":pk": { S: pk },
+            ":userId": { S: userId },
+          },
+          Limit: 200,
+          ScanIndexForward: false,
+        })
+      );
+
+      return (result.Items || []).map((item) => unmarshall(item));
+    } catch (error) {
+      console.error("Error fetching user analytics:", error);
+      return [];
+    }
+  }
+
+  /**
+   * Get popular events by aggregate click count.
+   * Reads from ANALYTICS#POPULAR_EVENTS records.
+   * Returns a map of eventId -> clickCount.
+   */
+  async getPopularEvents(limit: number = 50): Promise<Record<string, number>> {
+    try {
+      const result = await this.client.send(
+        new QueryCommand({
+          TableName: this.tableName,
+          KeyConditionExpression:
+            "pk = :pk AND begins_with(sk, :skPrefix)",
+          ExpressionAttributeValues: {
+            ":pk": { S: "ANALYTICS#POPULAR_EVENTS" },
+            ":skPrefix": { S: "EVENT#" },
+          },
+          Limit: limit,
+          ScanIndexForward: false,
+        })
+      );
+
+      const popularMap: Record<string, number> = {};
+      for (const item of result.Items || []) {
+        const record = unmarshall(item);
+        const eventId = record.sk?.replace("EVENT#", "") || "";
+        const clickCount =
+          typeof record.clickCount === "number" ? record.clickCount : 0;
+        if (eventId) {
+          popularMap[eventId] = clickCount;
+        }
+      }
+
+      return popularMap;
+    } catch (error) {
+      // Table may not have popularity records yet - return empty
+      console.warn("Error fetching popular events (may not exist yet):", error);
+      return {};
+    }
   }
 }
 

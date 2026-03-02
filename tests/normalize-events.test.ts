@@ -5,6 +5,10 @@ import {
   transformMeetupDCEvent,
   transformCrawlerEvent,
 } from "../packages/functions/src/events/normalizeEvents";
+import {
+  normalizeCategory,
+  VALID_CATEGORIES,
+} from "../packages/shared-utils/src/index";
 
 describe("Event normalization transforms", () => {
   describe("transformWashingtonianEvent", () => {
@@ -202,6 +206,211 @@ describe("Event normalization transforms", () => {
         website: "https://example.com",
         instagram: "https://instagram.com/event",
       });
+    });
+  });
+});
+
+describe("normalizeCategory", () => {
+  describe("keyword matching", () => {
+    it("maps 'art talk' to Arts & Culture", () => {
+      expect(normalizeCategory("art talk")).toBe("Arts & Culture");
+    });
+
+    it("maps 'beer' to Food & Drink", () => {
+      expect(normalizeCategory("beer")).toBe("Food & Drink");
+    });
+
+    it("maps 'concert' to Music", () => {
+      expect(normalizeCategory("concert")).toBe("Music");
+    });
+
+    it("maps 'jazz night' to Music", () => {
+      expect(normalizeCategory("jazz night")).toBe("Music");
+    });
+
+    it("maps 'comedy' to Comedy", () => {
+      expect(normalizeCategory("comedy")).toBe("Comedy");
+    });
+
+    it("maps 'stand-up' to Comedy", () => {
+      expect(normalizeCategory("stand-up")).toBe("Comedy");
+    });
+
+    it("maps 'improv' to Comedy", () => {
+      expect(normalizeCategory("improv")).toBe("Comedy");
+    });
+
+    it("maps 'hiking' to Outdoors & Recreation", () => {
+      expect(normalizeCategory("hiking")).toBe("Outdoors & Recreation");
+    });
+
+    it("maps 'workshop' to Education", () => {
+      expect(normalizeCategory("workshop")).toBe("Education");
+    });
+
+    it("maps 'theater' to Theater", () => {
+      expect(normalizeCategory("theater")).toBe("Theater");
+    });
+
+    it("maps 'theatre' to Theater", () => {
+      expect(normalizeCategory("theatre")).toBe("Theater");
+    });
+
+    it("maps 'volunteer' to Community", () => {
+      expect(normalizeCategory("volunteer")).toBe("Community");
+    });
+
+    it("maps 'happy hour' to Food & Drink", () => {
+      expect(normalizeCategory("happy hour")).toBe("Food & Drink");
+    });
+
+    it("maps 'bar crawl' to Nightlife", () => {
+      expect(normalizeCategory("bar crawl")).toBe("Nightlife");
+    });
+
+    it("maps 'yoga' to Sports", () => {
+      expect(normalizeCategory("yoga")).toBe("Sports");
+    });
+
+    it("maps 'mixer' to Networking", () => {
+      expect(normalizeCategory("mixer")).toBe("Networking");
+    });
+  });
+
+  describe("case insensitivity", () => {
+    it("maps 'Birding' to Outdoors & Recreation", () => {
+      expect(normalizeCategory("Birding")).toBe("Outdoors & Recreation");
+    });
+
+    it("maps 'birding' to Outdoors & Recreation", () => {
+      expect(normalizeCategory("birding")).toBe("Outdoors & Recreation");
+    });
+
+    it("maps 'MUSIC' to Music", () => {
+      expect(normalizeCategory("MUSIC")).toBe("Music");
+    });
+
+    it("maps 'Art Exhibit' to Arts & Culture", () => {
+      expect(normalizeCategory("Art Exhibit")).toBe("Arts & Culture");
+    });
+  });
+
+  describe("junk rejection", () => {
+    it("maps '250' to General", () => {
+      expect(normalizeCategory("250")).toBe("General");
+    });
+
+    it("maps 'bad bunny' to General", () => {
+      expect(normalizeCategory("bad bunny")).toBe("General");
+    });
+
+    it("maps 'Lincoln' to General", () => {
+      expect(normalizeCategory("Lincoln")).toBe("General");
+    });
+
+    it("maps 'bhm' to General", () => {
+      expect(normalizeCategory("bhm")).toBe("General");
+    });
+
+    it("maps 'Mardi Gras at Dauphine\\'s (6-10)' to Festival", () => {
+      expect(normalizeCategory("Mardi Gras at Dauphine's (6-10)")).toBe(
+        "Festival"
+      );
+    });
+  });
+
+  describe("deduplication", () => {
+    it("deduplicates ['music', 'concert'] to 'Music'", () => {
+      expect(normalizeCategory(["music", "concert"])).toBe("Music");
+    });
+
+    it("deduplicates ['art', 'art tour', 'art exhibit'] to 'Arts & Culture'", () => {
+      expect(normalizeCategory(["art", "art tour", "art exhibit"])).toBe(
+        "Arts & Culture"
+      );
+    });
+
+    it("keeps distinct categories from ['music', 'food']", () => {
+      const result = normalizeCategory(["music", "food"]);
+      expect(result).toContain("Music");
+      expect(result).toContain("Food & Drink");
+    });
+  });
+
+  describe("holiday normalization", () => {
+    it("maps 'Valentines' to Festival", () => {
+      expect(normalizeCategory("Valentines")).toBe("Festival");
+    });
+
+    it("maps 'Valentine\\'s Day' to Festival", () => {
+      expect(normalizeCategory("Valentine's Day")).toBe("Festival");
+    });
+
+    it("maps 'christmas' to Festival", () => {
+      expect(normalizeCategory("christmas")).toBe("Festival");
+    });
+
+    it("maps 'halloween' to Festival", () => {
+      expect(normalizeCategory("halloween")).toBe("Festival");
+    });
+  });
+
+  describe("edge cases", () => {
+    it("returns 'General' for undefined", () => {
+      expect(normalizeCategory(undefined)).toBe("General");
+    });
+
+    it("returns 'General' for empty string", () => {
+      expect(normalizeCategory("")).toBe("General");
+    });
+
+    it("returns 'General' for empty array", () => {
+      expect(normalizeCategory([])).toBe("General");
+    });
+
+    it("drops General when a specific category is also matched", () => {
+      const result = normalizeCategory(["xyz-junk", "music"]);
+      expect(result).toBe("Music");
+    });
+  });
+
+  describe("VALID_CATEGORIES", () => {
+    it("contains exactly 13 categories", () => {
+      expect(VALID_CATEGORIES).toHaveLength(13);
+    });
+
+    it("includes General", () => {
+      expect(VALID_CATEGORIES).toContain("General");
+    });
+
+    it("normalizeCategory always returns values in VALID_CATEGORIES", () => {
+      const testInputs = [
+        "art",
+        "comedy",
+        "music",
+        "beer",
+        "yoga",
+        "hiking",
+        "theater",
+        "festival",
+        "workshop",
+        "volunteer",
+        "mixer",
+        "nightlife",
+        "250",
+        "bad bunny",
+        undefined,
+        "",
+      ];
+
+      const validSet = new Set(VALID_CATEGORIES as readonly string[]);
+
+      for (const input of testInputs) {
+        const result = normalizeCategory(input);
+        for (const part of result.split(",")) {
+          expect(validSet.has(part)).toBe(true);
+        }
+      }
     });
   });
 });

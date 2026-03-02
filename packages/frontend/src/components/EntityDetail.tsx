@@ -84,7 +84,7 @@ export function EntityDetail({
             {hasValidCost(cost) && <Cost cost={cost} />}
             {socials && <Socials socials={socials} />}
             {date != null && <DateDisplay date={date} />}
-            {hasValidLocation(location) && <Location location={location} />}
+            {hasValidLocation(location) && <Location location={location!} />}
             {categories && (
               <Categories displayMode="display" eventCategories={categories} />
             )}

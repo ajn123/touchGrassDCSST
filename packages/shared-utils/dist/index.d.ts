@@ -49,7 +49,14 @@ export declare function normalizeDate(dateStr?: string): string | undefined;
  */
 export declare function normalizeTime(timeStr?: string): string | undefined;
 /**
- * Normalize category to consistent format
+ * Canonical event categories — the only values that should appear in the DB and UI.
+ */
+export declare const VALID_CATEGORIES: readonly ["Arts & Culture", "Comedy", "Community", "Education", "Festival", "Food & Drink", "General", "Music", "Networking", "Nightlife", "Outdoors & Recreation", "Sports", "Theater"];
+export type ValidCategory = (typeof VALID_CATEGORIES)[number];
+/**
+ * Normalize category to a canonical value using substring matching.
+ * Always returns one of the VALID_CATEGORIES — never passes through raw crawler text.
+ * When given an array, deduplicates the resolved categories before joining.
  */
 export declare function normalizeCategory(category?: string | string[]): string;
 /**
@@ -149,6 +156,8 @@ declare const _default: {
     transformOpenWebNinjaEvent: typeof transformOpenWebNinjaEvent;
     validateEvent: typeof validateEvent;
     sanitizeEvent: typeof sanitizeEvent;
+    VALID_CATEGORIES: readonly ["Arts & Culture", "Comedy", "Community", "Education", "Festival", "Food & Drink", "General", "Music", "Networking", "Nightlife", "Outdoors & Recreation", "Sports", "Theater"];
+    normalizeCategory: typeof normalizeCategory;
 };
 export default _default;
 //# sourceMappingURL=index.d.ts.map

@@ -22,6 +22,13 @@ interface EntityDetailProps {
   rightActionNode?: ReactNode;
 }
 
+// Helper function to check if location is meaningful (not "UNKNOWN" or empty)
+export function hasValidLocation(location: string | undefined): boolean {
+  if (!location) return false;
+  const lower = location.toLowerCase().trim();
+  return !lower.includes("unknown") && lower.length > 0;
+}
+
 // Helper function to check if cost is valid
 function hasValidCost(cost: any): boolean {
   if (!cost) return false;
@@ -77,7 +84,7 @@ export function EntityDetail({
             {hasValidCost(cost) && <Cost cost={cost} />}
             {socials && <Socials socials={socials} />}
             {date != null && <DateDisplay date={date} />}
-            {location && <Location location={location} />}
+            {hasValidLocation(location) && <Location location={location} />}
             {categories && (
               <Categories displayMode="display" eventCategories={categories} />
             )}

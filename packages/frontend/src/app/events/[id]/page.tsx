@@ -121,7 +121,7 @@ export default async function ItemPage({
       />
 
       {/* Map Section */}
-      {(item.coordinates || item.location) && (
+      {(item.coordinates || (item.location && !item.location.toLowerCase().includes("unknown"))) && (
         <div>
           <h2 className="text-xl font-semibold mb-3">Location</h2>
           <EventMap

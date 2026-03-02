@@ -1,6 +1,6 @@
 "use client";
 
-import { resolveImageUrl } from "@/lib/image-utils";
+import { resolveImageUrl, shouldBeUnoptimized } from "@/lib/image-utils";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -28,18 +28,20 @@ interface Event {
 function EventImage({
   imageUrl,
   title,
+  category,
+  venue,
   onLoad,
   onError,
 }: {
   imageUrl: string;
   title?: string;
+  category?: string;
+  venue?: string;
   onLoad: () => void;
   onError: () => void;
 }) {
-  const resolvedUrl = resolveImageUrl(imageUrl) || "/images/placeholder.jpg";
-  // Use unoptimized for external images to avoid 404 errors in Next.js image optimization
-  const isExternal = resolvedUrl.startsWith('http://') || resolvedUrl.startsWith('https://');
-  
+  const resolvedUrl = resolveImageUrl(imageUrl, category, title, venue) || "/images/placeholder.jpg";
+
   return (
     <Image
       src={resolvedUrl}
@@ -49,7 +51,7 @@ function EventImage({
       className="object-cover"
       onLoad={onLoad}
       onError={onError}
-      unoptimized={isExternal}
+      unoptimized={shouldBeUnoptimized(resolvedUrl)}
     />
   );
 }
@@ -94,6 +96,8 @@ export default function FeaturedEvent({ event }: { event: Event }) {
               <EventImage
                 imageUrl={event.image_url}
                 title={event.title}
+                category={event.category}
+                venue={event.venue}
                 onLoad={handleImageLoad}
                 onError={handleImageError}
               />
@@ -142,7 +146,8 @@ export default function FeaturedEvent({ event }: { event: Event }) {
             {event.title}
           </h3>
           <p className="text-gray-600 mb-4 flex-1 line-clamp-2 min-h-[2.5rem]">
-            {event.venue || event.location}
+            {[event.venue, event.location]
+              .find((v) => v && !v.toLowerCase().includes("unknown")) || ""}
           </p>
 
           <div className="mt-auto">

@@ -42,6 +42,28 @@ class DCImprovEvent {
   }
 }
 
+// Titles that are section headings or non-event pages, not actual shows
+export const INVALID_TITLE_PATTERNS = [
+  "about the show",
+  "online showroom",
+  "about us",
+  "contact us",
+  "gift cards",
+  "private events",
+  "group sales",
+  "faq",
+  "terms of service",
+  "privacy policy",
+  "dc improv",
+];
+
+export function isInvalidTitle(title: string): boolean {
+  const lower = title.toLowerCase().trim();
+  return INVALID_TITLE_PATTERNS.some(
+    (pattern) => lower === pattern || lower.includes(pattern)
+  );
+}
+
 class DCImprovCrawler {
   private events: DCImprovEvent[] = [];
   private ticketUrls: string[] = [];
@@ -585,8 +607,9 @@ class DCImprovCrawler {
 
           // If we're on a checkout page, create a single event
           if (isCheckoutPage || eventData.isCheckout) {
-            if (!eventData.title) {
-              console.log(`⚠️ Skipping checkout page with no title: ${request.url}`);
+            if (!eventData.title || isInvalidTitle(eventData.title)) {
+              console.log(`⚠️ Skipping checkout page with no/invalid title "${eventData.title}": ${request.url}`);
+              this.skippedEventsCount++;
               return;
             }
 
@@ -643,8 +666,8 @@ class DCImprovCrawler {
             return;
           }
           
-          // Skip if title is "About The Show" or similar
-          if (eventData.title.toLowerCase().includes("about the show")) {
+          // Skip non-event titles (section headings, navigation pages, etc.)
+          if (isInvalidTitle(eventData.title)) {
             console.log(`⚠️ Skipping page with invalid title "${eventData.title}": ${request.url}`);
             this.skippedEventsCount++;
             return;

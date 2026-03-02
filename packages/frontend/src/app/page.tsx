@@ -1,6 +1,7 @@
 import Categories from "@/components/Categories";
 import FeaturedGroups from "@/components/FeaturedGroups";
 import MonthlyCalendar from "@/components/MonthlyCalendar";
+import PersonalizedEvents from "@/components/PersonalizedEvents";
 import SearchBar from "@/components/SearchBar";
 import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
 import { getCategoriesFromEvents } from "@/lib/filter-events";
@@ -64,6 +65,9 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* Personalized Events - client component that hydrates after SSR */}
+      <PersonalizedEvents />
 
       {/* Compact Calendar Section */}
       <MonthlyCalendar variant="compact" />

@@ -249,7 +249,8 @@ export function RecentEventsList() {
                         <span>{getCategoryDisplay(event.category)}</span>
                       </div>
                     )}
-                    {(event.location || event.venue) && (
+                    {(event.location || event.venue) &&
+                      !(event.venue || event.location || "").toLowerCase().includes("unknown") && (
                       <div className="flex items-center">
                         <svg
                           className="h-4 w-4 mr-1 text-gray-400"

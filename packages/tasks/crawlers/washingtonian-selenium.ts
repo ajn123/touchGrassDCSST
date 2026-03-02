@@ -537,6 +537,8 @@ class WashingtonianPlaywrightCrawler {
   }
 }
 
+export { WashingtonianPlaywrightCrawler };
+
 // Main execution
 async function main() {
   console.log("🎬 Starting Washingtonian Playwright Crawler...");
@@ -553,5 +555,8 @@ async function main() {
   }
 }
 
-// Run the crawler
-main();
+// Only auto-run when executed directly (not imported)
+const isDirectRun = process.argv[1]?.includes('washingtonian-selenium');
+if (isDirectRun) {
+  main();
+}

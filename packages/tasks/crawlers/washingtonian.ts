@@ -1,4 +1,4 @@
-import { WashingtonianSeleniumCrawler } from "./washingtonian-selenium";
+import { WashingtonianPlaywrightCrawler as WashingtonianSeleniumCrawler } from "./washingtonian-selenium";
 
 async function handler(event: any = {}) {
   console.log("🚀 Washingtonian crawl Lambda invoked", {

@@ -334,15 +334,17 @@ export default function MonthlyCalendar({
   return (
     <div
       className={`${
-        isCompact ? "max-w-7xl mx-auto px-4 py-16" : "max-w-7xl mx-auto p-6"
+        isCompact
+          ? "max-w-7xl mx-auto px-2 py-8 md:px-4 md:py-16"
+          : "max-w-7xl mx-auto p-3 md:p-6"
       } ${className}`}
     >
       {/* Header */}
       {showHeader && (
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4 md:mb-6">
           {isCompact ? (
             <>
-              <h2 className="text-4xl font-bold">Event Calendar</h2>
+              <h2 className="text-2xl md:text-4xl font-bold">Event Calendar</h2>
               <Link
                 href="/calendar"
                 className="hover:text-blue-300 transition-colors text-sm underline"
@@ -360,7 +362,7 @@ export default function MonthlyCalendar({
                 <FontAwesomeIcon icon={faChevronLeft} className="text-lg" />
               </button>
 
-              <h2 className="text-2xl font-bold">
+              <h2 className="text-base md:text-2xl font-bold text-center">
                 {windowStartDate
                   ? formatEtRange(windowStartDate, windowDays)
                   : "Loading..."}
@@ -386,16 +388,16 @@ export default function MonthlyCalendar({
       >
         {/* Navigation Header for Compact */}
         {isCompact && (
-          <div className="flex items-center justify-between p-4 border-b bg-gray-50">
+          <div className="flex items-center justify-between p-2 md:p-4 border-b bg-gray-50">
             <button
               onClick={goToPreviousMonth}
-              className="p-2 hover:bg-gray-200 rounded-lg transition-colors text-gray-700 hover:text-gray-900"
+              className="p-1.5 md:p-2 hover:bg-gray-200 rounded-lg transition-colors text-gray-700 hover:text-gray-900"
               aria-label="Previous Month"
             >
               <FontAwesomeIcon icon={faChevronLeft} className="w-4 h-4" />
             </button>
 
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-sm md:text-lg font-semibold text-gray-900">
               {windowStartDate
                 ? formatEtRange(windowStartDate, windowDays)
                 : "Loading..."}
@@ -403,7 +405,7 @@ export default function MonthlyCalendar({
 
             <button
               onClick={goToNextMonth}
-              className="p-2 hover:bg-gray-200 rounded-lg transition-colors text-gray-700 hover:text-gray-900"
+              className="p-1.5 md:p-2 hover:bg-gray-200 rounded-lg transition-colors text-gray-700 hover:text-gray-900"
               aria-label="Next Month"
             >
               <FontAwesomeIcon icon={faChevronRight} className="w-4 h-4" />
@@ -417,21 +419,21 @@ export default function MonthlyCalendar({
             isCompact ? "bg-gray-50 border-gray-300" : "border-gray-200"
           }`}
         >
-          {(isCompact
-            ? ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-            : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-          ).map((day, index) => (
-            <div
-              key={index}
-              className={`text-center font-medium ${
-                isCompact
-                  ? "p-2 text-xs text-gray-600 border-r border-gray-300"
-                  : "p-3 text-sm"
-              }`}
-            >
-              {day}
-            </div>
-          ))}
+          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
+            (day, index) => (
+              <div
+                key={index}
+                className={`text-center font-medium ${
+                  isCompact
+                    ? "p-1 md:p-2 text-[10px] md:text-xs text-gray-600 border-r border-gray-300"
+                    : "p-1.5 md:p-3 text-[10px] md:text-sm"
+                }`}
+              >
+                <span className="md:hidden">{day[0]}</span>
+                <span className="hidden md:inline">{day}</span>
+              </div>
+            )
+          )}
         </div>
 
         {/* Calendar Days */}
@@ -441,83 +443,101 @@ export default function MonthlyCalendar({
               href={`/calendar/day/${formatDateForUrl(day.date)}`}
               className={`border-r border-b ${
                 isCompact ? "border-gray-300" : "border-gray-200"
-              } ${isCompact ? "p-1" : "p-2"} ${
+              } ${isCompact ? "p-0.5 md:p-1" : "p-1 md:p-2"} ${
                 !day.isCurrentMonth ? "bg-gray-50 text-gray-400" : "bg-white"
-              } ${isCompact ? "min-h-[80px]" : "min-h-[200px]"}`}
+              } ${
+                isCompact
+                  ? "min-h-[60px] md:min-h-[80px]"
+                  : "min-h-[70px] md:min-h-[200px]"
+              }`}
               key={index}
             >
               {/* Day Number */}
               <div
-                className={`font-medium ${isCompact ? "mb-1" : "mb-2"} ${
+                className={`font-medium ${isCompact ? "mb-0.5 md:mb-1" : "mb-1 md:mb-2"} ${
                   day.isToday
                     ? "font-bold text-blue-600"
                     : day.isCurrentMonth
                     ? "text-gray-900"
                     : "text-gray-400"
-                } ${isCompact ? "text-xs" : "text-sm"}`}
+                } ${isCompact ? "text-[10px] md:text-xs" : "text-[10px] md:text-sm"}`}
               >
-                {formatMonthDay(day.date)}
+                <span className="md:hidden">{day.dayNumber}</span>
+                <span className="hidden md:inline">{formatMonthDay(day.date)}</span>
               </div>
 
-              {/* Events */}
-              <div className={`${isCompact ? "space-y-0.5" : "space-y-1"}`}>
-                {day.events
-                  .slice(0, isCompact ? 2 : 5)
-                  .map((event, eventIndex) => {
-                    const eventId = event.pk.replace(/^(EVENT-|EVENT#)/, "");
-                    return (
+              {/* Events - mobile: dots only, desktop: full cards */}
+              {day.events.length > 0 && (
+                <>
+                  {/* Mobile: colored dots indicating events */}
+                  <div className="flex flex-wrap gap-0.5 md:hidden">
+                    {day.events.slice(0, 3).map((event) => (
                       <div
                         key={event.pk}
-                        className={`rounded cursor-pointer transition-colors truncate ${
-                          isCompact
-                            ? "text-xs bg-blue-100 text-blue-800 px-1 py-0.5 hover:bg-blue-200"
-                            : "text-xs bg-blue-50 border border-blue-200 p-1 hover:bg-blue-100"
-                        }`}
-                        title={`${event.title} - ${
-                          event.start_time
-                            ? formatTime(event.start_time)
-                            : event.time
-                            ? formatTime(event.time)
-                            : ""
-                        } - ${event.location || event.venue || "Location TBD"}`}
-                        onClick={() => handleEventClick(event)}
-                      >
-                        <div
-                          className={`font-medium ${
-                            isCompact ? "text-blue-800" : "text-blue-800"
-                          }`}
-                        >
-                          {event.title}
-                        </div>
-                        {!isCompact && (event.start_time || event.time) && (
-                          <div className="text-blue-600">
-                            {formatTime((event.start_time || event.time)!)}
-                          </div>
-                        )}
-                        {!isCompact && (event.location || event.venue) && (
-                          <div className="text-blue-500 truncate">
-                            {event.location || event.venue}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-
-                {day.events.length > 2 && (
-                  <div className="text-xs text-gray-500 text-center">
-                    +{day.events.length - 2} Show More
+                        className="w-1.5 h-1.5 rounded-full bg-blue-500"
+                      />
+                    ))}
+                    {day.events.length > 3 && (
+                      <span className="text-[8px] text-gray-500 leading-none self-center">
+                        +{day.events.length - 3}
+                      </span>
+                    )}
                   </div>
-                )}
-              </div>
+
+                  {/* Desktop: full event cards */}
+                  <div className={`hidden md:block ${isCompact ? "space-y-0.5" : "space-y-1"}`}>
+                    {day.events
+                      .slice(0, isCompact ? 2 : 5)
+                      .map((event) => (
+                        <div
+                          key={event.pk}
+                          className={`rounded cursor-pointer transition-colors truncate ${
+                            isCompact
+                              ? "text-xs bg-blue-100 text-blue-800 px-1 py-0.5 hover:bg-blue-200"
+                              : "text-xs bg-blue-50 border border-blue-200 p-1 hover:bg-blue-100"
+                          }`}
+                          title={`${event.title} - ${
+                            event.start_time
+                              ? formatTime(event.start_time)
+                              : event.time
+                              ? formatTime(event.time)
+                              : ""
+                          } - ${event.location || event.venue || "Location TBD"}`}
+                          onClick={() => handleEventClick(event)}
+                        >
+                          <div className="font-medium text-blue-800">
+                            {event.title}
+                          </div>
+                          {!isCompact && (event.start_time || event.time) && (
+                            <div className="text-blue-600">
+                              {formatTime((event.start_time || event.time)!)}
+                            </div>
+                          )}
+                          {!isCompact && (event.location || event.venue) && (
+                            <div className="text-blue-500 truncate">
+                              {event.location || event.venue}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+
+                    {day.events.length > (isCompact ? 2 : 5) && (
+                      <div className="text-xs text-gray-500 text-center">
+                        +{day.events.length - (isCompact ? 2 : 5)} more
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </Link>
           ))}
         </div>
 
         {/* Footer for Compact */}
         {isCompact && (
-          <div className="p-3 bg-gray-50 text-center">
-            <p className="text-xs text-gray-600">
-              Click the day to see more events • Click events for details
+          <div className="p-2 md:p-3 bg-gray-50 text-center">
+            <p className="text-[10px] md:text-xs text-gray-600">
+              Tap a day to see events
             </p>
           </div>
         )}
@@ -525,7 +545,7 @@ export default function MonthlyCalendar({
 
       {/* Event Details Modal (optional) for Full */}
       {!isCompact && (
-        <div className="mt-6 text-sm">
+        <div className="mt-4 md:mt-6 text-sm">
           <p>
             Click on events to view details. Navigate between months using the
             arrow buttons.

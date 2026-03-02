@@ -30,6 +30,7 @@ export default $config({
       meetupdcCron,
       dcsportsCron,
       generateMissingImagesCron,
+      newsletterCron,
     } = await import("./infra/cron");
     const {
       WashingtonianTask,
@@ -49,6 +50,7 @@ export default $config({
       Cron: cron,
       washingtonianCron: washingtonianCron,
       ...(copyProdToDevCron && { copyProdToDevCron }),
+      newsletterCron: newsletterCron,
       Api: api,
       Bucket: bucket,
       Web: web,

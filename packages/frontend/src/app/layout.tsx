@@ -1,5 +1,6 @@
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
+import NewsletterPopup from "@/components/NewsletterPopup";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { UserProvider } from "@/contexts/UserContext";
 import type { Metadata } from "next";
@@ -73,6 +74,7 @@ export default function RootLayout({
             <Header />
             <main className="min-h-screen">{children}</main>
             <Footer />
+            <NewsletterPopup />
           </UserProvider>
         </ThemeProvider>
       </body>

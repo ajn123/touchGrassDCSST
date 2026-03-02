@@ -4,6 +4,26 @@
  */
 
 import { Event } from "./dynamodb/TouchGrassDynamoDB";
+import { normalizeCategory } from "@touchgrass/shared-utils";
+
+/**
+ * Canonical categories — must stay in sync with VALID_CATEGORIES in shared-utils.
+ */
+const VALID_CATEGORIES = [
+  "Arts & Culture",
+  "Comedy",
+  "Community",
+  "Education",
+  "Festival",
+  "Food & Drink",
+  "General",
+  "Music",
+  "Networking",
+  "Nightlife",
+  "Outdoors & Recreation",
+  "Sports",
+  "Theater",
+] as const;
 
 export interface FilterOptions {
   query?: string;
@@ -256,32 +276,42 @@ export function filterEvents(
 
 /**
  * Get unique categories from events
- * Splits categories by comma and slash to create individual category entries
+ * Normalizes each raw category through the shared-utils normalizeCategory()
+ * so only canonical categories appear in the UI.
  */
 export function getCategoriesFromEvents(events: Event[]): string[] {
+  const validSet = new Set(VALID_CATEGORIES as readonly string[]);
   const categorySet = new Set<string>();
 
-  events.forEach((event) => {
+  for (const event of events) {
+    // Collect raw category tokens from the event
+    let rawTokens: string[] = [];
+
     if (Array.isArray(event.category)) {
-      event.category.forEach((cat) => {
-        if (cat && cat.trim()) {
-          // Split by both comma and slash to handle "christmas/novelty" or "christmas,novelty"
-          const splitCategories = cat
-            .split(/[,\/]/)
-            .map((c) => c.trim())
-            .filter((c) => c.length > 0);
-          splitCategories.forEach((c) => categorySet.add(c));
-        }
-      });
+      rawTokens = event.category.flatMap((cat) =>
+        cat
+          .split(/[,\/]/)
+          .map((c) => c.trim())
+          .filter((c) => c.length > 0)
+      );
     } else if (event.category && event.category.trim()) {
-      // Split by both comma and slash to handle "christmas/novelty" or "christmas,novelty"
-      const splitCategories = event.category
+      rawTokens = event.category
         .split(/[,\/]/)
         .map((c) => c.trim())
         .filter((c) => c.length > 0);
-      splitCategories.forEach((c) => categorySet.add(c));
     }
-  });
+
+    // Normalize each token individually and keep only canonical values
+    for (const token of rawTokens) {
+      const normalized = normalizeCategory(token);
+      // normalizeCategory may return comma-separated when multiple resolve
+      for (const part of normalized.split(",")) {
+        if (validSet.has(part)) {
+          categorySet.add(part);
+        }
+      }
+    }
+  }
 
   return Array.from(categorySet).sort();
 }

@@ -138,42 +138,215 @@ export function normalizeTime(timeStr?: string): string | undefined {
 }
 
 /**
- * Normalize category to consistent format
+ * Canonical event categories — the only values that should appear in the DB and UI.
+ */
+export const VALID_CATEGORIES = [
+  "Arts & Culture",
+  "Comedy",
+  "Community",
+  "Education",
+  "Festival",
+  "Food & Drink",
+  "General",
+  "Music",
+  "Networking",
+  "Nightlife",
+  "Outdoors & Recreation",
+  "Sports",
+  "Theater",
+] as const;
+
+export type ValidCategory = (typeof VALID_CATEGORIES)[number];
+
+/**
+ * Substring → canonical-category mapping.
+ * Order matters: first match wins, so more-specific substrings come first.
+ */
+const CATEGORY_KEYWORDS: [string, ValidCategory][] = [
+  // Arts & Culture
+  ["museum", "Arts & Culture"],
+  ["gallery", "Arts & Culture"],
+  ["exhibit", "Arts & Culture"],
+  ["culture", "Arts & Culture"],
+  ["film", "Arts & Culture"],
+  ["cinema", "Arts & Culture"],
+  ["photo", "Arts & Culture"],
+  ["paint", "Arts & Culture"],
+  ["sculpture", "Arts & Culture"],
+  ["craft", "Arts & Culture"],
+  ["poetry", "Arts & Culture"],
+  ["literary", "Arts & Culture"],
+  ["book", "Arts & Culture"],
+  ["art", "Arts & Culture"],
+
+  // Comedy
+  ["comedy", "Comedy"],
+  ["standup", "Comedy"],
+  ["stand-up", "Comedy"],
+  ["improv", "Comedy"],
+  ["open mic", "Comedy"],
+
+  // Community
+  ["community", "Community"],
+  ["volunteer", "Community"],
+  ["charity", "Community"],
+  ["fundraiser", "Community"],
+  ["family", "Community"],
+  ["kids", "Community"],
+  ["youth", "Community"],
+  ["senior", "Community"],
+  ["neighborhood", "Community"],
+  ["civic", "Community"],
+  ["scout", "Community"],
+
+  // Education
+  ["education", "Education"],
+  ["workshop", "Education"],
+  ["class", "Education"],
+  ["lecture", "Education"],
+  ["seminar", "Education"],
+  ["conference", "Education"],
+  ["talk", "Education"],
+  ["learn", "Education"],
+  ["training", "Education"],
+  ["panel", "Education"],
+
+  // Festival
+  ["festival", "Festival"],
+  ["parade", "Festival"],
+  ["fair", "Festival"],
+  ["carnival", "Festival"],
+  ["mardi gras", "Festival"],
+  ["celebration", "Festival"],
+  ["holiday", "Festival"],
+  ["christmas", "Festival"],
+  ["halloween", "Festival"],
+  ["valentine", "Festival"],
+  ["new year", "Festival"],
+
+  // Food & Drink
+  ["food", "Food & Drink"],
+  ["drink", "Food & Drink"],
+  ["beer", "Food & Drink"],
+  ["wine", "Food & Drink"],
+  ["cocktail", "Food & Drink"],
+  ["brunch", "Food & Drink"],
+  ["tasting", "Food & Drink"],
+  ["culinary", "Food & Drink"],
+  ["dining", "Food & Drink"],
+  ["happy hour", "Food & Drink"],
+  ["cooking", "Food & Drink"],
+  ["bake", "Food & Drink"],
+  ["cookie", "Food & Drink"],
+
+  // Music
+  ["music", "Music"],
+  ["concert", "Music"],
+  ["jazz", "Music"],
+  ["orchestra", "Music"],
+  ["symphony", "Music"],
+  ["dj", "Music"],
+  ["live band", "Music"],
+  ["choir", "Music"],
+  ["karaoke", "Music"],
+  ["rock", "Music"],
+  ["punk", "Music"],
+  ["folk", "Music"],
+  ["gospel", "Music"],
+  ["bluegrass", "Music"],
+
+  // Networking
+  ["network", "Networking"],
+  ["business", "Networking"],
+  ["professional", "Networking"],
+  ["meetup", "Networking"],
+  ["mixer", "Networking"],
+  ["career", "Networking"],
+  ["entrepreneur", "Networking"],
+
+  // Nightlife
+  ["nightlife", "Nightlife"],
+  ["club", "Nightlife"],
+  ["dance party", "Nightlife"],
+  ["bar crawl", "Nightlife"],
+  ["rave", "Nightlife"],
+  ["lounge", "Nightlife"],
+
+  // Outdoors & Recreation
+  ["outdoor", "Outdoors & Recreation"],
+  ["hike", "Outdoors & Recreation"],
+  ["hiking", "Outdoors & Recreation"],
+  ["nature", "Outdoors & Recreation"],
+  ["bird", "Outdoors & Recreation"],
+  ["garden", "Outdoors & Recreation"],
+  ["park", "Outdoors & Recreation"],
+  ["trail", "Outdoors & Recreation"],
+  ["camping", "Outdoors & Recreation"],
+  ["kayak", "Outdoors & Recreation"],
+  ["bike", "Outdoors & Recreation"],
+  ["cycling", "Outdoors & Recreation"],
+
+  // Sports
+  ["sport", "Sports"],
+  ["soccer", "Sports"],
+  ["basketball", "Sports"],
+  ["football", "Sports"],
+  ["baseball", "Sports"],
+  ["tennis", "Sports"],
+  ["fitness", "Sports"],
+  ["yoga", "Sports"],
+  ["marathon", "Sports"],
+  ["workout", "Sports"],
+  ["gym", "Sports"],
+  ["athletic", "Sports"],
+
+  // Theater
+  ["theater", "Theater"],
+  ["theatre", "Theater"],
+  ["play", "Theater"],
+  ["musical", "Theater"],
+  ["opera", "Theater"],
+  ["performance", "Theater"],
+  ["stage", "Theater"],
+  ["ballet", "Theater"],
+  ["dance", "Theater"],
+];
+
+/**
+ * Normalize category to a canonical value using substring matching.
+ * Always returns one of the VALID_CATEGORIES — never passes through raw crawler text.
+ * When given an array, deduplicates the resolved categories before joining.
  */
 export function normalizeCategory(category?: string | string[]): string {
   if (!category) return "General";
 
   const categories = Array.isArray(category) ? category : [category];
-  const normalizedCategories = categories.map((cat) => {
-    const normalized = cat.toLowerCase().trim();
 
-    // Map common variations to standard categories
-    const categoryMap: { [key: string]: string } = {
-      music: "Music",
-      concert: "Music",
-      jazz: "Music",
-      festival: "Festival",
-      parade: "Festival",
-      sports: "Sports",
-      soccer: "Sports",
-      museum: "Museum",
-      art: "Arts & Culture",
-      culture: "Arts & Culture",
-      food: "Food & Drink",
-      drink: "Food & Drink",
-      networking: "Networking",
-      business: "Networking",
-      education: "Education",
-      workshop: "Education",
-      community: "Community",
-      volunteer: "Community",
-      general: "General",
-    };
+  const resolved = new Set<ValidCategory>();
 
-    return categoryMap[normalized] || cat;
-  });
+  for (const cat of categories) {
+    const lower = cat.toLowerCase().trim();
+    if (!lower) continue;
 
-  return normalizedCategories.join(",");
+    let matched = false;
+    for (const [keyword, canonical] of CATEGORY_KEYWORDS) {
+      if (lower.includes(keyword)) {
+        resolved.add(canonical);
+        matched = true;
+        break; // first match wins per input token
+      }
+    }
+    if (!matched) {
+      resolved.add("General");
+    }
+  }
+
+  if (resolved.size === 0) return "General";
+
+  // Drop "General" when a more specific category was also matched
+  if (resolved.size > 1) resolved.delete("General");
+
+  return Array.from(resolved).join(",");
 }
 
 /**
@@ -628,4 +801,8 @@ export default {
   transformOpenWebNinjaEvent,
   validateEvent,
   sanitizeEvent,
+
+  // Category utilities
+  VALID_CATEGORIES,
+  normalizeCategory,
 };

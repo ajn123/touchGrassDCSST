@@ -1,6 +1,7 @@
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
 import { Resource } from "sst";
+import { normalizeCategory } from "@touchgrass/shared-utils";
 
 // Standardized event interface
 export interface NormalizedEvent {
@@ -133,45 +134,6 @@ export class EventNormalizer {
   }
 
   /**
-   * Normalize category to consistent format
-   */
-  private normalizeCategory(category?: string | string[]): string {
-    if (!category) return "General";
-
-    const categories = Array.isArray(category) ? category : [category];
-    const normalizedCategories = categories.map((cat) => {
-      const normalized = cat.toLowerCase().trim();
-
-      // Map common variations to standard categories
-      const categoryMap: { [key: string]: string } = {
-        music: "Music",
-        concert: "Music",
-        jazz: "Music",
-        festival: "Festival",
-        parade: "Festival",
-        sports: "Sports",
-        soccer: "Sports",
-        museum: "Museum",
-        art: "Arts & Culture",
-        culture: "Arts & Culture",
-        food: "Food & Drink",
-        drink: "Food & Drink",
-        networking: "Networking",
-        business: "Networking",
-        education: "Education",
-        workshop: "Education",
-        community: "Community",
-        volunteer: "Community",
-        general: "General",
-      };
-
-      return categoryMap[normalized] || cat;
-    });
-
-    return normalizedCategories.join(",");
-  }
-
-  /**
    * Normalize cost information
    */
   private normalizeCost(cost?: any): NormalizedEvent["cost"] {
@@ -288,7 +250,7 @@ export class EventNormalizer {
       end_date: this.normalizeDate(event.end_date),
       location: event.location,
       venue: event.venue,
-      category: this.normalizeCategory(event.category),
+      category: normalizeCategory(event.category),
       image_url: event.image_url,
       cost: this.normalizeCost(event.cost),
       socials: event.socials,
@@ -324,7 +286,7 @@ export class EventNormalizer {
       coordinates: event.coordinates,
 
       // Categorization
-      category: this.normalizeCategory(event.category),
+      category: normalizeCategory(event.category),
       isPublic: (event.isPublic ?? true).toString(),
 
       // Media & Links

@@ -88,7 +88,11 @@
     "update:isPublic": "sst shell tsx src/update-events-isPublic.ts",
     "update:isPublic:all": "sst shell tsx src/update-events-isPublic.ts all",
     "update:isPublic:prod": "sst shell --stage production tsx src/update-events-isPublic.ts",
-    "update:isPublic:prod:all": "sst shell --stage production tsx src/update-events-isPublic.ts all"
+    "update:isPublic:prod:all": "sst shell --stage production tsx src/update-events-isPublic.ts all",
+    "migrate:categories": "sst shell tsx src/migrate-categories.ts",
+    "migrate:categories:apply": "sst shell tsx src/migrate-categories.ts apply",
+    "migrate:categories:prod": "sst shell --stage production tsx src/migrate-categories.ts",
+    "migrate:categories:prod:apply": "sst shell --stage production tsx src/migrate-categories.ts apply"
   },
   "devDependencies": {
     "@types/node": "^22",

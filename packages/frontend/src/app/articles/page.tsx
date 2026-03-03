@@ -1,8 +1,21 @@
 import ArticleCard from "@/components/ArticleCard";
 import { getArticles } from "@/lib/dynamodb/dynamodb-articles";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+export const metadata: Metadata = {
+  title: "Articles - Weekly DC Guides",
+  description:
+    "Weekly guides to the best things to do in Washington DC, powered by real opinions from Reddit and Google Reviews. Coffee shops, restaurants, nightlife, and more.",
+  openGraph: {
+    title: "Articles - Weekly DC Guides | TouchGrass DC",
+    description:
+      "Weekly guides to the best things to do in DC, powered by real local opinions.",
+    url: "https://touchgrassdc.com/articles",
+  },
+};
 
 export default async function ArticlesPage() {
   const articles = await getArticles();

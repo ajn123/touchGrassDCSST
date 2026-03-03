@@ -1,4 +1,17 @@
 import { ContactForm } from "@/components/ContactForm";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "About & Contact",
+  description:
+    "Learn about TouchGrass DC and get in touch. We help you discover the best events, activities, and things to do in the DC area.",
+  openGraph: {
+    title: "About & Contact | TouchGrass DC",
+    description:
+      "Learn about TouchGrass DC and get in touch.",
+    url: "https://touchgrassdc.com/about",
+  },
+};
 
 export default function ContactPage() {
   return (

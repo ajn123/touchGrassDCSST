@@ -102,8 +102,34 @@ export default async function ArticlePage({
     })
     .slice(0, 3);
 
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.title,
+    description: article.excerpt,
+    image: article.image_url || undefined,
+    datePublished: new Date(article.publishedAt).toISOString(),
+    dateModified: new Date(article.updatedAt || article.publishedAt).toISOString(),
+    author: {
+      "@type": "Organization",
+      name: "TouchGrass DC",
+      url: "https://touchgrassdc.com",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "TouchGrass DC",
+      url: "https://touchgrassdc.com",
+    },
+    mainEntityOfPage: `https://touchgrassdc.com/articles/${slug}`,
+    articleSection: article.category,
+  };
+
   return (
     <main className="min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       <article className="max-w-3xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">

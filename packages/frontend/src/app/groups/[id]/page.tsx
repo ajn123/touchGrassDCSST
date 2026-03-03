@@ -9,6 +9,44 @@ import {
   transformSchedulesForDisplay,
 } from "@/lib/dynamodb/dynamodb-groups";
 import { resolveImageUrl } from "@/lib/image-utils";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const awaitedParams = await params;
+  const groupTitle = decodeURIComponent(awaitedParams.id);
+  const group = await getGroup(groupTitle);
+
+  if (!group) {
+    return { title: "Group Not Found" };
+  }
+
+  const categories = Array.isArray(group.category)
+    ? group.category.join(", ")
+    : group.category || "";
+  const description = group.description
+    ? group.description.substring(0, 160).replace(/<[^>]*>/g, "")
+    : `${group.title} — a community group in the DC area. ${categories}`;
+
+  return {
+    title: group.title,
+    description,
+    openGraph: {
+      title: group.title,
+      description,
+      url: `https://touchgrassdc.com/groups/${encodeURIComponent(group.title)}`,
+      siteName: "TouchGrass DC",
+    },
+    twitter: {
+      card: "summary",
+      title: group.title,
+      description,
+    },
+  };
+}
 
 export default async function GroupPage({
   params,
@@ -85,8 +123,28 @@ export default async function GroupPage({
     );
   }
 
+  const groupJsonLd: Record<string, any> = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: group.title,
+    description: group.description?.substring(0, 300).replace(/<[^>]*>/g, ""),
+    url: `https://touchgrassdc.com/groups/${encodeURIComponent(group.title)}`,
+  };
+  if (group.location) {
+    groupJsonLd.address = {
+      "@type": "PostalAddress",
+      addressLocality: group.location,
+      addressRegion: "DC",
+    };
+  }
+  if (group.socials?.website) groupJsonLd.sameAs = [group.socials.website];
+
   return (
     <DetailPageContainer>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(groupJsonLd) }}
+      />
       {/* Admin Mode - Show all group details */}
       {isAdmin && (
         <AdminEntityPanel

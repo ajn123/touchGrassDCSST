@@ -8,7 +8,55 @@ import EventMap from "@/components/EventMap";
 import { ReportWrongInfoButton } from "@/components/ReportWrongInfoButton";
 import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
 import { resolveImageUrl } from "@/lib/image-utils";
+import type { Metadata } from "next";
 import { Resource } from "sst";
+
+async function getEvent(id: string) {
+  const decodedId = decodeURIComponent(id);
+  const db = new TouchGrassDynamoDB(Resource.Db.name);
+  let item = await db.getEvent(decodedId);
+  if (!item) {
+    item = await db.getEventByTitle(decodedId);
+  }
+  return item;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const awaitedParams = await params;
+  const item = await getEvent(awaitedParams.id);
+
+  if (!item) {
+    return { title: "Event Not Found" };
+  }
+
+  const description = item.description
+    ? item.description.substring(0, 160).replace(/<[^>]*>/g, "")
+    : `${item.title} in Washington DC`;
+  const imageUrl = resolveImageUrl(item.image_url);
+
+  return {
+    title: item.title,
+    description,
+    openGraph: {
+      title: item.title,
+      description,
+      type: "article",
+      url: `https://touchgrassdc.com/events/${encodeURIComponent(awaitedParams.id)}`,
+      images: imageUrl ? [{ url: imageUrl, width: 1200, height: 630 }] : [],
+      siteName: "TouchGrass DC",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: item.title,
+      description,
+      images: imageUrl ? [imageUrl] : [],
+    },
+  };
+}
 
 export default async function ItemPage({
   params,
@@ -33,18 +81,8 @@ export default async function ItemPage({
 
   const WHITELIST: any = [];
 
-  // This runs on the server during rendering
-  const rawId = awaitedParams.id;
-  const decodedId = decodeURIComponent(rawId);
+  const item = await getEvent(awaitedParams.id);
 
-  const db = new TouchGrassDynamoDB(Resource.Db.name);
-  // Try by primary key/id first; if not found, try by event title
-  let item = await db.getEvent(decodedId);
-  if (!item) {
-    item = await db.getEventByTitle(decodedId);
-  }
-
-  console.log(item);
   if (!item) {
     return <div>Item not found</div>;
   }
@@ -83,8 +121,43 @@ export default async function ItemPage({
     ? item.category[0]
     : item.category;
 
+  const eventJsonLd: Record<string, any> = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: item.title,
+    description: item.description?.substring(0, 300).replace(/<[^>]*>/g, ""),
+    url: `https://touchgrassdc.com/events/${encodeURIComponent(awaitedParams.id)}`,
+  };
+  if (item.start_date) eventJsonLd.startDate = item.start_date;
+  if (item.end_date) eventJsonLd.endDate = item.end_date;
+  if (item.image_url) eventJsonLd.image = resolveImageUrl(item.image_url);
+  if (item.location) {
+    eventJsonLd.location = {
+      "@type": "Place",
+      name: item.venue || item.location,
+      address: item.location,
+    };
+  }
+  if (item.cost) {
+    eventJsonLd.offers = {
+      "@type": "Offer",
+      price: item.cost.type === "free" ? "0" : String(item.cost.amount),
+      priceCurrency: item.cost.currency || "USD",
+      availability: "https://schema.org/InStock",
+    };
+  }
+  eventJsonLd.organizer = {
+    "@type": "Organization",
+    name: "TouchGrass DC",
+    url: "https://touchgrassdc.com",
+  };
+
   return (
     <DetailPageContainer>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd) }}
+      />
       <EventPageTracker eventId={item.pk} category={eventCategory} />
       {/* Analytics handled centrally in middleware */}
       {artificialDelay > 0 && (

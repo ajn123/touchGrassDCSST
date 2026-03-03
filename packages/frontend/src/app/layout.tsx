@@ -18,23 +18,52 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// This runs on the server during rendering
-async function getLayoutData() {
-  // Fetch any data you need for the layout
-  return {
-    title: "TouchGrass DC",
-    description: "Server-side rendered app",
-  };
-}
+const SITE_URL = "https://touchgrassdc.com";
+const SITE_NAME = "TouchGrass DC";
+const SITE_DESCRIPTION =
+  "Discover the best events, comedy shows, community groups, and things to do in Washington DC. Weekly guides powered by real local opinions.";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const data = await getLayoutData();
-
-  return {
-    title: data.title,
-    description: data.description,
-  };
-}
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    images: [
+      {
+        url: "/images/dc-skyline.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TouchGrass DC - Things to do in Washington DC",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    images: ["/images/dc-skyline.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
+  alternates: {
+    canonical: SITE_URL,
+  },
+};
 
 export default function RootLayout({
   children,

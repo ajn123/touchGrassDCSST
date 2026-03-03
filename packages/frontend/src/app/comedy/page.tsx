@@ -1,9 +1,22 @@
 import ComedyEventsTab from "@/components/ComedyEventsTab";
 import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
+import type { Metadata } from "next";
 import { Resource } from "sst";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+export const metadata: Metadata = {
+  title: "Comedy Events in DC",
+  description:
+    "Upcoming comedy shows at DC Improv, DC Comedy Loft, and more. Find stand-up, improv, and sketch comedy events in Washington DC.",
+  openGraph: {
+    title: "Comedy Events in DC | TouchGrass DC",
+    description:
+      "Upcoming comedy shows at DC Improv, DC Comedy Loft, and more venues in Washington DC.",
+    url: "https://touchgrassdc.com/comedy",
+  },
+};
 
 export default async function ComedyEventsPage() {
   const db = new TouchGrassDynamoDB(Resource.Db.name);

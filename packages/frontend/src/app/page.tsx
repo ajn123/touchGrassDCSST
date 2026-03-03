@@ -5,12 +5,25 @@ import PersonalizedEvents from "@/components/PersonalizedEvents";
 import SearchBar from "@/components/SearchBar";
 import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
 import { getCategoriesFromEvents } from "@/lib/filter-events";
+import type { Metadata } from "next";
 import { revalidatePath } from "next/cache";
 import Image from "next/image";
 import { Resource } from "sst";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+export const metadata: Metadata = {
+  title: "TouchGrass DC - Discover Things to Do in Washington DC",
+  description:
+    "Your guide to everything happening in the District. Find events, comedy shows, community groups, and the best spots in the DMV — powered by real local opinions.",
+  openGraph: {
+    title: "TouchGrass DC - Discover Things to Do in Washington DC",
+    description:
+      "Your guide to everything happening in the District. Find events, comedy shows, community groups, and the best spots in the DMV.",
+    url: "https://touchgrassdc.com",
+  },
+};
 
 interface Category {
   category: string;
@@ -43,8 +56,35 @@ export default async function Home() {
   // Convert to the format expected by Categories component
   const categories: Category[] = categoryStrings.map((cat) => ({ category: cat }));
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "TouchGrass DC",
+    url: "https://touchgrassdc.com",
+    description:
+      "Your guide to everything happening in the District. Find events, comedy shows, community groups, and the best spots in the DMV.",
+    publisher: {
+      "@type": "Organization",
+      name: "TouchGrass DC",
+      url: "https://touchgrassdc.com",
+      areaServed: {
+        "@type": "City",
+        name: "Washington, DC",
+      },
+    },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: "https://touchgrassdc.com/search?q={search_term_string}",
+      "query-input": "required name=search_term_string",
+    },
+  };
+
   return (
     <main className="min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Hero Section */}
       <section className="relative h-[60vh] flex items-center justify-center">
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 to-black/30 z-10" />

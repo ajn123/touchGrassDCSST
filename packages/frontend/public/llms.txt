@@ -1,0 +1,36 @@
+# TouchGrass DC
+
+> Your guide to everything happening in Washington, DC. Events, comedy shows, community groups, and weekly articles about the best spots in the DMV.
+
+TouchGrass DC is an event aggregation and local guide platform for the Washington, DC metropolitan area (DC, Maryland, Virginia). It helps people discover things to do, from concerts and comedy shows to run clubs and social groups.
+
+## Main Sections
+
+- [Home](https://touchgrassdc.com/): Upcoming events, personalized recommendations, and a monthly calendar
+- [Articles](https://touchgrassdc.com/articles): Weekly guides to the best spots in DC — coffee shops, restaurants, BBQ, brunch, nightlife, and more. Written using real opinions from Reddit and Google Reviews
+- [Groups](https://touchgrassdc.com/groups): Community groups, run clubs, sports leagues, dance classes, and social organizations in the DMV
+- [Comedy](https://touchgrassdc.com/comedy): Upcoming comedy shows at DC Improv, DC Comedy Loft, and other venues
+- [Calendar](https://touchgrassdc.com/calendar): Full monthly calendar of events
+- [About](https://touchgrassdc.com/about): About the project and contact information
+
+## Content Types
+
+### Events
+Each event has a title, date, time, location, category, description, and optional image. Events are crawled from comedy venues, Eventbrite, and other DC event sources. Events are categorized (Comedy, Music, Sports, Food, Arts, etc.) and include venue addresses.
+
+### Articles
+Weekly long-form guides published every Monday. Topics rotate through 20 categories including best coffee shops, BBQ, happy hours, date spots, free things to do, hidden gems, and more. Articles are researched using real Reddit discussions from r/washingtondc, r/nova, and r/maryland, plus Google Places ratings and reviews. Each article includes specific place recommendations with addresses and ratings.
+
+### Groups
+Curated community groups and social organizations in the DMV area. Categories include Running, Sports, Social, Outdoors, Hiking, Cycling, Dance, Photography, Book Club, Board Games, Climbing, Fitness, Yoga, and more. Each group has a description, category, cost info, social links, and optional recurring schedules.
+
+## API
+
+- Events API: https://touchgrassdc.com/api/events/all
+- Individual event: https://touchgrassdc.com/events/{id}
+- Individual article: https://touchgrassdc.com/articles/{slug}
+- Individual group: https://touchgrassdc.com/groups/{name}
+
+## Location
+
+Focused on Washington, DC and the surrounding DMV (DC, Maryland, Virginia) metropolitan area.

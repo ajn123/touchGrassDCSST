@@ -299,6 +299,48 @@ export function transformDCSportsEvent(event: any): NormalizedEvent {
   };
 }
 
+/**
+ * Transform DC Improv event to normalized format
+ */
+export function transformDCImprovEvent(event: any): NormalizedEvent {
+  return {
+    title: event.title,
+    description: event.description,
+    start_date: normalizeDate(event.date || event.start_date),
+    start_time: normalizeTime(event.time || event.start_time),
+    location: event.location,
+    venue: event.venue || "DC Improv",
+    category: normalizeCategory(event.category || "comedy"),
+    url: event.url,
+    image_url: event.image_url,
+    cost: normalizeCost(event.price || event.cost),
+    socials: event.url ? { website: event.url } : undefined,
+    isPublic: true,
+    source: "dcimprov",
+  };
+}
+
+/**
+ * Transform DC Comedy Loft event to normalized format
+ */
+export function transformDCComedyLoftEvent(event: any): NormalizedEvent {
+  return {
+    title: event.title,
+    description: event.description,
+    start_date: normalizeDate(event.date || event.start_date),
+    start_time: normalizeTime(event.time || event.start_time),
+    location: event.location,
+    venue: event.venue || "The Comedy Loft of DC",
+    category: normalizeCategory(event.category || "comedy"),
+    url: event.url,
+    image_url: event.image_url,
+    cost: normalizeCost(event.price || event.cost),
+    socials: event.url ? { website: event.url } : undefined,
+    isPublic: true,
+    source: "dccomedyloft",
+  };
+}
+
 // Dummy saveEvents function to mimic member function, you will need to implement it or import if defined elsewhere.
 export async function saveEvents(
   normalizedEvents: NormalizedEvent[],
@@ -793,6 +835,12 @@ export const handler: Handler = async (event, context, callback) => {
             break;
           case "dcsports":
             normalizedEvent = transformDCSportsEvent(rawEvent);
+            break;
+          case "dcimprov":
+            normalizedEvent = transformDCImprovEvent(rawEvent);
+            break;
+          case "dccomedyloft":
+            normalizedEvent = transformDCComedyLoftEvent(rawEvent);
             break;
           default: {
             // Assume it's already in normalized format

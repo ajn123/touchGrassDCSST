@@ -61,6 +61,33 @@ Scripts in `packages/scripts/` can be run with: `sst run packages/scripts/src/<s
 3. Normalized events are saved to **DynamoDB**
 4. **Next.js frontend** fetches events from the API Gateway with field projection support
 
+## Crawler Architecture
+
+### DC Improv (`packages/tasks/crawlers/dcimprov.ts`)
+Two-pass Playwright crawler:
+- **Pass 1** (`collectShowUrls`): visits `https://www.dcimprov.com/shows/`, collects `a[href*="/shows/main-showroom/"]` links
+- **Pass 2** (`crawlShowPages`): visits each show page, extracts `h1` as title, date from body text regex, time from "When: ..." pattern, `request.url` as the event URL (dcimprov.com — not seatengine)
+- `eventType: "dcimprov"` → normalized by `transformDCImprovEvent` in `normalizeEvents.ts`
+
+### DC Comedy Loft (`packages/tasks/crawlers/dccomedyloft.ts`)
+Single-pass JSON-LD crawler:
+- Visits `https://www.dccomedyloft.com/events` once with `waitUntil: "networkidle"`
+- Extracts all events from `<script type="application/ld+json">` tags
+- JSON-LD structure: `Place { "Events": [...] }` (capital E — not `@graph`)
+- Each entry has `name`, `startDate` (UTC ISO), `description`, `image`, `url` (dccomedyloft.com/shows/[id])
+- UTC→Eastern conversion via `parseISODateToEastern()` using `Intl` API (`timeZone: "America/New_York"`)
+- `eventType: "dccomedyloft"` → normalized by `transformDCComedyLoftEvent` in `normalizeEvents.ts`
+
+### Adding a new crawler source
+When adding a new `eventType` to a crawler:
+1. Add a `transformXxxEvent` function in `packages/functions/src/events/normalizeEvents.ts` — map `date`→`start_date` and `time`→`start_time` (the DynamoDB `addEventToDb` Lambda reads `start_date`/`start_time`, not `date`/`time`)
+2. Add a `case "xxx":` branch in the `normalizeEvents` handler switch statement
+3. Without a matching case, events fall to `default:` which passes raw fields — dates will be silently dropped
+
+### DB Maintenance Scripts (`packages/scripts/src/`)
+- `cleanup-junk-events.ts` — removes DC Improv junk events (seatengine URLs, nav-link titles)
+- `delete-comedy-venue-events.ts` — removes all DC Improv + DC Comedy Loft events for clean re-crawl
+
 ## DynamoDB Schema
 
 Single-table design with composite keys:
@@ -123,3 +150,4 @@ A daily Lambda cron (`generateMissingImagesCron`) also backfills real SVG placeh
 - Frontend path alias: `@/*` maps to `packages/frontend/src/*`
 - Crawlers validate events have titles and future dates before saving; output is limited to 50 events per run
 - Payloads exceeding 256KB are automatically batched before sending to Step Functions
+- Next.js server components that query DynamoDB directly **must** have `export const dynamic = "force-dynamic"; export const revalidate = 0;` — without this, pages cache stale data after DB updates

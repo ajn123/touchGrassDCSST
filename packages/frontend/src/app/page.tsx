@@ -9,6 +9,9 @@ import { revalidatePath } from "next/cache";
 import Image from "next/image";
 import { Resource } from "sst";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 interface Category {
   category: string;
 }

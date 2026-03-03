@@ -2,6 +2,9 @@ import ComedyEventsTab from "@/components/ComedyEventsTab";
 import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
 import { Resource } from "sst";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function ComedyEventsPage() {
   const db = new TouchGrassDynamoDB(Resource.Db.name);
   

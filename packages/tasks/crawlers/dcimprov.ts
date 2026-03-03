@@ -66,7 +66,7 @@ export function isInvalidTitle(title: string): boolean {
 
 class DCImprovCrawler {
   private events: DCImprovEvent[] = [];
-  private ticketUrls: string[] = [];
+  private showUrls: string[] = [];
   private skippedEventsCount: number = 0;
 
   // Parse date from various formats
@@ -283,9 +283,11 @@ class DCImprovCrawler {
     return undefined;
   }
 
-  // First pass: collect all "get tickets" URLs from the homepage
-  async collectTicketUrls(): Promise<string[]> {
-    console.log("🔍 Collecting ticket URLs from homepage...");
+  // First pass: collect all show URLs from the DC Improv shows listing page
+  async collectShowUrls(): Promise<string[]> {
+    console.log("🔍 Collecting show URLs from DC Improv shows listing...");
+
+    const showUrls: string[] = [];
 
     const crawler = new PlaywrightCrawler({
       maxRequestsPerCrawl: 1,
@@ -293,7 +295,7 @@ class DCImprovCrawler {
       minConcurrency: 1,
       requestHandlerTimeoutSecs: 60,
       requestHandler: async ({ page, request }) => {
-        console.log(`🔗 Processing homepage: ${request.url}`);
+        console.log(`🔗 Processing shows listing: ${request.url}`);
 
         try {
           await page.goto(request.url, {
@@ -303,103 +305,39 @@ class DCImprovCrawler {
 
           await page.waitForTimeout(2000);
 
-          // Extract all "get tickets" links and event info
-          const ticketInfo = await page.evaluate(() => {
-            const links: string[] = [];
-            const eventData: Array<{
-              url: string;
-              title: string;
-              dateText: string;
-              venue: string;
-            }> = [];
+          const urls = await page.evaluate(() => {
+            const seen = new Set<string>();
+            const results: string[] = [];
 
-            // Look for "get tickets" links (case insensitive)
-            const ticketLinks = Array.from(document.querySelectorAll("a")).filter(
-              (link) => {
-                const text = link.textContent?.toLowerCase().trim() || "";
-                return (
-                  text.includes("get tickets") ||
-                  text.includes("get ticket") ||
-                  link.getAttribute("href")?.includes("ticket") ||
-                  link.getAttribute("href")?.includes("show")
-                );
+            const links = Array.from(
+              document.querySelectorAll('a[href*="/shows/main-showroom/"]')
+            ) as HTMLAnchorElement[];
+
+            links.forEach((link) => {
+              const href = link.href;
+              if (!href || seen.has(href)) return;
+
+              // Ensure it's a valid show URL with a slug after /main-showroom/
+              try {
+                const url = new URL(href);
+                const parts = url.pathname.split("/").filter(Boolean);
+                // Expect: ["shows", "main-showroom", slug]
+                if (parts.length < 3 || !parts[2]) return;
+              } catch {
+                return;
               }
-            );
 
-            ticketLinks.forEach((link) => {
-              const href = link.getAttribute("href");
-              if (!href) return;
-
-              // Convert relative URLs to absolute
-              const fullUrl = href.startsWith("http")
-                ? href
-                : `${window.location.origin}${href.startsWith("/") ? href : `/${href}`}`;
-
-              if (!links.includes(fullUrl)) {
-                links.push(fullUrl);
-
-                // Try to extract event info from nearby elements
-                let title = "";
-                let dateText = "";
-                let venue = "";
-
-                // Look for title in parent or nearby elements
-                const parent = link.closest("article, .event, [class*='event'], [class*='show']");
-                if (parent) {
-                  const titleEl =
-                    parent.querySelector("h1, h2, h3, h4, [class*='title']") ||
-                    parent.querySelector("strong, b");
-                  if (titleEl) {
-                    title = titleEl.textContent?.trim() || "";
-                  }
-
-                  // Look for date
-                  const dateEl =
-                    parent.querySelector("time, [class*='date'], [class*='Date']") ||
-                    parent.querySelector("span, div");
-                  if (dateEl) {
-                    const text = dateEl.textContent?.trim() || "";
-                    // Check if it looks like a date
-                    if (
-                      /([A-Za-z]+)\s+(\d{1,2})/.test(text) ||
-                      /([A-Za-z]+)\s+(\d{1,2})\s*-\s*([A-Za-z]+)\s+(\d{1,2})/.test(
-                        text
-                      )
-                    ) {
-                      dateText = text;
-                    }
-                  }
-
-                  // Look for venue info
-                  const venueEl = parent.querySelector(
-                    "[class*='venue'], [class*='Venue'], [class*='room'], [class*='Room']"
-                  );
-                  if (venueEl) {
-                    venue = venueEl.textContent?.trim() || "";
-                  }
-                }
-
-                // If no title found, try to get from link text or nearby text
-                if (!title) {
-                  title = link.textContent?.trim() || "";
-                }
-
-                eventData.push({ url: fullUrl, title, dateText, venue });
-              }
+              seen.add(href);
+              results.push(href);
             });
 
-            return { links, eventData };
+            return results;
           });
 
-          // Convert relative URLs to absolute
-          this.ticketUrls = ticketInfo.links;
-
-          console.log(`✅ Found ${this.ticketUrls.length} ticket URLs`);
-          if (ticketInfo.eventData.length > 0) {
-            console.log(`📋 Found ${ticketInfo.eventData.length} events with metadata`);
-          }
+          urls.forEach((url) => showUrls.push(url));
+          console.log(`✅ Found ${showUrls.length} show URLs`);
         } catch (error) {
-          console.error(`❌ Error collecting ticket URLs:`, error);
+          console.error(`❌ Error collecting show URLs:`, error);
         }
       },
       launchContext: {
@@ -417,29 +355,29 @@ class DCImprovCrawler {
     });
 
     try {
-      await crawler.run(["https://www.dcimprov.com/"]);
-      return this.ticketUrls;
+      await crawler.run(["https://www.dcimprov.com/shows/"]);
+      return showUrls;
     } catch (error) {
-      console.error("❌ Failed to collect ticket URLs:", error);
+      console.error("❌ Failed to collect show URLs:", error);
       return [];
     }
   }
 
-  // Second pass: visit each ticket URL and extract event details
-  async crawlTicketPages(ticketUrls: string[]): Promise<DCImprovEvent[]> {
+  // Second pass: visit each DC Improv show page and extract event details
+  async crawlShowPages(showUrls: string[]): Promise<DCImprovEvent[]> {
     console.log(
-      `🕷️ Starting DC Improv ticket page crawl for ${ticketUrls.length} URLs...`
+      `🕷️ Starting DC Improv show page crawl for ${showUrls.length} URLs...`
     );
 
     this.events = [];
 
     const crawler = new PlaywrightCrawler({
-      maxRequestsPerCrawl: ticketUrls.length,
+      maxRequestsPerCrawl: showUrls.length,
       maxConcurrency: 3,
       minConcurrency: 1,
       requestHandlerTimeoutSecs: 90,
       requestHandler: async ({ page, request }) => {
-        console.log(`🔗 Processing ticket page: ${request.url}`);
+        console.log(`🔗 Processing show page: ${request.url}`);
 
         try {
           await page.goto(request.url, {
@@ -447,228 +385,100 @@ class DCImprovCrawler {
             timeout: 30000,
           });
 
-          await page.waitForTimeout(3000); // Wait for page to load
+          await page.waitForTimeout(2000);
 
-          // Check if we're on a checkout page or event detail page
-          const isCheckoutPage =
-            request.url.includes("checkout") ||
-            request.url.includes("cart") ||
-            request.url.includes("purchase");
-
-          // Extract event details
           const eventData = await page.evaluate(() => {
-            // Extract title - prioritize specific selectors
-            let title = "";
-            
-            // Priority 1: Try the specific field-entry title-link structure
-            const titleLinkEl = document.querySelector("dd.field-entry.title-link.titlelink a");
-            if (titleLinkEl) {
-              title = titleLinkEl.textContent?.trim() || "";
-            }
-            
-            // Priority 2: Try h1 with event-header class
+            // Title: h1 on page is the performer/show name
+            const h1 = document.querySelector("h1");
+            let title = h1?.textContent?.trim() || "";
+
+            // Fallback: derive title from URL slug if h1 is empty
             if (!title) {
-              const eventHeaderEl = document.querySelector("h1.event-header");
-              if (eventHeaderEl) {
-                title = eventHeaderEl.textContent?.trim() || "";
+              const pathParts = window.location.pathname.split("/").filter(Boolean);
+              const slug = pathParts[pathParts.length - 1] || "";
+              title = slug
+                .split("-")
+                .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(" ");
+            }
+
+            // Description: first <p> after the "About the Show" h2
+            let description = "";
+            const headings = Array.from(document.querySelectorAll("h2"));
+            const aboutH2 = headings.find((h) =>
+              h.textContent?.toLowerCase().includes("about the show")
+            );
+            if (aboutH2) {
+              let next = aboutH2.nextElementSibling;
+              while (next && next.tagName !== "P") {
+                next = next.nextElementSibling;
               }
-            }
-            
-            // Fallback to other selectors if not found
-            if (!title) {
-              const titleEl =
-                document.querySelector("h1") ||
-                document.querySelector("h2") ||
-                document.querySelector(".event-title, [class*='title']") ||
-                document.querySelector("title");
-              title = titleEl?.textContent?.trim() || "";
+              description = next?.textContent?.trim() || "";
             }
 
-            // Extract description
-            const descriptionEl =
-              document.querySelector(".event-description, [class*='description']") ||
-              document.querySelector("p");
-            const description = descriptionEl?.textContent?.trim() || "";
-
-            // Extract dates - look for date text in various places
+            // Date extraction from body text
+            const bodyText = document.body.innerText || "";
             const dateTexts: string[] = [];
 
-            // Look for date elements
-            const dateElements = document.querySelectorAll(
-              "time, [class*='date'], [class*='Date'], [datetime]"
-            );
-            dateElements.forEach((el) => {
-              const datetime = el.getAttribute("datetime");
-              if (datetime) {
-                dateTexts.push(datetime);
-              }
-              const text = el.textContent?.trim();
-              if (text && !dateTexts.includes(text)) {
-                dateTexts.push(text);
-              }
-            });
-
-            // Look for date patterns in the page text
-            const bodyText = document.body.textContent || "";
-
-            // Format: "January 27", "January 30 - February 1"
-            const datePatterns = bodyText.match(
-              /([A-Za-z]+)\s+(\d{1,2})(\s*-\s*([A-Za-z]+)\s+(\d{1,2}))?/g
-            );
-            if (datePatterns) {
-              datePatterns.forEach((pattern) => {
-                if (!dateTexts.includes(pattern)) {
-                  dateTexts.push(pattern);
-                }
-              });
+            // Look for date ranges like "January 30 - February 1"
+            const rangeRegex = /([A-Za-z]+)\s+(\d{1,2})\s*[-\u2013]\s*(?:[A-Za-z]+\s+)?(\d{1,2})/g;
+            let rangeMatch;
+            while ((rangeMatch = rangeRegex.exec(bodyText)) !== null) {
+              dateTexts.push(rangeMatch[0]);
             }
 
-            // Extract times
-            const times: string[] = [];
-            const timeElements = document.querySelectorAll(
-              "time, [class*='time'], [class*='Time'], [class*='showtime']"
-            );
-            timeElements.forEach((el) => {
-              const timeText = el.textContent?.trim();
-              if (timeText && /(\d{1,2}:\d{2}\s*[ap]\.?m\.?|\d{1,2}\s*[ap]\.?m\.?)/i.test(timeText)) {
-                times.push(timeText);
+            // Collect single date patterns (skip those already covered by a range)
+            const singleRegex = /([A-Za-z]+)\s+(\d{1,2})/g;
+            let singleMatch;
+            while ((singleMatch = singleRegex.exec(bodyText)) !== null) {
+              const candidate = singleMatch[0];
+              if (!dateTexts.some((d) => d.includes(candidate))) {
+                dateTexts.push(candidate);
               }
-            });
-
-            // Also look for time patterns in text
-            const timePatterns = bodyText.match(
-              /(\d{1,2}:\d{2}\s*[ap]\.?m\.?|\d{1,2}\s*[ap]\.?m\.?)/gi
-            );
-            if (timePatterns) {
-              timePatterns.forEach((pattern) => {
-                const cleaned = pattern.trim();
-                if (cleaned && !times.includes(cleaned)) {
-                  times.push(cleaned);
-                }
-              });
             }
 
-            // Extract price information
+            // Time extraction from "When: ..." line in body text
+            const whenMatch = bodyText.match(/When:\s*(.+)/i);
+            const whenText = whenMatch ? whenMatch[1] : "";
+            const timeStrings: string[] = [];
+            const timeRegex = /(\d{1,2}:\d{2}\s*(?:[ap]\.?m\.?)?|\d{1,2}\s*[ap]\.?m\.?)/gi;
+            let timeMatch;
+            while ((timeMatch = timeRegex.exec(whenText)) !== null) {
+              timeStrings.push(timeMatch[1].trim());
+            }
+
+            // Price extraction
             const priceTexts: string[] = [];
-            const priceElements = document.querySelectorAll(
-              "[class*='price'], [class*='Price'], [class*='cost'], [class*='Cost'], [class*='ticket']"
+            const priceEls = document.querySelectorAll(
+              "[class*='price'], [class*='Price'], [class*='cost']"
             );
-            priceElements.forEach((el) => {
+            priceEls.forEach((el) => {
               const text = el.textContent?.trim();
-              if (
-                text &&
-                (text.includes("$") || text.toLowerCase().includes("free"))
-              ) {
+              if (text && (text.includes("$") || text.toLowerCase().includes("free"))) {
                 priceTexts.push(text);
-              }
-            });
-
-            // Extract venue
-            let venue = "DC Improv";
-            const venueEl = document.querySelector(
-              "[class*='venue'], [class*='Venue'], [class*='room'], [class*='Room']"
-            );
-            if (venueEl) {
-              venue = venueEl.textContent?.trim() || "DC Improv";
-            }
-
-            // Check for multiple show dates/times (for event detail pages)
-            const showDates: Array<{ date: string; time: string }> = [];
-            const showElements = document.querySelectorAll(
-              "[class*='show'], [class*='Show'], [class*='performance'], [class*='Performance']"
-            );
-
-            showElements.forEach((el) => {
-              const text = el.textContent?.trim() || "";
-              const dateMatch = text.match(/([A-Za-z]+)\s+(\d{1,2})/);
-              const timeMatch = text.match(/(\d{1,2}:\d{2}\s*[ap]\.?m\.?|\d{1,2}\s*[ap]\.?m\.?)/i);
-              
-              if (dateMatch && timeMatch) {
-                showDates.push({
-                  date: dateMatch[0],
-                  time: timeMatch[0],
-                });
               }
             });
 
             return {
               title,
               description,
-              dates: dateTexts,
-              times,
+              dateTexts,
+              times: timeStrings,
               prices: priceTexts,
-              venue,
-              showDates,
-              isCheckout: window.location.href.includes("checkout") || 
-                         window.location.href.includes("cart") ||
-                         window.location.href.includes("purchase"),
             };
           });
 
-          // If we're on a checkout page, create a single event
-          if (isCheckoutPage || eventData.isCheckout) {
-            if (!eventData.title || isInvalidTitle(eventData.title)) {
-              console.log(`⚠️ Skipping checkout page with no/invalid title "${eventData.title}": ${request.url}`);
-              this.skippedEventsCount++;
-              return;
-            }
-
-            // Try to extract date and time from checkout page
-            let parsedDate = "";
-            let parsedTime: string | undefined = undefined;
-
-            if (eventData.dates && eventData.dates.length > 0) {
-              parsedDate = this.parseDate(eventData.dates[0]);
-            }
-
-            if (eventData.times && eventData.times.length > 0) {
-              parsedTime = this.parseTime(eventData.times[0]);
-            }
-
-            // If no date found, use today as fallback
-            if (!parsedDate) {
-              const today = new Date();
-              const yearStr = today.getFullYear();
-              const monthStr = String(today.getMonth() + 1).padStart(2, "0");
-              const dayStr = String(today.getDate()).padStart(2, "0");
-              parsedDate = `${yearStr}-${monthStr}-${dayStr}`;
-            }
-
-            const parsedPrice = eventData.prices && eventData.prices.length > 0
-              ? this.parsePrice(eventData.prices[0])
-              : undefined;
-
-            if (!eventData.title || eventData.title.trim() === "") {
-              console.log(`⚠️ Skipping event with no title from checkout page: ${request.url}`);
-              this.skippedEventsCount++;
-              return;
-            }
-
-            const event = new DCImprovEvent(
-              eventData.title,
-              parsedDate,
-              parsedTime,
-              "1140 Connecticut Ave. NW, Washington, DC 20036",
-              eventData.description,
-              request.url,
-              "comedy",
-              parsedPrice,
-              eventData.venue
-            );
-            this.events.push(event);
-            console.log(`✅ Extracted single event from checkout: ${request.url}`);
-            return;
-          }
-
-          // If we're on an event detail page, extract all dates/times
+          // Validate title
           if (!eventData.title || eventData.title.trim() === "") {
             console.log(`⚠️ Skipping page with no title: ${request.url}`);
+            this.skippedEventsCount++;
             return;
           }
-          
-          // Skip non-event titles (section headings, navigation pages, etc.)
+
           if (isInvalidTitle(eventData.title)) {
-            console.log(`⚠️ Skipping page with invalid title "${eventData.title}": ${request.url}`);
+            console.log(
+              `⚠️ Skipping page with invalid title "${eventData.title}": ${request.url}`
+            );
             this.skippedEventsCount++;
             return;
           }
@@ -677,210 +487,93 @@ class DCImprovCrawler {
           const parsedDates: string[] = [];
           const dateRanges: Array<{ start: string; end: string }> = [];
 
-          if (eventData.dates && eventData.dates.length > 0) {
-            eventData.dates.forEach((dateStr) => {
-              // Check if it's a date range
-              const range = this.parseDateRange(dateStr);
-              if (range) {
+          eventData.dateTexts.forEach((dateStr) => {
+            const range = this.parseDateRange(dateStr);
+            if (range) {
+              if (!dateRanges.some((r) => r.start === range.start)) {
                 dateRanges.push(range);
-              } else {
-                const parsed = this.parseDate(dateStr);
-                if (parsed) parsedDates.push(parsed);
               }
-            });
-          }
-
-          // If we have showDates from the page, use those
-          if (eventData.showDates && eventData.showDates.length > 0) {
-            eventData.showDates.forEach((show) => {
-              const parsed = this.parseDate(show.date);
-              if (parsed) {
+            } else {
+              const parsed = this.parseDate(dateStr);
+              if (parsed && !parsedDates.includes(parsed)) {
                 parsedDates.push(parsed);
-                // If we have a time for this show, create an event with it
-                const parsedTime = this.parseTime(show.time);
-                if (parsedTime) {
-                  const parsedPrice = eventData.prices && eventData.prices.length > 0
-                    ? this.parsePrice(eventData.prices[0])
-                    : undefined;
-
-                  if (!eventData.title || eventData.title.trim() === "") {
-                    console.log(`⚠️ Skipping event with no title from showDates: ${request.url}`);
-                    this.skippedEventsCount++;
-                    return; // Use return instead of continue in forEach
-                  }
-
-                  const event = new DCImprovEvent(
-                    eventData.title,
-                    parsed,
-                    parsedTime,
-                    "1140 Connecticut Ave. NW, Washington, DC 20036",
-                    eventData.description,
-                    request.url,
-                    "comedy",
-                    parsedPrice,
-                    eventData.venue
-                  );
-                  this.events.push(event);
-                }
               }
-            });
-
-            // If we created events from showDates, skip the rest
-            if (this.events.length > 0) {
-              console.log(`✅ Extracted ${this.events.length} events from detail page: ${request.url}`);
-              return;
             }
-          }
+          });
 
-          // Parse times
+          // Parse times (deduplicate)
           const parsedTimes: string[] = [];
-          if (eventData.times && eventData.times.length > 0) {
-            eventData.times.forEach((timeStr) => {
-              const parsed = this.parseTime(timeStr);
-              if (parsed) parsedTimes.push(parsed);
-            });
-          }
+          eventData.times.forEach((timeStr) => {
+            const parsed = this.parseTime(timeStr);
+            if (parsed && !parsedTimes.includes(parsed)) {
+              parsedTimes.push(parsed);
+            }
+          });
 
           // Parse price
           const parsedPrice =
-            eventData.prices && eventData.prices.length > 0
+            eventData.prices.length > 0
               ? this.parsePrice(eventData.prices[0])
               : undefined;
 
-          // Handle date ranges - create events for each date in the range
+          // Helper to create an event with the correct dcimprov.com show URL
+          const createEvent = (
+            date: string,
+            time?: string,
+            startDate?: string,
+            endDate?: string
+          ) => {
+            const event = new DCImprovEvent(
+              eventData.title,
+              date,
+              time,
+              "1140 Connecticut Ave. NW, Washington, DC 20036",
+              eventData.description,
+              request.url, // dcimprov.com show URL — the key fix!
+              "comedy",
+              parsedPrice,
+              "DC Improv",
+              startDate,
+              endDate
+            );
+            this.events.push(event);
+          };
+
+          // Create events from date ranges
           if (dateRanges.length > 0) {
             dateRanges.forEach((range) => {
               const startDate = new Date(range.start);
               const endDate = new Date(range.end);
               const currentDate = new Date(startDate);
-
               while (currentDate <= endDate) {
                 const dateStr = currentDate.toISOString().split("T")[0];
-                
                 if (parsedTimes.length > 0) {
-                  // Create event for each time
-                  parsedTimes.forEach((time) => {
-                    if (!eventData.title || eventData.title.trim() === "") {
-                      console.log(`⚠️ Skipping event with no title from date range: ${request.url}`);
-                      this.skippedEventsCount++;
-                      return;
-                    }
-
-                    const event = new DCImprovEvent(
-                      eventData.title,
-                      dateStr,
-                      time,
-                      "1140 Connecticut Ave. NW, Washington, DC 20036",
-                      eventData.description,
-                      request.url,
-                      "comedy",
-                      parsedPrice,
-                      eventData.venue,
-                      range.start,
-                      range.end
-                    );
-                    this.events.push(event);
-                  });
-                } else {
-                  // Create event without time
-                  if (!eventData.title || eventData.title.trim() === "") {
-                    console.log(`⚠️ Skipping event with no title from date range: ${request.url}`);
-                    this.skippedEventsCount++;
-                    return;
-                  }
-
-                  const event = new DCImprovEvent(
-                    eventData.title,
-                    dateStr,
-                    undefined,
-                    "1140 Connecticut Ave. NW, Washington, DC 20036",
-                    eventData.description,
-                    request.url,
-                    "comedy",
-                    parsedPrice,
-                    eventData.venue,
-                    range.start,
-                    range.end
+                  parsedTimes.forEach((time) =>
+                    createEvent(dateStr, time, range.start, range.end)
                   );
-                  this.events.push(event);
+                } else {
+                  createEvent(dateStr, undefined, range.start, range.end);
                 }
-
                 currentDate.setDate(currentDate.getDate() + 1);
               }
             });
           } else if (parsedDates.length > 0) {
-            // Multiple dates - create one event per date
-            parsedDates.forEach((date) => {
-              if (parsedTimes.length > 0) {
-                // Create event for each time
-                parsedTimes.forEach((time) => {
-                  if (!eventData.title || eventData.title.trim() === "") {
-                    console.log(`⚠️ Skipping event with no title from parsed dates: ${request.url}`);
-                    this.skippedEventsCount++;
-                    return;
-                  }
-
-                  const event = new DCImprovEvent(
-                    eventData.title,
-                    date,
-                    time,
-                    "1140 Connecticut Ave. NW, Washington, DC 20036",
-                    eventData.description,
-                    request.url,
-                    "comedy",
-                    parsedPrice,
-                    eventData.venue
-                  );
-                  this.events.push(event);
-                });
-              } else {
-                // Create event without time
-                if (!eventData.title || eventData.title.trim() === "") {
-                  console.log(`⚠️ Skipping event with no title from parsed dates: ${request.url}`);
-                  this.skippedEventsCount++;
-                  return;
-                }
-
-                const event = new DCImprovEvent(
-                  eventData.title,
-                  date,
-                  undefined,
-                  "1140 Connecticut Ave. NW, Washington, DC 20036",
-                  eventData.description,
-                  request.url,
-                  "comedy",
-                  parsedPrice,
-                  eventData.venue
-                );
-                this.events.push(event);
-              }
-            });
-          } else {
-            // Fallback: create single event
-            const today = new Date();
-            const yearStr = today.getFullYear();
-            const monthStr = String(today.getMonth() + 1).padStart(2, "0");
-            const dayStr = String(today.getDate()).padStart(2, "0");
-            const fallbackDate = `${yearStr}-${monthStr}-${dayStr}`;
-
-            if (!eventData.title || eventData.title.trim() === "") {
-              console.log(`⚠️ Skipping event with no title from fallback: ${request.url}`);
-              this.skippedEventsCount++;
-              return;
+            // Use the first parsed date (most likely the show date)
+            const date = parsedDates[0];
+            if (parsedTimes.length > 0) {
+              parsedTimes.forEach((time) => createEvent(date, time));
+            } else {
+              createEvent(date);
             }
-
-            const event = new DCImprovEvent(
-              eventData.title,
-              fallbackDate,
-              parsedTimes[0],
-              "1140 Connecticut Ave. NW, Washington, DC 20036",
-              eventData.description,
-              request.url,
-              "comedy",
-              parsedPrice,
-              eventData.venue
-            );
-            this.events.push(event);
+          } else {
+            // Fallback: use today's date
+            const today = new Date();
+            const fallbackDate = today.toISOString().split("T")[0];
+            if (parsedTimes.length > 0) {
+              parsedTimes.forEach((time) => createEvent(fallbackDate, time));
+            } else {
+              createEvent(fallbackDate);
+            }
           }
 
           console.log(`✅ Extracted events from: ${request.url}`);
@@ -903,10 +596,12 @@ class DCImprovCrawler {
     });
 
     try {
-      await crawler.run(ticketUrls);
+      await crawler.run(showUrls);
       console.log(`🎉 Total events found: ${this.events.length}`);
       if (this.skippedEventsCount > 0) {
-        console.log(`⚠️ Skipped ${this.skippedEventsCount} events due to missing titles`);
+        console.log(
+          `⚠️ Skipped ${this.skippedEventsCount} events due to missing/invalid titles`
+        );
       }
       return this.events;
     } catch (error) {
@@ -918,16 +613,16 @@ class DCImprovCrawler {
   async crawlEvents(): Promise<DCImprovEvent[]> {
     console.log("🕷️ Starting DC Improv event crawl with Playwright...");
 
-    // Step 1: Collect all ticket URLs
-    const ticketUrls = await this.collectTicketUrls();
+    // Step 1: Collect all show URLs from the listing page
+    const showUrls = await this.collectShowUrls();
 
-    if (ticketUrls.length === 0) {
-      console.log("⚠️ No ticket URLs found");
+    if (showUrls.length === 0) {
+      console.log("⚠️ No show URLs found");
       return [];
     }
 
-    // Step 2: Crawl each ticket page
-    const events = await this.crawlTicketPages(ticketUrls);
+    // Step 2: Crawl each show page for details
+    const events = await this.crawlShowPages(showUrls);
 
     return events;
   }
@@ -1051,7 +746,7 @@ class DCImprovCrawler {
       const AWS_LIMIT = 262144; // AWS Step Functions hard limit
       const MAX_PAYLOAD_SIZE = 260000; // Leave small buffer (260 KB) to account for any encoding differences
       const payloadSizeBytes = Buffer.from(stringifiedInput, 'utf8').length;
-      
+
       console.log("📦 [STEP FUNCTIONS DEBUG] Payload size check:", {
         payloadSizeBytes,
         maxPayloadSize: MAX_PAYLOAD_SIZE,
@@ -1070,12 +765,12 @@ class DCImprovCrawler {
       // If payload is too large, split into batches
       if (payloadSizeBytes > MAX_PAYLOAD_SIZE) {
         console.log(`⚠️ Payload size (${payloadSizeBytes} bytes) exceeds limit. Splitting into batches...`);
-        
+
         // Calculate average event size
         const avgEventSize = payloadSizeBytes / sanitizedEvents.length;
         // Calculate safe batch size (leave 20% buffer for JSON structure overhead)
         const BATCH_SIZE = Math.max(1, Math.floor((MAX_PAYLOAD_SIZE * 0.8) / avgEventSize));
-        
+
         console.log(`📦 Average event size: ${Math.round(avgEventSize)} bytes, Batch size: ${BATCH_SIZE} events`);
 
         // Helper function to send a batch with size validation
@@ -1109,7 +804,7 @@ class DCImprovCrawler {
           const batchExecutionName = depth > 0
             ? `${executionName}-batch-${batchNumber}-sub-${uniqueSuffix}`
             : `${executionName}-batch-${batchNumber}-${uniqueSuffix}`;
-          
+
           const batchInputObject = {
             stateMachineArn: Resource.normaizeEventStepFunction.arn,
             input: batchStringified,

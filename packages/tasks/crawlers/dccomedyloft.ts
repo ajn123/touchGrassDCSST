@@ -44,191 +44,38 @@ class ComedyLoftEvent {
 
 class ComedyLoftCrawler {
   private events: ComedyLoftEvent[] = [];
-  private showUrls: string[] = [];
   private skippedEventsCount: number = 0;
 
-  // Parse date from various formats like "Sun, Feb 22, 2026", "February 22 - March 22", etc.
-  private parseDate(dateStr: string): string {
+  // Convert a UTC ISO 8601 date string to Eastern time date + time strings.
+  // e.g. "2026-03-05T00:00:00Z" → { date: "2026-03-04", time: "7:00 pm" }
+  private parseISODateToEastern(isoDate: string): { date: string; time: string } | null {
     try {
-      if (!dateStr) return "";
+      const d = new Date(isoDate);
+      if (isNaN(d.getTime())) return null;
 
-      const cleaned = dateStr.trim();
+      // Date in Eastern (handles EST/EDT automatically)
+      const dateStr = d.toLocaleDateString("en-US", {
+        timeZone: "America/New_York",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }); // "03/04/2026"
 
-      // Handle date ranges like "February 22 - March 22"
-      const rangeMatch = cleaned.match(
-        /([A-Za-z]+)\s+(\d{1,2})\s*-\s*([A-Za-z]+)\s+(\d{1,2})/i
-      );
-      if (rangeMatch) {
-        // Use the start date
-        const monthName = rangeMatch[1];
-        const day = rangeMatch[2];
-        return this.parseMonthDayToISO(monthName, day);
-      }
+      const timeStr = d.toLocaleTimeString("en-US", {
+        timeZone: "America/New_York",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      }); // "7:00 PM"
 
-      // Handle single dates like "Sun, Feb 22, 2026"
-      const singleDateMatch = cleaned.match(
-        /([A-Za-z]+),\s*([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})/i
-      );
-      if (singleDateMatch) {
-        const monthName = singleDateMatch[2];
-        const day = singleDateMatch[3];
-        const year = singleDateMatch[4];
-        return this.parseMonthDayYearToISO(monthName, day, year);
-      }
+      // "03/04/2026" → "2026-03-04"
+      const [month, day, year] = dateStr.split("/");
+      const date = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
 
-      // Handle dates like "Fri, Jan 30, 2026"
-      const shortDateMatch = cleaned.match(
-        /([A-Za-z]+),\s*([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})/i
-      );
-      if (shortDateMatch) {
-        const monthName = shortDateMatch[2];
-        const day = shortDateMatch[3];
-        const year = shortDateMatch[4];
-        return this.parseMonthDayYearToISO(monthName, day, year);
-      }
-
-      // Handle dates like "Thu Jan 29 2026, 7:30 PM"
-      const noCommaMatch = cleaned.match(
-        /([A-Za-z]+)\s+([A-Za-z]+)\s+(\d{1,2})\s+(\d{4})/i
-      );
-      if (noCommaMatch) {
-        const monthName = noCommaMatch[2];
-        const day = noCommaMatch[3];
-        const year = noCommaMatch[4];
-        return this.parseMonthDayYearToISO(monthName, day, year);
-      }
-
-      return "";
-    } catch (error) {
-      console.error("Error parsing date:", error);
-      return "";
+      return { date, time: timeStr.toLowerCase() };
+    } catch {
+      return null;
     }
-  }
-
-  // Helper to convert month name and day to ISO date (current year assumed)
-  private parseMonthDayToISO(monthName: string, day: string): string {
-    const monthMap: { [key: string]: number } = {
-      january: 1,
-      jan: 1,
-      february: 2,
-      feb: 2,
-      march: 3,
-      mar: 3,
-      april: 4,
-      apr: 4,
-      may: 5,
-      june: 6,
-      jun: 6,
-      july: 7,
-      jul: 7,
-      august: 8,
-      aug: 8,
-      september: 9,
-      sep: 9,
-      october: 10,
-      oct: 10,
-      november: 11,
-      nov: 11,
-      december: 12,
-      dec: 12,
-    };
-
-    const monthLower = monthName.toLowerCase();
-    const monthNum = monthMap[monthLower];
-    if (!monthNum) return "";
-
-    const today = new Date();
-    let year = today.getFullYear();
-    const dayNum = parseInt(day);
-
-    // Create date and check if it's in the past
-    const date = new Date(year, monthNum - 1, dayNum);
-
-    // If the date is more than 6 months in the past, assume it's next year
-    const sixMonthsAgo = new Date(today);
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-    if (date < sixMonthsAgo) {
-      date.setFullYear(year + 1);
-      year = year + 1;
-    }
-
-    const yearStr = date.getFullYear();
-    const monthStr = String(date.getMonth() + 1).padStart(2, "0");
-    const dayStr = String(date.getDate()).padStart(2, "0");
-    return `${yearStr}-${monthStr}-${dayStr}`;
-  }
-
-  // Helper to convert month name, day, and year to ISO date
-  private parseMonthDayYearToISO(
-    monthName: string,
-    day: string,
-    year: string
-  ): string {
-    const monthMap: { [key: string]: number } = {
-      january: 1,
-      jan: 1,
-      february: 2,
-      feb: 2,
-      march: 3,
-      mar: 3,
-      april: 4,
-      apr: 4,
-      may: 5,
-      june: 6,
-      jun: 6,
-      july: 7,
-      jul: 7,
-      august: 8,
-      aug: 8,
-      september: 9,
-      sep: 9,
-      october: 10,
-      oct: 10,
-      november: 11,
-      nov: 11,
-      december: 12,
-      dec: 12,
-    };
-
-    const monthLower = monthName.toLowerCase();
-    const monthNum = monthMap[monthLower];
-    if (!monthNum) return "";
-
-    const yearNum = parseInt(year);
-    const dayNum = parseInt(day);
-
-    const monthStr = String(monthNum).padStart(2, "0");
-    const dayStr = String(dayNum).padStart(2, "0");
-    return `${yearNum}-${monthStr}-${dayStr}`;
-  }
-
-  // Parse time from formats like "7:00 PM", "7:30 PM - 9:45 PM", etc.
-  private parseTime(timeStr: string): string | undefined {
-    if (!timeStr) return undefined;
-
-    const cleaned = timeStr.trim().replace(/\s+/g, " ");
-
-    // Handle time ranges like "7:30 PM - 9:45 PM"
-    const rangeMatch = cleaned.match(
-      /(\d{1,2}:\d{2}\s*[ap]m)\s*-\s*(\d{1,2}:\d{2}\s*[ap]m)/i
-    );
-    if (rangeMatch) {
-      return `${rangeMatch[1].toLowerCase()}-${rangeMatch[2].toLowerCase()}`;
-    }
-
-    // Handle single times like "7:00 PM"
-    const singleTimeMatch = cleaned.match(/(\d{1,2}:\d{2}\s*[ap]m)/i);
-    if (singleTimeMatch) {
-      return singleTimeMatch[1].toLowerCase();
-    }
-
-    // Handle times without colons like "7 PM"
-    const noColonMatch = cleaned.match(/(\d{1,2}\s*[ap]m)/i);
-    if (noColonMatch) {
-      return noColonMatch[1].toLowerCase();
-    }
-
-    return cleaned || undefined;
   }
 
   // Parse price from text
@@ -238,14 +85,16 @@ class ComedyLoftCrawler {
     if (/(^|\b)free(\b|$)/.test(lower)) return "free";
     const money = text.match(/\$\s*([0-9]+(?:\.[0-9]{2})?)/);
     if (money) return money[1];
-    const bare = text.match(/\b([0-9]+(?:\.[0-9]{2})?)\b/);
-    if (bare) return bare[1];
     return undefined;
   }
 
-  // First pass: collect all show URLs from the events page
-  async collectShowUrls(): Promise<string[]> {
-    console.log("🔍 Collecting show URLs from events page...");
+  // Single pass: extract all events from the JSON-LD schema on the events listing page.
+  // Each JSON-LD Event entry has name, startDate (UTC ISO), description, image, and
+  // url pointing to https://www.dccomedyloft.com/shows/[id] — exactly what we need.
+  async crawlEvents(): Promise<ComedyLoftEvent[]> {
+    console.log("🕷️ Starting Comedy Loft DC crawl via JSON-LD...");
+
+    this.events = [];
 
     const crawler = new PlaywrightCrawler({
       maxRequestsPerCrawl: 1,
@@ -255,70 +104,114 @@ class ComedyLoftCrawler {
       requestHandler: async ({ page, request }) => {
         console.log(`🔗 Processing events page: ${request.url}`);
 
-        try {
-          await page.goto(request.url, {
-            waitUntil: "domcontentloaded",
-            timeout: 30000,
-          });
+        await page.goto(request.url, {
+          waitUntil: "networkidle",
+          timeout: 30000,
+        });
 
-          await page.waitForTimeout(2000);
+        // Extract all Event entries from JSON-LD <script> tags
+        const extracted = await page.evaluate(() => {
+          const results: Array<{
+            title: string;
+            startDate: string;
+            description: string;
+            imageUrl: string;
+            url: string;
+          }> = [];
 
-          // Extract all show links and basic event info
-          const eventInfo = await page.evaluate(() => {
-            const links: string[] = [];
-            const eventData: Array<{ url: string; title: string; dateText: string }> = [];
-            
-            // Look for links that go to /shows/ or event detail pages
-            const linkElements = document.querySelectorAll("a[href*='/shows/']");
-            linkElements.forEach((link) => {
-              const href = link.getAttribute("href");
-              if (href && !links.includes(href)) {
-                links.push(href);
-                
-                // Try to extract title and date from nearby elements
-                let title = "";
-                let dateText = "";
-                
-                // Look for title in parent or nearby elements
-                const parent = link.closest("article, .event, [class*='event']");
-                if (parent) {
-                  const titleEl = parent.querySelector("h2, h3, h4, [class*='title']");
-                  if (titleEl) {
-                    title = titleEl.textContent?.trim() || "";
-                  }
-                  
-                  // Look for date
-                  const dateEl = parent.querySelector("time, [class*='date'], [class*='Date']");
-                  if (dateEl) {
-                    dateText = dateEl.textContent?.trim() || "";
-                  }
-                }
-                
-                // If no title found, try to get from link text or nearby
-                if (!title) {
-                  title = link.textContent?.trim() || "";
-                }
-                
-                eventData.push({ url: href, title, dateText });
+          const scripts = Array.from(
+            document.querySelectorAll('script[type="application/ld+json"]')
+          );
+
+          for (const script of scripts) {
+            let parsed: any;
+            try {
+              parsed = JSON.parse(script.textContent || "");
+            } catch {
+              continue;
+            }
+
+            // Handle array, @graph wrapper, Place.Events wrapper (dccomedyloft.com), or bare object
+            const items: any[] = Array.isArray(parsed)
+              ? parsed
+              : parsed["Events"]   // dccomedyloft.com uses Place { "Events": [...] }
+              ? parsed["Events"]
+              : parsed["@graph"]
+              ? parsed["@graph"]
+              : [parsed];
+
+            for (const item of items) {
+              if (item["@type"] !== "Event") continue;
+
+              // Strip HTML tags from description
+              let description = "";
+              if (item.description) {
+                const div = document.createElement("div");
+                div.innerHTML = item.description;
+                description = (div.textContent || div.innerText || "").trim();
               }
-            });
-            
-            return { links, eventData };
-          });
 
-          // Convert relative URLs to absolute
-          const baseUrl = "https://www.dccomedyloft.com";
-          this.showUrls = eventInfo.links.map((url) => {
-            if (url.startsWith("http")) return url;
-            return `${baseUrl}${url}`;
-          });
+              // Normalise image field (string or object with .url)
+              let imageUrl = "";
+              if (typeof item.image === "string") {
+                imageUrl = item.image;
+              } else if (item.image?.url) {
+                imageUrl = item.image.url;
+              }
 
-          console.log(`✅ Found ${this.showUrls.length} show URLs`);
-          if (eventInfo.eventData.length > 0) {
-            console.log(`📋 Found ${eventInfo.eventData.length} events with metadata`);
+              results.push({
+                title: (item.name || "").trim(),
+                startDate: item.startDate || "",
+                description,
+                imageUrl,
+                url: item.url || "",
+              });
+            }
           }
-        } catch (error) {
-          console.error(`❌ Error collecting show URLs:`, error);
+
+          return results;
+        });
+
+        console.log(`📋 Extracted ${extracted.length} events from JSON-LD`);
+
+        for (const ev of extracted) {
+          if (!ev.title || !ev.startDate) {
+            this.skippedEventsCount++;
+            continue;
+          }
+
+          // Ensure the URL is an absolute dccomedyloft.com show page
+          const url = ev.url.startsWith("http")
+            ? ev.url
+            : `https://www.dccomedyloft.com${ev.url}`;
+
+          if (!url.includes("dccomedyloft.com")) {
+            console.log(`⚠️ Skipping event with unexpected URL: ${url}`);
+            this.skippedEventsCount++;
+            continue;
+          }
+
+          // Convert UTC ISO → Eastern date + time
+          const eastern = this.parseISODateToEastern(ev.startDate);
+          if (!eastern) {
+            console.log(`⚠️ Could not parse date "${ev.startDate}" for "${ev.title}"`);
+            this.skippedEventsCount++;
+            continue;
+          }
+
+          const event = new ComedyLoftEvent(
+            ev.title,
+            eastern.date,
+            eastern.time,
+            "1523 22nd St NW, Washington DC 20037",
+            ev.description || undefined,
+            url, // https://www.dccomedyloft.com/shows/[id]
+            "comedy",
+            undefined, // price not available in JSON-LD
+            "The Comedy Loft of DC"
+          );
+          this.events.push(event);
+          console.log(`✅ ${ev.title} — ${eastern.date} ${eastern.time} → ${url}`);
         }
       },
       launchContext: {
@@ -337,341 +230,15 @@ class ComedyLoftCrawler {
 
     try {
       await crawler.run(["https://www.dccomedyloft.com/events"]);
-      return this.showUrls;
-    } catch (error) {
-      console.error("❌ Failed to collect show URLs:", error);
-      return [];
-    }
-  }
-
-  // Second pass: crawl each show page to extract details
-  async crawlShowPages(showUrls: string[]): Promise<ComedyLoftEvent[]> {
-    console.log(`🕷️ Starting Comedy Loft show crawl for ${showUrls.length} shows...`);
-
-    this.events = [];
-
-    const crawler = new PlaywrightCrawler({
-      maxRequestsPerCrawl: showUrls.length,
-      maxConcurrency: 3,
-      minConcurrency: 1,
-      requestHandlerTimeoutSecs: 60,
-      requestHandler: async ({ page, request }) => {
-        console.log(`🔗 Processing show: ${request.url}`);
-
-        try {
-          await page.goto(request.url, {
-            waitUntil: "domcontentloaded",
-            timeout: 30000,
-          });
-
-          await page.waitForTimeout(2000);
-
-          // Extract event details from the show page
-          const eventData = await page.evaluate(() => {
-            // Extract title
-            const titleEl =
-              document.querySelector("h1") ||
-              document.querySelector("h2") ||
-              document.querySelector(".event-title") ||
-              document.querySelector("title");
-            const title = titleEl?.textContent?.trim() || "";
-
-            // Extract description
-            const descriptionEl =
-              document.querySelector(".event-description") ||
-              document.querySelector('[class*="description"]') ||
-              document.querySelector("p");
-            const description = descriptionEl?.textContent?.trim() || "";
-
-            // Extract dates - look for date text in various places
-            const dateTexts: string[] = [];
-            
-            // Look for date elements
-            const dateElements = document.querySelectorAll(
-              "time, [class*='date'], [class*='Date'], [datetime]"
-            );
-            dateElements.forEach((el) => {
-              // Check datetime attribute first
-              const datetime = el.getAttribute("datetime");
-              if (datetime) {
-                dateTexts.push(datetime);
-              }
-              // Then check text content
-              const text = el.textContent?.trim();
-              if (text && !dateTexts.includes(text)) {
-                dateTexts.push(text);
-              }
-            });
-
-            // Look for date patterns in the page text (various formats)
-            const bodyText = document.body.textContent || "";
-            
-            // Format: "Sun, Feb 22, 2026" or "Fri, Jan 30, 2026"
-            const fullDatePatterns = bodyText.match(
-              /([A-Za-z]+),\s*([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})/g
-            );
-            if (fullDatePatterns) {
-              fullDatePatterns.forEach((pattern) => {
-                if (!dateTexts.includes(pattern)) {
-                  dateTexts.push(pattern);
-                }
-              });
-            }
-            
-            // Format: "Thu Jan 29 2026, 7:30 PM"
-            const noCommaDatePatterns = bodyText.match(
-              /([A-Za-z]+)\s+([A-Za-z]+)\s+(\d{1,2})\s+(\d{4})/g
-            );
-            if (noCommaDatePatterns) {
-              noCommaDatePatterns.forEach((pattern) => {
-                if (!dateTexts.includes(pattern)) {
-                  dateTexts.push(pattern);
-                }
-              });
-            }
-            
-            // Format: "February 22 - March 22" (date ranges)
-            const dateRangePatterns = bodyText.match(
-              /([A-Za-z]+)\s+(\d{1,2})\s*-\s*([A-Za-z]+)\s+(\d{1,2})/g
-            );
-            if (dateRangePatterns) {
-              dateRangePatterns.forEach((pattern) => {
-                if (!dateTexts.includes(pattern)) {
-                  dateTexts.push(pattern);
-                }
-              });
-            }
-
-            // Extract times from event-list-button-group
-            // Structure: <div class="event-list-button-group">
-            //   <div class="event-divider">
-            //     <a class="event-btn-inline" href="/shows/350790"> 7:00 PM</a>
-            //   </div>
-            // </div>
-            const times: string[] = [];
-            const timeGroups = document.querySelectorAll(".event-list-button-group");
-            timeGroups.forEach((group) => {
-              const timeButtons = group.querySelectorAll(".event-btn-inline");
-              timeButtons.forEach((btn) => {
-                const timeText = btn.textContent?.trim();
-                if (timeText && /(\d{1,2}:\d{2}\s*[ap]m|\d{1,2}\s*[ap]m)/i.test(timeText)) {
-                  times.push(timeText);
-                }
-              });
-            });
-            
-            // Also check for times in other common locations
-            if (times.length === 0) {
-              const allTimeElements = document.querySelectorAll(
-                "time, [class*='time'], [class*='Time']"
-              );
-              allTimeElements.forEach((el) => {
-                const timeText = el.textContent?.trim();
-                if (timeText && /(\d{1,2}:\d{2}\s*[ap]m|\d{1,2}\s*[ap]m)/i.test(timeText)) {
-                  times.push(timeText);
-                }
-              });
-            }
-
-            // Extract price information
-            const priceTexts: string[] = [];
-            const priceElements = document.querySelectorAll(
-              "[class*='price'], [class*='Price'], [class*='cost'], [class*='Cost']"
-            );
-            priceElements.forEach((el) => {
-              const text = el.textContent?.trim();
-              if (text && (text.includes("$") || text.toLowerCase().includes("free"))) {
-                priceTexts.push(text);
-              }
-            });
-
-            // Extract venue (should be "The Comedy Loft of DC" or similar)
-            const venue = "The Comedy Loft of DC";
-            const location = "1523 22nd St NW, Washington DC 20037";
-
-            return {
-              title,
-              description,
-              dates: dateTexts,
-              times,
-              prices: priceTexts,
-              venue,
-              location,
-            };
-          });
-
-          // Process the extracted data
-          if (!eventData.title) {
-            console.log(`⚠️ Skipping show with no title: ${request.url}`);
-            return;
-          }
-
-          // Parse dates
-          const parsedDates: string[] = [];
-          if (eventData.dates && eventData.dates.length > 0) {
-            eventData.dates.forEach((dateStr) => {
-              const parsed = this.parseDate(dateStr);
-              if (parsed) parsedDates.push(parsed);
-            });
-          }
-
-          // If no dates found, try to extract from URL or page
-          if (parsedDates.length === 0) {
-            // Try to find dates in the page content
-            const pageContent = await page.textContent("body");
-            if (pageContent) {
-              const dateMatch = pageContent.match(
-                /([A-Za-z]+,\s*[A-Za-z]+\s+\d{1,2},?\s+\d{4})/g
-              );
-              if (dateMatch) {
-                dateMatch.forEach((dateStr) => {
-                  const parsed = this.parseDate(dateStr);
-                  if (parsed) parsedDates.push(parsed);
-                });
-              }
-            }
-          }
-
-          // If still no dates, use today's date as fallback
-          if (parsedDates.length === 0) {
-            const today = new Date();
-            const yearStr = today.getFullYear();
-            const monthStr = String(today.getMonth() + 1).padStart(2, "0");
-            const dayStr = String(today.getDate()).padStart(2, "0");
-            parsedDates.push(`${yearStr}-${monthStr}-${dayStr}`);
-          }
-
-          // Parse times
-          const parsedTimes: string[] = [];
-          if (eventData.times && eventData.times.length > 0) {
-            eventData.times.forEach((timeStr) => {
-              const parsed = this.parseTime(timeStr);
-              if (parsed) parsedTimes.push(parsed);
-            });
-          }
-
-          // Parse price
-          let parsedPrice: string | undefined = undefined;
-          if (eventData.prices && eventData.prices.length > 0) {
-            parsedPrice = this.parsePrice(eventData.prices[0]);
-          }
-
-          // Create events - one per date/time combination
-          if (parsedDates.length > 0 && parsedTimes.length > 0) {
-            // Multiple dates and times - create events for each combination
-            parsedDates.forEach((date) => {
-              parsedTimes.forEach((time) => {
-                if (!eventData.title || eventData.title.trim() === "") {
-                  console.log(`⚠️ Skipping event with no title from date/time combination: ${request.url}`);
-                  this.skippedEventsCount++;
-                  return;
-                }
-
-                const event = new ComedyLoftEvent(
-                  eventData.title,
-                  date,
-                  time,
-                  eventData.location,
-                  eventData.description,
-                  request.url,
-                  "comedy",
-                  parsedPrice,
-                  eventData.venue
-                );
-                this.events.push(event);
-              });
-            });
-          } else if (parsedDates.length > 0) {
-            // Multiple dates - create one event per date
-            parsedDates.forEach((date) => {
-              if (!eventData.title || eventData.title.trim() === "") {
-                console.log(`⚠️ Skipping event with no title from parsed dates: ${request.url}`);
-                this.skippedEventsCount++;
-                return;
-              }
-
-              const event = new ComedyLoftEvent(
-                eventData.title,
-                date,
-                parsedTimes[0],
-                eventData.location,
-                eventData.description,
-                request.url,
-                "comedy",
-                parsedPrice,
-                eventData.venue
-              );
-              this.events.push(event);
-            });
-          } else {
-            // Fallback: create single event
-            if (!eventData.title || eventData.title.trim() === "") {
-              console.log(`⚠️ Skipping event with no title from fallback: ${request.url}`);
-              this.skippedEventsCount++;
-              return;
-            }
-
-            const event = new ComedyLoftEvent(
-              eventData.title,
-              parsedDates[0] || "",
-              parsedTimes[0],
-              eventData.location,
-              eventData.description,
-              request.url,
-              "comedy",
-              parsedPrice,
-              eventData.venue
-            );
-            this.events.push(event);
-          }
-
-          console.log(`✅ Extracted event from: ${request.url}`);
-        } catch (error) {
-          console.error(`❌ Error extracting event from ${request.url}:`, error);
-        }
-      },
-      launchContext: {
-        launchOptions: {
-          headless: true,
-          args: [
-            "--no-sandbox",
-            "--disable-setuid-sandbox",
-            "--disable-dev-shm-usage",
-            "--disable-gpu",
-            "--window-size=1280,720",
-          ],
-        },
-      },
-    });
-
-    try {
-      await crawler.run(showUrls);
       console.log(`🎉 Total events found: ${this.events.length}`);
       if (this.skippedEventsCount > 0) {
-        console.log(`⚠️ Skipped ${this.skippedEventsCount} events due to missing titles`);
+        console.log(`⚠️ Skipped ${this.skippedEventsCount} events`);
       }
       return this.events;
     } catch (error) {
       console.error("❌ Crawler failed:", error);
       return [];
     }
-  }
-
-  async crawlEvents(): Promise<ComedyLoftEvent[]> {
-    console.log("🕷️ Starting Comedy Loft event crawl with Playwright...");
-
-    // Step 1: Collect all show URLs
-    const showUrls = await this.collectShowUrls();
-
-    if (showUrls.length === 0) {
-      console.log("⚠️ No show URLs found");
-      return [];
-    }
-
-    // Step 2: Crawl each show page
-    const events = await this.crawlShowPages(showUrls);
-
-    return events;
   }
 
   async saveEvents(events: ComedyLoftEvent[]): Promise<void> {
@@ -791,9 +358,9 @@ class ComedyLoftCrawler {
 
       // Check payload size (Step Functions limit is 262144 bytes / 256 KB)
       const AWS_LIMIT = 262144; // AWS Step Functions hard limit
-      const MAX_PAYLOAD_SIZE = 260000; // Leave small buffer (260 KB) to account for any encoding differences
+      const MAX_PAYLOAD_SIZE = 260000; // Leave small buffer
       const payloadSizeBytes = Buffer.from(stringifiedInput, 'utf8').length;
-      
+
       console.log("📦 [STEP FUNCTIONS DEBUG] Payload size check:", {
         payloadSizeBytes,
         maxPayloadSize: MAX_PAYLOAD_SIZE,
@@ -812,15 +379,12 @@ class ComedyLoftCrawler {
       // If payload is too large, split into batches
       if (payloadSizeBytes > MAX_PAYLOAD_SIZE) {
         console.log(`⚠️ Payload size (${payloadSizeBytes} bytes) exceeds limit. Splitting into batches...`);
-        
-        // Calculate average event size
+
         const avgEventSize = payloadSizeBytes / sanitizedEvents.length;
-        // Calculate safe batch size (leave 20% buffer for JSON structure overhead)
         const BATCH_SIZE = Math.max(1, Math.floor((MAX_PAYLOAD_SIZE * 0.8) / avgEventSize));
-        
+
         console.log(`📦 Average event size: ${Math.round(avgEventSize)} bytes, Batch size: ${BATCH_SIZE} events`);
 
-        // Helper function to send a batch with size validation
         let subBatchCounter = 0;
         const sendBatch = async (batch: any[], batchNumber: number, depth: number = 0): Promise<void> => {
           const batchPayload = {
@@ -833,11 +397,9 @@ class ComedyLoftCrawler {
           const batchSizeBytes = Buffer.from(batchStringified, 'utf8').length;
 
           if (batchSizeBytes > AWS_LIMIT) {
-            // Still too large, split in half
             console.error(`❌ Batch still too large (${batchSizeBytes} bytes). Splitting further...`);
             if (batch.length === 1) {
-              // Single event is too large - this is a problem
-              throw new Error(`Single event is too large (${batchSizeBytes} bytes). Cannot split further. Event: ${JSON.stringify(batch[0]).substring(0, 200)}...`);
+              throw new Error(`Single event is too large (${batchSizeBytes} bytes). Cannot split further.`);
             }
             const mid = Math.floor(batch.length / 2);
             await sendBatch(batch.slice(0, mid), batchNumber, depth + 1);
@@ -845,22 +407,20 @@ class ComedyLoftCrawler {
             return;
           }
 
-          // Generate unique execution name with timestamp and counter to avoid collisions
           subBatchCounter++;
           const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).substr(2, 6)}-${subBatchCounter}`;
           const batchExecutionName = depth > 0
             ? `${executionName}-batch-${batchNumber}-sub-${uniqueSuffix}`
             : `${executionName}-batch-${batchNumber}-${uniqueSuffix}`;
-          
+
           const batchInputObject = {
             stateMachineArn: Resource.normaizeEventStepFunction.arn,
             input: batchStringified,
             name: batchExecutionName,
           };
 
-          // Final safety check before sending - use actual AWS limit (262144)
           if (batchSizeBytes > 262144) {
-            throw new Error(`Batch ${batchExecutionName} is still too large (${batchSizeBytes} bytes) even after splitting. AWS limit: 262144 bytes.`);
+            throw new Error(`Batch ${batchExecutionName} is still too large (${batchSizeBytes} bytes).`);
           }
 
           const batchCommand = new StartExecutionCommand(batchInputObject);
@@ -868,7 +428,6 @@ class ComedyLoftCrawler {
           console.log(`🚀 Step Functions execution ${batchExecutionName} started (${batchSizeBytes} bytes):`, batchResponse.executionArn);
         };
 
-        // Split into batches and send
         let batchNumber = 1;
         for (let i = 0; i < sanitizedEvents.length; i += BATCH_SIZE) {
           const batch = sanitizedEvents.slice(i, i + BATCH_SIZE);
@@ -881,7 +440,6 @@ class ComedyLoftCrawler {
       }
 
       // Payload is within limit, send normally
-      // Final safety check - double verify size
       if (payloadSizeBytes > AWS_LIMIT) {
         console.error(`❌ CRITICAL: Payload size check failed! Size: ${payloadSizeBytes} bytes, AWS Limit: ${AWS_LIMIT} bytes`);
         throw new Error(`Payload size (${payloadSizeBytes} bytes) exceeds AWS limit (${AWS_LIMIT} bytes) but batching logic was not triggered. This is a bug.`);
@@ -901,7 +459,6 @@ class ComedyLoftCrawler {
         inputSizeBytes: Buffer.from(inputObject.input, 'utf8').length,
       });
 
-      // One more check right before sending - use AWS limit
       const finalSizeCheck = Buffer.from(inputObject.input, 'utf8').length;
       if (finalSizeCheck > AWS_LIMIT) {
         throw new Error(`Final size check failed: ${finalSizeCheck} bytes exceeds AWS limit of ${AWS_LIMIT} bytes`);

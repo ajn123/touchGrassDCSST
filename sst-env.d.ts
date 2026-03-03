@@ -25,6 +25,10 @@ declare module "sst" {
       "name": string
       "type": "sst.aws.Bucket"
     }
+    "OPENROUTER_API_KEY": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
     "OPENWEBNINJA_API_KEY": {
       "type": "sst.sst.Secret"
       "value": string

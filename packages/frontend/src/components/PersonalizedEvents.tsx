@@ -4,7 +4,6 @@ import { resolveImageUrl, shouldBeUnoptimized } from "@/lib/image-utils";
 import {
   getCategoryPreferences,
   getClickHistory,
-  getUserLocation,
 } from "@/lib/userPreferences";
 import Image from "next/image";
 import Link from "next/link";
@@ -34,17 +33,6 @@ export default function PersonalizedEvents() {
       try {
         const categoryPreferences = getCategoryPreferences();
         const clickHistory = getClickHistory();
-        const location = await getUserLocation();
-
-        // Only fetch if we have some personalization signals
-        if (
-          categoryPreferences.length === 0 &&
-          clickHistory.length === 0 &&
-          !location
-        ) {
-          setLoading(false);
-          return;
-        }
 
         const response = await fetch("/api/recommendations", {
           method: "POST",
@@ -55,8 +43,6 @@ export default function PersonalizedEvents() {
               eventId: c.eventId,
               category: c.category,
             })),
-            lat: location?.lat,
-            lng: location?.lng,
             limit: 8,
           }),
         });
@@ -76,8 +62,7 @@ export default function PersonalizedEvents() {
     fetchRecommendations();
   }, []);
 
-  // Don't render if no personalization data or no events
-  if (!loading && (!hasPersonalization || events.length === 0)) {
+  if (!loading && events.length === 0) {
     return null;
   }
 
@@ -85,10 +70,7 @@ export default function PersonalizedEvents() {
     return (
       <section className="max-w-7xl mx-auto px-4 py-12">
         <div className="flex items-center gap-2 mb-6">
-          <h2 className="text-2xl font-bold text-white">Recommended for You</h2>
-          <span className="text-xs bg-emerald-600 text-white px-2 py-0.5 rounded-full">
-            Personalized
-          </span>
+          <h2 className="text-2xl font-bold text-white">Upcoming Events</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
@@ -111,10 +93,14 @@ export default function PersonalizedEvents() {
   return (
     <section className="max-w-7xl mx-auto px-4 py-12">
       <div className="flex items-center gap-2 mb-6">
-        <h2 className="text-2xl font-bold text-white">Recommended for You</h2>
-        <span className="text-xs bg-emerald-600 text-white px-2 py-0.5 rounded-full">
-          Personalized
-        </span>
+        <h2 className="text-2xl font-bold text-white">
+          {hasPersonalization ? "Recommended for You" : "Upcoming Events"}
+        </h2>
+        {hasPersonalization && (
+          <span className="text-xs bg-emerald-600 text-white px-2 py-0.5 rounded-full">
+            Personalized
+          </span>
+        )}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {events.map((event) => {

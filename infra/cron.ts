@@ -3,6 +3,7 @@ import { db } from "./db";
 import { EmailConfig } from "./email";
 import { OPENROUTER_API_KEY, OPENWEBNINJA_API_KEY } from "./secrets";
 import { normalizeEventStepFunction } from "./step_functions";
+import { bucket } from "./storage";
 import {
   ClockOutDCTask,
   DCComedyLoftTask,
@@ -60,6 +61,15 @@ const copyProdToDevCron = new sst.aws.Cron("copyProdToDevCron", {
   schedule: "cron(0 2 * * ? *)", // Daily at 2 AM UTC (10 PM EST previous day)
 });
 
+const generateMissingImagesCron = new sst.aws.Cron("generateMissingImagesCron", {
+  function: {
+    handler: "packages/functions/src/events/generateMissingImages.handler",
+    link: [db, bucket],
+    timeout: "5 minutes",
+  },
+  schedule: "rate(1 day)",
+});
+
 const newsletterCron = new sst.aws.Cron("newsletterCron", {
   function: {
     handler: "packages/functions/src/newsletter/sendNewsletter.handler",
@@ -76,6 +86,7 @@ export {
   dccomedyloftCron,
   dcimprovCron,
   eventbriteCron,
+  generateMissingImagesCron,
   newsletterCron,
   washingtonianCron,
 };

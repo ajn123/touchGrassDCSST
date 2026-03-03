@@ -784,6 +784,111 @@ export function sanitizeEvent(event: any): any {
 }
 
 // ============================================================================
+// SVG IMAGE GENERATION
+// ============================================================================
+
+const CATEGORY_COLORS: Record<string, string> = {
+  "Arts & Culture": "#E11D48",
+  "Comedy": "#F59E0B",
+  "Community": "#2563EB",
+  "Education": "#4338CA",
+  "Festival": "#CA8A04",
+  "Food & Drink": "#EA580C",
+  "General": "#475569",
+  "Music": "#7C3AED",
+  "Networking": "#0D9488",
+  "Nightlife": "#6D28D9",
+  "Outdoors & Recreation": "#16A34A",
+  "Sports": "#059669",
+  "Theater": "#DC2626",
+};
+
+/**
+ * Word-wrap a string into lines of at most `maxChars` characters.
+ * Returns at most `maxLines` lines.
+ */
+function wrapText(text: string, maxChars: number, maxLines: number): string[] {
+  const words = text.split(" ");
+  const lines: string[] = [];
+  let current = "";
+  for (const word of words) {
+    if (lines.length >= maxLines) break;
+    const candidate = current ? `${current} ${word}` : word;
+    if (candidate.length > maxChars) {
+      if (current) lines.push(current);
+      current = word.slice(0, maxChars);
+    } else {
+      current = candidate;
+    }
+  }
+  if (current && lines.length < maxLines) lines.push(current);
+  return lines;
+}
+
+function escapeXml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+/**
+ * Generate a styled SVG placeholder image for an event.
+ * Returns a Buffer containing UTF-8 encoded SVG XML.
+ */
+export function generateStyledEventSvgBuffer({
+  title,
+  category,
+  venue,
+}: {
+  title?: string;
+  category?: string;
+  venue?: string;
+}): Buffer {
+  const color = CATEGORY_COLORS[category ?? ""] ?? CATEGORY_COLORS["General"];
+  const safeTitle = escapeXml(title || "Untitled Event");
+  const safeVenue = escapeXml(venue || "");
+  const safeCategory = escapeXml(category || "General");
+
+  const titleLines = wrapText(safeTitle, 32, 3);
+  const lineHeight = 68;
+  const titleStartY = 200;
+
+  const titleSvg = titleLines
+    .map(
+      (line, i) =>
+        `<text x="64" y="${titleStartY + i * lineHeight}" fill="#f8fafc" font-family="system-ui,-apple-system,sans-serif" font-size="52" font-weight="700" letter-spacing="-0.5">${line}</text>`
+    )
+    .join("\n  ");
+
+  const venueY = titleStartY + titleLines.length * lineHeight + 28;
+  const venueSvg = safeVenue
+    ? `<text x="64" y="${venueY}" fill="#94a3b8" font-family="system-ui,-apple-system,sans-serif" font-size="26">${safeVenue}</text>`
+    : "";
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="0" y="0" width="8" height="630" fill="${color}"/>
+  <rect x="0" y="0" width="1200" height="6" fill="${color}"/>
+  <rect x="64" y="68" rx="16" width="${safeCategory.length * 12 + 48}" height="36" fill="${color}" fill-opacity="0.2"/>
+  <text x="88" y="92" fill="${color}" font-family="system-ui,-apple-system,sans-serif" font-size="16" font-weight="600" letter-spacing="0.5">${safeCategory}</text>
+  ${titleSvg}
+  ${venueSvg}
+  <text x="64" y="596" fill="#334155" font-family="system-ui,-apple-system,sans-serif" font-size="18">touchgrassdc.com</text>
+</svg>`;
+
+  return Buffer.from(svg, "utf-8");
+}
+
+// ============================================================================
 // EXPORTS
 // ============================================================================
 

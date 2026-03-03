@@ -73,7 +73,28 @@ Five GSIs: `createdAtIndex`, `eventCategoryIndex`, `publicEventsIndex`, `eventTi
 
 **API Gateway** (Lambda/Hono): `GET|POST /events`, `GET|PUT|DELETE /events/{id}`, `POST /crawler/openwebninja`
 
-**Next.js API routes** (`packages/frontend/src/app/api/`): Crawler triggers, S3 presigned URLs, statistics/analytics, health check
+**Next.js API routes** (`packages/frontend/src/app/api/`): Crawler triggers, S3 presigned URLs, statistics/analytics, health check, recommendations
+
+## Recommendation System
+
+Client-side personalization using localStorage signals — no auth required.
+
+**Data collection** (`packages/frontend/src/lib/userPreferences.ts`):
+- `addToClickHistory(eventId, category)` — called on every event detail page view via `EventPageTracker`; stores up to 50 entries in `localStorage["touchgrass_click_history"]`
+- `setCategoryPreferences(categories)` — stores explicit category preferences in `localStorage["touchgrass_category_prefs"]`
+
+**Signal recording** (`packages/frontend/src/components/EventPageTracker.tsx`):
+- Client component rendered on every `/events/[id]` page
+- Fires `addToClickHistory` in a `useEffect` with the event's `pk` and primary category
+
+**API** (`packages/frontend/src/app/api/recommendations/route.ts` — Next.js, queries DynamoDB directly):
+- **With signals**: queries `eventCategoryIndex` GSI per category, deduplicates, scores by preference match (+3), click similarity (+2), recency (+1), and penalizes already-viewed events (-1)
+- **No signals (new user)**: falls back to `getCurrentAndFutureEvents()` sorted by date
+
+**Component** (`packages/frontend/src/components/PersonalizedEvents.tsx`):
+- Always fetches on mount — no early-return gate
+- Shows **"Upcoming Events"** for new users; **"Recommended for You" + Personalized badge** once signals exist
+- Renders nothing only if the API returns zero events
 
 ## SST Stages
 
@@ -85,6 +106,15 @@ Five GSIs: `createdAtIndex`, `eventCategoryIndex`, `publicEventsIndex`, `eventTi
 ## Environment Variables
 
 See `.env.example`. Key vars: `GOOGLE_MAPS_API_KEY`, `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`, `AWS_REGION`, `DB_NAME`. SST-managed secrets include `OPENWEBNINJA_API_KEY`.
+
+## Image Handling
+
+`packages/frontend/src/lib/image-utils.ts` — `resolveImageUrl(image_url, category, title, venue)`:
+- If `image_url` is set, returns it directly (http/https) or resolves from `/images/` (static)
+- If missing, generates a **seeded picsum URL** (`https://picsum.photos/seed/{title}/400/300`) so each event gets a unique but consistent placeholder image
+- `shouldBeUnoptimized(url)` returns true for external URLs (used to bypass Next.js image optimization)
+
+A daily Lambda cron (`generateMissingImagesCron`) also backfills real SVG placeholder images to S3 for any events without `image_url`, using `generateStyledEventSvgBuffer` from `@touchgrass/shared-utils`.
 
 ## Conventions
 

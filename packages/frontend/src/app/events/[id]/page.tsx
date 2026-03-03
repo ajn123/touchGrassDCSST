@@ -3,6 +3,7 @@ import { AdminEntityPanel } from "@/components/AdminEntityPanel";
 import { DateDisplay } from "@/components/Date";
 import DetailPageContainer from "@/components/DetailPageContainer";
 import { EntityDetail } from "@/components/EntityDetail";
+import { EventPageTracker } from "@/components/EventPageTracker";
 import EventMap from "@/components/EventMap";
 import { ReportWrongInfoButton } from "@/components/ReportWrongInfoButton";
 import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
@@ -78,8 +79,13 @@ export default async function ItemPage({
     ? parseInt(resolvedSearchParams.delay)
     : 0;
 
+  const eventCategory = Array.isArray(item.category)
+    ? item.category[0]
+    : item.category;
+
   return (
     <DetailPageContainer>
+      <EventPageTracker eventId={item.pk} category={eventCategory} />
       {/* Analytics handled centrally in middleware */}
       {artificialDelay > 0 && (
         <div

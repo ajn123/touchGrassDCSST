@@ -3,8 +3,28 @@ export interface ArticleTopic {
   title: string;
   redditQueries: string[];
   googlePlacesQuery: string | null;
+  coverImageQuery: string;
   promptContext: string;
   category: string;
+}
+
+/**
+ * Generate a deterministic Unsplash cover image URL for an article.
+ * Uses the topic's coverImageQuery as a seed so the same topic always
+ * gets the same image, but different weeks get variety via the slug.
+ */
+export function getCoverImageUrl(topic: ArticleTopic, slug: string): string {
+  // Use slug as seed for deterministic but varied results per week
+  const seed = slug.replace(/[^a-z0-9]/g, "");
+  return `https://images.unsplash.com/photo-${seed}?w=1200&h=630&fit=crop&q=80`;
+}
+
+/**
+ * Generate an Unsplash source redirect URL that returns a random photo
+ * matching the search query. No API key needed.
+ */
+export function getUnsplashSearchUrl(query: string): string {
+  return `https://source.unsplash.com/1200x630/?${encodeURIComponent(query)}`;
 }
 
 export const ARTICLE_TOPICS: ArticleTopic[] = [
@@ -13,6 +33,7 @@ export const ARTICLE_TOPICS: ArticleTopic[] = [
     title: "Best Coffee Shops in DC",
     redditQueries: ["best coffee DC", "coffee shop recommendation DC", "favorite cafe washington"],
     googlePlacesQuery: "best coffee shops Washington DC",
+    coverImageQuery: "coffee shop latte",
     promptContext: "Focus on independent/local shops, not just Starbucks. Mention what makes each one special — the vibe, the espresso, pastries, work-from-home friendliness.",
     category: "Food & Drink",
   },
@@ -21,6 +42,7 @@ export const ARTICLE_TOPICS: ArticleTopic[] = [
     title: "Best BBQ in the DMV",
     redditQueries: ["best bbq DC", "barbecue DMV", "best brisket washington DC"],
     googlePlacesQuery: "best BBQ restaurant Washington DC",
+    coverImageQuery: "bbq brisket smoker",
     promptContext: "Cover different BBQ styles (Texas, Carolina, Memphis). Mention signature dishes, portion sizes, and whether they have outdoor seating.",
     category: "Food & Drink",
   },
@@ -29,6 +51,7 @@ export const ARTICLE_TOPICS: ArticleTopic[] = [
     title: "Best Free Things to Do in DC",
     redditQueries: ["free things to do DC", "free activities washington", "free events DC this month"],
     googlePlacesQuery: null,
+    coverImageQuery: "washington dc national mall",
     promptContext: "Highlight that DC is one of the best cities for free entertainment — Smithsonians, memorials, free concerts, gallery openings, farmers markets. Include lesser-known freebies.",
     category: "Community",
   },
@@ -37,6 +60,7 @@ export const ARTICLE_TOPICS: ArticleTopic[] = [
     title: "Most Instagram-Worthy Restaurants in DC",
     redditQueries: ["instagrammable restaurants DC", "prettiest restaurants DC", "aesthetic cafe washington", "photogenic restaurant DC"],
     googlePlacesQuery: "instagram worthy restaurant Washington DC",
+    coverImageQuery: "aesthetic restaurant interior neon",
     promptContext: "Focus on the visual experience — interior design, plating, rooftop views, neon signs, flower walls. Mention the best dishes to photograph and ideal time to visit for lighting.",
     category: "Food & Drink",
   },
@@ -45,6 +69,7 @@ export const ARTICLE_TOPICS: ArticleTopic[] = [
     title: "Best Ways to Make Friends in DC",
     redditQueries: ["how to make friends DC", "meeting people washington DC", "social groups DC", "lonely in DC"],
     googlePlacesQuery: null,
+    coverImageQuery: "group friends socializing bar",
     promptContext: "DC has a huge transplant population — lots of people looking for friends. Cover run clubs, social sports leagues (DC Fray, Volo), meetup groups, climbing gyms, dance classes, volunteer orgs, and bar trivia.",
     category: "Community",
   },
@@ -53,6 +78,7 @@ export const ARTICLE_TOPICS: ArticleTopic[] = [
     title: "Best Dance Classes & Social Dances in the DMV",
     redditQueries: ["dance classes DC", "salsa dancing DC", "swing dance washington", "social dancing DMV"],
     googlePlacesQuery: "dance classes Washington DC",
+    coverImageQuery: "salsa dancing couple",
     promptContext: "Cover salsa, bachata, swing, two-step, and more. Mention beginner-friendly options, no-partner-needed nights, and the best social dances where you can practice.",
     category: "Arts & Culture",
   },
@@ -61,6 +87,7 @@ export const ARTICLE_TOPICS: ArticleTopic[] = [
     title: "Best Happy Hours in DC",
     redditQueries: ["best happy hour DC", "cheap drinks DC", "happy hour deals washington"],
     googlePlacesQuery: "best happy hour Washington DC",
+    coverImageQuery: "cocktails happy hour bar",
     promptContext: "Include specific deals (e.g., '$6 margaritas', 'half-price oysters'). Mention the vibe — after-work crowd, date-worthy, rooftop, dive bar. Note which neighborhoods have the best concentration of options.",
     category: "Food & Drink",
   },
@@ -69,6 +96,7 @@ export const ARTICLE_TOPICS: ArticleTopic[] = [
     title: "Hidden Gems of the DMV",
     redditQueries: ["hidden gems DC", "underrated spots DC", "secret places washington", "lesser known DC"],
     googlePlacesQuery: null,
+    coverImageQuery: "secret alley speakeasy",
     promptContext: "The stuff tourists never find. Speakeasies, hole-in-the-wall restaurants, secret gardens, off-the-beaten-path museums, underground art spaces. The more obscure, the better.",
     category: "Community",
   },
@@ -77,6 +105,7 @@ export const ARTICLE_TOPICS: ArticleTopic[] = [
     title: "Best Date Spots in DC",
     redditQueries: ["date ideas DC", "romantic restaurants DC", "first date spots washington", "date night DC"],
     googlePlacesQuery: "romantic restaurant Washington DC",
+    coverImageQuery: "romantic dinner candlelight",
     promptContext: "Cover the spectrum: first dates (low-pressure, casual), established couples (fancy dinner), adventurous dates (axe throwing, escape rooms). Mention price ranges.",
     category: "Food & Drink",
   },
@@ -85,6 +114,7 @@ export const ARTICLE_TOPICS: ArticleTopic[] = [
     title: "Best Brunch Spots in DC",
     redditQueries: ["best brunch DC", "brunch recommendations washington", "bottomless brunch DC"],
     googlePlacesQuery: "best brunch Washington DC",
+    coverImageQuery: "brunch eggs benedict mimosa",
     promptContext: "Brunch is a religion in DC. Cover bottomless options, boozy brunch, healthy brunch, and the best classic eggs benedict. Mention wait times and reservation tips.",
     category: "Food & Drink",
   },
@@ -93,6 +123,7 @@ export const ARTICLE_TOPICS: ArticleTopic[] = [
     title: "Best Pizza in the DMV",
     redditQueries: ["best pizza DC", "pizza recommendations DMV", "favorite pizza washington"],
     googlePlacesQuery: "best pizza Washington DC",
+    coverImageQuery: "pizza slice neapolitan",
     promptContext: "Cover different styles: NY-style, Neapolitan, Detroit, by-the-slice late-night spots. Mention signature pies and whether they do delivery.",
     category: "Food & Drink",
   },
@@ -101,6 +132,7 @@ export const ARTICLE_TOPICS: ArticleTopic[] = [
     title: "Best Outdoor Activities in the DMV",
     redditQueries: ["outdoor activities DC", "hiking near DC", "best parks washington", "kayaking DC"],
     googlePlacesQuery: null,
+    coverImageQuery: "hiking trail forest river",
     promptContext: "Rock Creek Park, Great Falls, Billy Goat Trail, C&O Canal, Shenandoah day trips. Include seasonal activities — cherry blossoms, fall foliage, summer kayaking, winter ice skating.",
     category: "Outdoors & Recreation",
   },
@@ -109,6 +141,7 @@ export const ARTICLE_TOPICS: ArticleTopic[] = [
     title: "Best Live Music Venues in DC",
     redditQueries: ["live music DC", "best music venues DC", "concert venues washington"],
     googlePlacesQuery: "live music venue Washington DC",
+    coverImageQuery: "live concert stage crowd",
     promptContext: "From intimate jazz clubs to big concert halls. Cover different genres — jazz (Blues Alley), rock (9:30 Club, Black Cat), indie, go-go music (DC's own genre!).",
     category: "Music",
   },
@@ -117,6 +150,7 @@ export const ARTICLE_TOPICS: ArticleTopic[] = [
     title: "Best Food Trucks in DC",
     redditQueries: ["best food trucks DC", "food truck recommendations washington", "lunch trucks DC"],
     googlePlacesQuery: null,
+    coverImageQuery: "food truck street tacos",
     promptContext: "DC has an incredible food truck scene. Cover where to find them (L'Enfant Plaza, Farragut Square, Union Market area) and the standout trucks by cuisine type.",
     category: "Food & Drink",
   },
@@ -125,6 +159,7 @@ export const ARTICLE_TOPICS: ArticleTopic[] = [
     title: "Best Rooftop Bars in DC",
     redditQueries: ["rooftop bars DC", "best rooftop DC", "outdoor drinking washington"],
     googlePlacesQuery: "rooftop bar Washington DC",
+    coverImageQuery: "rooftop bar city skyline sunset",
     promptContext: "DC's skyline is gorgeous and the building height limit means rooftops have unobstructed views. Mention which ones have monument views, the drink prices, and dress codes.",
     category: "Food & Drink",
   },
@@ -133,6 +168,7 @@ export const ARTICLE_TOPICS: ArticleTopic[] = [
     title: "Best Bookstores & Cozy Reading Spots in DC",
     redditQueries: ["bookstores DC", "best bookstore washington", "cozy spots to read DC"],
     googlePlacesQuery: "independent bookstore Washington DC",
+    coverImageQuery: "bookstore shelves cozy reading",
     promptContext: "Cover independent bookstores (Politics and Prose, Solid State Books, East City Bookshop, Kramers), their events, and the best nearby cafes for reading.",
     category: "Arts & Culture",
   },
@@ -141,6 +177,7 @@ export const ARTICLE_TOPICS: ArticleTopic[] = [
     title: "Best Farmers Markets in the DMV",
     redditQueries: ["farmers market DC", "best farmers market DMV", "fresh produce washington"],
     googlePlacesQuery: "farmers market Washington DC",
+    coverImageQuery: "farmers market fresh produce flowers",
     promptContext: "Cover the big ones (Dupont Circle, Eastern Market) and neighborhood gems. Mention seasonal highlights, standout vendors, and tips for getting the best stuff.",
     category: "Food & Drink",
   },
@@ -149,6 +186,7 @@ export const ARTICLE_TOPICS: ArticleTopic[] = [
     title: "Best Museums in DC (Free & Paid)",
     redditQueries: ["best museums DC", "museum recommendations washington", "underrated museums DC"],
     googlePlacesQuery: null,
+    coverImageQuery: "museum exhibit hall art",
     promptContext: "Most Smithsonians are free! Cover which ones are actually worth the visit (Air & Space, African American History, Natural History), plus paid gems (Spy Museum, Phillips Collection, Artechouse).",
     category: "Arts & Culture",
   },
@@ -157,6 +195,7 @@ export const ARTICLE_TOPICS: ArticleTopic[] = [
     title: "Best Running Routes in DC",
     redditQueries: ["running routes DC", "best places to run washington", "running trails DMV"],
     googlePlacesQuery: null,
+    coverImageQuery: "running trail sunrise park",
     promptContext: "Cover the classics (Mall loop, Rock Creek Trail, Georgetown Waterfront, Mt. Vernon Trail) and distance options. Mention water fountains, bathroom stops, and which routes are well-lit for night running.",
     category: "Outdoors & Recreation",
   },
@@ -165,6 +204,7 @@ export const ARTICLE_TOPICS: ArticleTopic[] = [
     title: "Best Late Night Eats in DC",
     redditQueries: ["late night food DC", "restaurants open late DC", "after midnight food washington"],
     googlePlacesQuery: "late night restaurant Washington DC",
+    coverImageQuery: "late night pizza diner neon",
     promptContext: "DC's late-night food scene is underrated. Cover pizza slices, diners, food trucks that stay open late, and 24-hour spots. Mention which neighborhoods are best for late-night munchies.",
     category: "Food & Drink",
   },

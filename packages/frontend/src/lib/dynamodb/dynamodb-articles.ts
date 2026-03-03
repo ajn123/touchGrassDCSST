@@ -22,6 +22,7 @@ export interface Article {
   topicSlug: string;
   sources: { title: string; url: string }[];
   places: { name: string; rating: number; address: string }[];
+  image_url?: string;
   isPublic: string;
   publishedAt: number;
   createdAt: number;

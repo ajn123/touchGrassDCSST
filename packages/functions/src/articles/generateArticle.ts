@@ -8,7 +8,7 @@ import { Handler } from "aws-lambda";
 import { Resource } from "sst";
 import { gatherGooglePlacesContent, formatGooglePlacesForPrompt } from "./google-places";
 import { gatherRedditContent, formatRedditContentForPrompt } from "./reddit";
-import { getTopicForWeek, generateArticleSlug, type ArticleTopic } from "./topics";
+import { getTopicForWeek, generateArticleSlug, getUnsplashSearchUrl, type ArticleTopic } from "./topics";
 
 const dynamoClient = new DynamoDBClient({
   region: process.env.AWS_REGION || "us-east-1",
@@ -107,6 +107,7 @@ async function saveArticle(
   article: ArticleOutput,
   sources: { title: string; url: string }[],
   places: { name: string; rating: number; address: string }[],
+  imageUrl: string,
 ): Promise<void> {
   const timestamp = Date.now();
   const item = {
@@ -120,6 +121,7 @@ async function saveArticle(
     topicSlug: topic.slug,
     sources: sources,
     places: places,
+    image_url: imageUrl,
     isPublic: "true",
     publishedAt: timestamp,
     createdAt: timestamp,
@@ -193,8 +195,11 @@ export const handler: Handler = async () => {
     throw new Error(`Article missing required fields: ${JSON.stringify(Object.keys(article))}`);
   }
 
-  // 5. Save to DynamoDB
-  await saveArticle(slug, topic, article, redditContent.sourceLinks, googlePlaces);
+  // 5. Generate cover image URL
+  const imageUrl = getUnsplashSearchUrl(topic.coverImageQuery);
+
+  // 6. Save to DynamoDB
+  await saveArticle(slug, topic, article, redditContent.sourceLinks, googlePlaces, imageUrl);
 
   console.log(`Article generation complete: "${article.title}"`);
 

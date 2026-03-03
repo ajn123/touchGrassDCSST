@@ -1,8 +1,45 @@
+import ArticleCard from "@/components/ArticleCard";
 import { getArticle, getArticles } from "@/lib/dynamodb/dynamodb-articles";
+import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const awaitedParams = await params;
+  const slug = decodeURIComponent(awaitedParams.slug);
+  const article = await getArticle(slug);
+
+  if (!article) {
+    return { title: "Article Not Found | TouchGrass DC" };
+  }
+
+  return {
+    title: `${article.title} | TouchGrass DC`,
+    description: article.excerpt,
+    openGraph: {
+      title: article.title,
+      description: article.excerpt,
+      type: "article",
+      publishedTime: new Date(article.publishedAt).toISOString(),
+      url: `https://touchgrassdc.com/articles/${slug}`,
+      images: article.image_url ? [{ url: article.image_url, width: 1200, height: 630 }] : [],
+      siteName: "TouchGrass DC",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description: article.excerpt,
+      images: article.image_url ? [article.image_url] : [],
+    },
+  };
+}
 
 function formatDate(timestamp: number): string {
   return new Date(timestamp).toLocaleDateString("en-US", {
@@ -51,6 +88,19 @@ export default async function ArticlePage({
       </main>
     );
   }
+
+  // Fetch related articles (same category, different slug)
+  const allArticles = await getArticles();
+  const relatedArticles = allArticles
+    .filter((a) => a.slug !== slug)
+    .sort((a, b) => {
+      // Prefer same category
+      const aMatch = a.category === article.category ? 1 : 0;
+      const bMatch = b.category === article.category ? 1 : 0;
+      if (aMatch !== bMatch) return bMatch - aMatch;
+      return b.publishedAt - a.publishedAt;
+    })
+    .slice(0, 3);
 
   return (
     <main className="min-h-screen">
@@ -103,6 +153,20 @@ export default async function ArticlePage({
             {article.title}
           </h1>
         </div>
+
+        {/* Cover Image */}
+        {article.image_url && (
+          <div className="relative w-full h-64 md:h-96 rounded-lg overflow-hidden mb-8">
+            <Image
+              src={article.image_url}
+              alt={article.title}
+              fill
+              className="object-cover"
+              unoptimized
+              priority
+            />
+          </div>
+        )}
 
         {/* Article Content */}
         <div
@@ -188,6 +252,36 @@ export default async function ArticlePage({
           </div>
         )}
       </article>
+
+      {/* Related Articles */}
+      {relatedArticles.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 pb-12">
+          <div
+            className="pt-8 mb-6"
+            style={{ borderTopWidth: "1px", borderColor: "var(--border-primary)" }}
+          >
+            <h2
+              className="text-2xl font-bold"
+              style={{ color: "var(--text-primary)" }}
+            >
+              More Articles
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {relatedArticles.map((related) => (
+              <ArticleCard
+                key={related.slug}
+                slug={related.slug}
+                title={related.title}
+                excerpt={related.excerpt}
+                category={related.category}
+                publishedAt={related.publishedAt}
+                imageUrl={related.image_url}
+              />
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }

@@ -4,6 +4,7 @@ import {
   getWeekNumber,
   getTopicForWeek,
   generateArticleSlug,
+  getUnsplashSearchUrl,
 } from "../packages/functions/src/articles/topics";
 import {
   formatRedditContentForPrompt,
@@ -39,6 +40,31 @@ describe("Article Topics", () => {
     for (const topic of ARTICLE_TOPICS) {
       expect(topic.slug).toMatch(/^[a-z0-9-]+$/);
     }
+  });
+
+  it("every topic has a coverImageQuery", () => {
+    for (const topic of ARTICLE_TOPICS) {
+      expect(topic.coverImageQuery).toBeTruthy();
+      expect(typeof topic.coverImageQuery).toBe("string");
+    }
+  });
+});
+
+describe("getUnsplashSearchUrl", () => {
+  it("returns a URL with the query encoded", () => {
+    const url = getUnsplashSearchUrl("coffee shop latte");
+    expect(url).toContain("source.unsplash.com");
+    expect(url).toContain("1200x630");
+    expect(url).toContain("coffee%20shop%20latte");
+  });
+
+  it("encodes special characters", () => {
+    const url = getUnsplashSearchUrl("food & drink");
+    expect(url).toContain("food%20%26%20drink");
+  });
+
+  it("returns consistent results for same query", () => {
+    expect(getUnsplashSearchUrl("test")).toBe(getUnsplashSearchUrl("test"));
   });
 });
 
@@ -145,6 +171,7 @@ describe("formatRedditContentForPrompt", () => {
           numComments: 15,
           url: "https://reddit.com/...",
           permalink: "/r/washingtondc/comments/abc",
+          subreddit: "washingtondc",
           created: 1709491234,
         },
       ],
@@ -161,11 +188,34 @@ describe("formatRedditContentForPrompt", () => {
     expect(result).toContain("25 upvotes");
   });
 
+  it("includes subreddit name in formatted output", () => {
+    const content: RedditContent = {
+      posts: [
+        {
+          id: "xyz",
+          title: "Best hike near NoVA",
+          selftext: "",
+          score: 30,
+          numComments: 10,
+          url: "",
+          permalink: "/r/nova/comments/xyz",
+          subreddit: "nova",
+          created: 1709491234,
+        },
+      ],
+      topComments: [],
+      sourceLinks: [],
+    };
+
+    const result = formatRedditContentForPrompt(content);
+    expect(result).toContain("r/nova");
+  });
+
   it("truncates long selftext", () => {
     const longText = "a".repeat(600);
     const content: RedditContent = {
       posts: [
-        { id: "x", title: "Test", selftext: longText, score: 1, numComments: 1, url: "", permalink: "", created: 0 },
+        { id: "x", title: "Test", selftext: longText, score: 1, numComments: 1, url: "", permalink: "", subreddit: "washingtondc", created: 0 },
       ],
       topComments: [],
       sourceLinks: [],
@@ -182,7 +232,7 @@ describe("formatRedditContentForPrompt", () => {
       author: `user${i}`,
     }));
     const content: RedditContent = {
-      posts: [{ id: "x", title: "Test", selftext: "", score: 1, numComments: 30, url: "", permalink: "", created: 0 }],
+      posts: [{ id: "x", title: "Test", selftext: "", score: 1, numComments: 30, url: "", permalink: "", subreddit: "washingtondc", created: 0 }],
       topComments: comments,
       sourceLinks: [],
     };

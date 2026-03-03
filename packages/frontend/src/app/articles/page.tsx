@@ -44,6 +44,7 @@ export default async function ArticlesPage() {
                 excerpt={article.excerpt}
                 category={article.category}
                 publishedAt={article.publishedAt}
+                imageUrl={article.image_url}
               />
             ))}
           </div>

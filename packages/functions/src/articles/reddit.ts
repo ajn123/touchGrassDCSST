@@ -10,6 +10,7 @@ export interface RedditPost {
   numComments: number;
   url: string;
   permalink: string;
+  subreddit: string;
   created: number;
 }
 
@@ -33,7 +34,7 @@ export async function fetchRedditPostsFromSubreddit(
   query: string,
   limit = 10,
 ): Promise<RedditPost[]> {
-  const url = `${REDDIT_BASE}/r/${subreddit}/search.json?q=${encodeURIComponent(query)}&restrict_sr=1&sort=relevance&t=year&limit=${limit}`;
+  const url = `${REDDIT_BASE}/r/${subreddit}/search.json?q=${encodeURIComponent(query)}&restrict_sr=1&sort=top&t=year&limit=${limit}`;
 
   const response = await fetch(url, {
     headers: { "User-Agent": USER_AGENT },
@@ -58,6 +59,7 @@ export async function fetchRedditPostsFromSubreddit(
       numComments: child.data?.num_comments || 0,
       url: child.data?.url || "",
       permalink: child.data?.permalink || "",
+      subreddit: child.data?.subreddit || subreddit,
       created: child.data?.created_utc || 0,
     }))
     .filter((post: RedditPost) => post.id && post.title);
@@ -169,7 +171,7 @@ export function formatRedditContentForPrompt(content: RedditContent): string {
   const sections: string[] = [];
 
   for (const post of content.posts) {
-    let section = `Thread: "${post.title}" (${post.score} upvotes, ${post.numComments} comments)`;
+    let section = `Thread from r/${post.subreddit}: "${post.title}" (${post.score} upvotes, ${post.numComments} comments)`;
     if (post.selftext) {
       const truncated = post.selftext.length > 500
         ? post.selftext.substring(0, 500) + "..."

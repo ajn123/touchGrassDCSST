@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 interface ArticleCardProps {
   slug: string;
@@ -6,6 +7,7 @@ interface ArticleCardProps {
   excerpt: string;
   category: string;
   publishedAt: number;
+  imageUrl?: string;
 }
 
 function formatDate(timestamp: number): string {
@@ -16,25 +18,30 @@ function formatDate(timestamp: number): string {
   });
 }
 
-function estimateReadTime(content?: string): string {
-  if (!content) return "3 min read";
-  const words = content.replace(/<[^>]*>/g, "").split(/\s+/).length;
-  const minutes = Math.max(1, Math.ceil(words / 200));
-  return `${minutes} min read`;
-}
-
 export default function ArticleCard({
   slug,
   title,
   excerpt,
   category,
   publishedAt,
+  imageUrl,
 }: ArticleCardProps) {
   return (
     <Link href={`/articles/${encodeURIComponent(slug)}`}>
       <article className="group rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 h-full flex flex-col"
         style={{ backgroundColor: "var(--bg-secondary)", borderColor: "var(--border-primary)", borderWidth: "1px" }}
       >
+        {imageUrl && (
+          <div className="relative w-full h-48 overflow-hidden">
+            <Image
+              src={imageUrl}
+              alt={title}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              unoptimized
+            />
+          </div>
+        )}
         <div className="p-6 flex flex-col flex-1">
           <div className="flex items-center gap-2 mb-3">
             <span

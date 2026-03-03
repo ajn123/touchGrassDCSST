@@ -65,7 +65,7 @@ const generateMissingImagesCron = new sst.aws.Cron("generateMissingImagesCron", 
   function: {
     handler: "packages/functions/src/events/generateMissingImages.handler",
     link: [db, bucket],
-    timeout: "5 minutes",
+    timeout: "10 minutes",
   },
   schedule: "rate(1 day)",
 });

@@ -375,5 +375,411 @@
       "instagram": "https://www.instagram.com/pitchafriend.dc/#"
     },
     "isPublic": true
+  },
+
+  {
+    "title": "DC Road Runners",
+    "description": "Running the nation's capital since 1961. DC Road Runners welcomes runners of all ability levels with a year-round schedule of events, weekly training runs, training programs, and 19 free races each year.",
+    "category": ["Sports", "Running"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "0-40"
+    },
+    "socials": {
+      "website": "https://dcroadrunners.org/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "DC Front Runners",
+    "description": "An LGBTQ+ running and walking club that holds a regular schedule of non-competitive group runs along Rock Creek Park, the National Mall, and the Potomac River banks. Choose your distance and set your pace. All are welcome.",
+    "category": ["Sports", "Running", "LGBTQ+"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://dcfrontrunners.org/"
+    },
+    "schedules": [
+      {
+        "days": ["Saturday"],
+        "recurrence_type": "weekly",
+        "time": "9:00 AM",
+        "location": "Rock Creek Park, Washington, DC"
+      }
+    ],
+    "isPublic": true
+  },
+  {
+    "title": "DC Capital Striders",
+    "description": "A community of runners in Washington, D.C., Northern Virginia, and Maryland that believes in running in a supportive, non-competitive environment. Great for beginners and experienced runners alike.",
+    "category": ["Sports", "Running"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://www.dccapitalstriders.com/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Capital Area Runners",
+    "description": "A DC metropolitan area running club founded to provide group training opportunities for highly motivated and competitive minded runners of all ability levels.",
+    "category": ["Sports", "Running"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://capitalarearunners.com/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Capital Hiking Club",
+    "description": "A non-profit hiking group in the DC/MD/VA area operating since 1937. They hike 52 weeks a year with options that challenge all skill levels. One of the oldest and most active hiking clubs in the region.",
+    "category": ["Outdoors", "Hiking"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://www.capitalhikingclub.org/",
+      "meetup": "https://www.meetup.com/capital-hiking-club/"
+    },
+    "schedules": [
+      {
+        "days": ["Saturday"],
+        "recurrence_type": "weekly",
+        "time": "Check website for times",
+        "location": "Various trailheads in DC, MD, VA"
+      },
+      {
+        "days": ["Sunday"],
+        "recurrence_type": "weekly",
+        "time": "Check website for times",
+        "location": "Various trailheads in DC, MD, VA"
+      }
+    ],
+    "isPublic": true
+  },
+  {
+    "title": "Wanderbirds Hiking Club",
+    "description": "Founded in 1934, the Wanderbirds is a non-profit, all-volunteer club that organizes day hikes every Sunday, year-round, for energetic folks in the DC area. Hikers range in age from 7 to over 80, and the club welcomes fast, experienced hikers as well as slower or beginning hikers.",
+    "category": ["Outdoors", "Hiking"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://wanderbirds.org/"
+    },
+    "schedules": [
+      {
+        "days": ["Sunday"],
+        "recurrence_type": "weekly",
+        "time": "Check website for times",
+        "location": "Various trailheads in DC, MD, VA"
+      }
+    ],
+    "isPublic": true
+  },
+  {
+    "title": "Potomac Pedalers Touring Club",
+    "description": "One of the largest bicycle clubs in the US. A non-profit educational, recreational and social organization for bicycling enthusiasts in the DC metro area with rides for all skill levels.",
+    "category": ["Sports", "Cycling"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "0-35"
+    },
+    "socials": {
+      "website": "https://potomacpedalers.org/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "DC Paceline",
+    "description": "One of Greater Washington Area's most well-known cycling training series. Four groups (A, B, C, and Juniors) ride criterium-style on a non-technical course. Great for community cycling rides in DC, Maryland, and Virginia.",
+    "category": ["Sports", "Cycling"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://dcpaceline.com/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Sends with Friends",
+    "description": "A minority-led rock climbing community in the DMV area that brings together climbers of all cultural backgrounds and nationalities since 2021. Meets monthly on the first Friday at DC Bouldering Project.",
+    "category": ["Sports", "Climbing"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "schedules": [
+      {
+        "days": ["Friday"],
+        "recurrence_type": "monthly",
+        "time": "7:00 PM - 9:00 PM",
+        "location": "DC Bouldering Project, 1200 Half St SE, Washington, DC 20003"
+      }
+    ],
+    "socials": {
+      "website": "https://boulderingproject.com/location/eckington/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Adventuring LGBTQ+",
+    "description": "An outdoors club for the LGBTQ+ community in the Washington DC metro area. LGBTQ+ volunteers lead hikes, kayaking trips, camping, and other outdoor activities year-round. All experience levels welcome.",
+    "category": ["Outdoors", "Hiking", "LGBTQ+"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://adventuringlgbtq.com/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Baila DC",
+    "description": "A premier salsa dance school in the DC metro area offering On2 salsa classes at 5 levels. Hosts two monthly 'Baila Thursdays' socials at La Cosecha in Union Market. No partner needed.",
+    "category": ["Dance", "Social"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "15-25"
+    },
+    "socials": {
+      "website": "https://bailadc.com/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Salsa With Silvia",
+    "description": "Fun and affordable Salsa, Bachata, and Reggaeton group classes in Washington, D.C. and Bethesda. Open to all levels from beginner to advanced with a welcoming social dance community.",
+    "category": ["Dance", "Social"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "15-25"
+    },
+    "socials": {
+      "website": "https://salsawithsilvia.com/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "DC Street Photography Collective",
+    "description": "A non-profit 501(c)(3) dedicated to street photographers from the DC, MD, VA areas. Devoted to producing, sharing, and creatively capturing the human condition through photography walks and exhibits.",
+    "category": ["Photography", "Arts"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://www.thedcspc.com/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Exposed DC",
+    "description": "Cultivates the Washington DC area photography community through news, highlighted images, regular social meetups, teach-ins, and an annual photography contest and exhibit. Open to photographers of all levels.",
+    "category": ["Photography", "Arts"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://exposeddc.com/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Solid State Books Book Clubs",
+    "description": "DC's independent bookstore at Union Market hosts multiple book clubs including a Horror book club (3rd Wednesday monthly) and a Science-Fiction & Fantasy book club. A welcoming community for readers of all genres.",
+    "category": ["Book Club"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://www.solidstatebooksdc.com/book-clubs"
+    },
+    "schedules": [
+      {
+        "days": ["Wednesday"],
+        "recurrence_type": "monthly",
+        "time": "7:00 PM",
+        "location": "Solid State Books, 600 H St NE, Washington, DC 20002"
+      }
+    ],
+    "isPublic": true
+  },
+  {
+    "title": "ZogSports DC",
+    "description": "Sign up as a whole team or register individually for coed recreational sports leagues including volleyball, kickball, dodgeball, softball, and more. Leagues end with happy hours and social events.",
+    "category": ["Sports", "Social"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "50-90"
+    },
+    "socials": {
+      "website": "https://www.zogsports.com/dc/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "OutLoud Sports DC",
+    "description": "A leading LGBTQ+ recreational sports organization in Washington DC that promotes inclusivity and fun through diverse sports including sand volleyball, tennis, pickleball, and dodgeball. All are welcome regardless of identity.",
+    "category": ["Sports", "Social", "LGBTQ+"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "40-80"
+    },
+    "socials": {
+      "website": "https://outloudsports.com/washingtondc"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "DC Pickleball League",
+    "description": "Multi-week ladder leagues with both social and competitive divisions at Rock Creek and WTEF. Great for meeting fellow pickleball players in the DC area at all skill levels.",
+    "category": ["Sports"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "30-60"
+    },
+    "socials": {
+      "website": "https://wdcpickleball.com/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Free Yoga For Everyone DC",
+    "description": "A Meetup group with over 1,000 members that practices traditional Ashtanga yoga together completely free of charge in open areas and parks in DC and Northern Virginia. All levels welcome, no experience needed.",
+    "category": ["Fitness", "Yoga"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "meetup": "https://www.meetup.com/free-yoga-for-everyone-ashtanga-yoga/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Spanglish Exchange DC",
+    "description": "A language exchange that brings together native English speakers and native Spanish speakers in a relaxed social setting. Practice conversation skills while making new friends over drinks.",
+    "category": ["Social", "Education"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "meetup": "https://www.meetup.com/spanglish-exchange-washington-dc-language-exchange/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "DC Language and Cultural Exchange Club",
+    "description": "A social group where people get together to practice and learn new languages with weekly language exchange meetings. Mainly a social for intermediate, advanced, and native speakers of many languages.",
+    "category": ["Social", "Education"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "meetup": "https://www.meetup.com/dclanguageexchangegroup/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Washington Area Bicyclist Association",
+    "description": "WABA advocates for better biking in the DC region and organizes community rides, bike-to-work events, and cycling education classes. They also lead group rides and social cycling events throughout the year.",
+    "category": ["Sports", "Cycling"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "0-40"
+    },
+    "socials": {
+      "website": "https://waba.org/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Take a Hike DMV",
+    "description": "A friendly and inclusive group for anyone who loves exploring the outdoors in the DC, Maryland, and Virginia area. They organize hikes across the DMV focusing on scenic and accessible trails within an easy drive of DC.",
+    "category": ["Outdoors", "Hiking"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "meetup": "https://www.meetup.com/takeahikedmv/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Pour House Trivia",
+    "description": "One of the largest trivia companies in the DC region with over 800 teams participating each week at dozens of bars and restaurants. Free to play with gift card prizes. Check their website for the full venue schedule.",
+    "category": ["Social", "Trivia"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://www.pourhousedc.com/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Soul Trak Outdoors",
+    "description": "A DC-based nonprofit organization that connects communities of color to outdoor spaces through hiking, climbing, and nature experiences. Meets monthly on the third Sunday at DC Bouldering Project.",
+    "category": ["Outdoors", "Social"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "schedules": [
+      {
+        "days": ["Sunday"],
+        "recurrence_type": "monthly",
+        "time": "4:00 PM - 7:00 PM",
+        "location": "DC Bouldering Project, 1200 Half St SE, Washington, DC 20003"
+      }
+    ],
+    "socials": {
+      "website": "https://boulderingproject.com/partners-page-eckington/"
+    },
+    "isPublic": true
   }
 ]

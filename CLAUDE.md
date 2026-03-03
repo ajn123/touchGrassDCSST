@@ -143,6 +143,22 @@ See `.env.example`. Key vars: `GOOGLE_MAPS_API_KEY`, `NEXT_PUBLIC_GOOGLE_MAPS_AP
 
 A daily Lambda cron (`generateMissingImagesCron`) also backfills real SVG placeholder images to S3 for any events without `image_url`, using `generateStyledEventSvgBuffer` from `@touchgrass/shared-utils`.
 
+## Groups
+
+`groups.json` contains curated community groups, run clubs, and social organizations in the DMV area. Groups are seeded into DynamoDB via `packages/scripts/src/seed-groups.ts`.
+
+**Data model**: Each group has `title`, `description`, `category[]`, `cost`, `socials`, optional `schedules[]`, and `isPublic: true`.
+
+**DynamoDB storage**:
+- `pk: "GROUP#<title>"`, `sk: "GROUP_INFO"` — main group metadata
+- `pk: "GROUP#<title>"`, `sk: "SCHEDULE#<day_time_location>"` — one item per schedule entry
+
+**Seeding**: `npm run shell tsx src/seed-groups.ts` (from `packages/scripts/`). The script checks for existing groups to avoid duplicates and sends items through Step Functions.
+
+**Categories**: Running, Sports, Social, Outdoors, Hiking, Cycling, Dating, LGBTQ+, Dance, Photography, Arts, Book Club, Board Games, Climbing, Fitness, Yoga, Education, Trivia, Volunteer
+
+**Frontend queries** (`packages/frontend/src/lib/dynamodb/dynamodb-groups.ts`): `getGroups()`, `getPublicGroups()`, `getGroupsByCategory()`, `searchGroups()`, `createGroup()`, `deleteGroup()`
+
 ## Conventions
 
 - TypeScript throughout; ES modules (`"type": "module"` in functions package)

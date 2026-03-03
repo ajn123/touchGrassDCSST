@@ -124,8 +124,8 @@ export default async function ArticlePage({
               Sources
             </h2>
             <p className="text-sm mb-3" style={{ color: "var(--text-tertiary)" }}>
-              This article was researched using real discussions from r/washingtondc
-              and Google Reviews.
+              This article was researched using real discussions from r/washingtondc,
+              r/nova, r/maryland, and Google Reviews.
             </p>
             <ul className="space-y-2">
               {article.sources.map((source, i) => (

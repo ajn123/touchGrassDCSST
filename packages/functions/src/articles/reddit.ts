@@ -1,6 +1,6 @@
 const REDDIT_BASE = "https://www.reddit.com";
 const USER_AGENT = "TouchGrassDC/1.0 (article-generator)";
-const SUBREDDIT = "washingtondc";
+const SUBREDDITS = ["washingtondc", "nova", "maryland"];
 
 export interface RedditPost {
   id: string;
@@ -26,17 +26,21 @@ export interface RedditContent {
 }
 
 /**
- * Search r/washingtondc for posts matching a query
+ * Search a single subreddit for posts matching a query
  */
-export async function fetchRedditPosts(query: string, limit = 10): Promise<RedditPost[]> {
-  const url = `${REDDIT_BASE}/r/${SUBREDDIT}/search.json?q=${encodeURIComponent(query)}&restrict_sr=1&sort=relevance&t=year&limit=${limit}`;
+export async function fetchRedditPostsFromSubreddit(
+  subreddit: string,
+  query: string,
+  limit = 10,
+): Promise<RedditPost[]> {
+  const url = `${REDDIT_BASE}/r/${subreddit}/search.json?q=${encodeURIComponent(query)}&restrict_sr=1&sort=relevance&t=year&limit=${limit}`;
 
   const response = await fetch(url, {
     headers: { "User-Agent": USER_AGENT },
   });
 
   if (!response.ok) {
-    console.warn(`Reddit search failed for "${query}": ${response.status}`);
+    console.warn(`Reddit search failed for r/${subreddit} "${query}": ${response.status}`);
     return [];
   }
 
@@ -60,17 +64,32 @@ export async function fetchRedditPosts(query: string, limit = 10): Promise<Reddi
 }
 
 /**
- * Fetch top comments from a Reddit post
+ * Search all DMV subreddits for posts matching a query
  */
-export async function fetchTopComments(postId: string, limit = 15): Promise<RedditComment[]> {
-  const url = `${REDDIT_BASE}/r/${SUBREDDIT}/comments/${postId}.json?sort=top&limit=${limit}`;
+export async function fetchRedditPosts(query: string, limit = 10): Promise<RedditPost[]> {
+  const allPosts: RedditPost[] = [];
+
+  for (const subreddit of SUBREDDITS) {
+    const posts = await fetchRedditPostsFromSubreddit(subreddit, query, limit);
+    allPosts.push(...posts);
+    await new Promise((r) => setTimeout(r, 500));
+  }
+
+  return allPosts;
+}
+
+/**
+ * Fetch top comments from a Reddit post using its permalink
+ */
+export async function fetchTopComments(permalink: string, limit = 15): Promise<RedditComment[]> {
+  const url = `${REDDIT_BASE}${permalink}.json?sort=top&limit=${limit}`;
 
   const response = await fetch(url, {
     headers: { "User-Agent": USER_AGENT },
   });
 
   if (!response.ok) {
-    console.warn(`Reddit comments failed for post ${postId}: ${response.status}`);
+    console.warn(`Reddit comments failed for ${permalink}: ${response.status}`);
     return [];
   }
 
@@ -119,7 +138,7 @@ export async function gatherRedditContent(queries: string[]): Promise<RedditCont
   const allComments: RedditComment[] = [];
 
   for (const post of topPosts) {
-    const comments = await fetchTopComments(post.id);
+    const comments = await fetchTopComments(post.permalink);
     allComments.push(...comments);
     await new Promise((r) => setTimeout(r, 500));
   }
@@ -165,5 +184,5 @@ export function formatRedditContentForPrompt(content: RedditContent): string {
     .map((c) => `- "${c.body.substring(0, 300)}" (${c.score} upvotes)`)
     .join("\n");
 
-  return `## Reddit Discussions from r/washingtondc\n\n${sections.join("\n\n")}\n\n## Top Comments\n${commentBlock}`;
+  return `## Reddit Discussions from r/washingtondc, r/nova, and r/maryland\n\n${sections.join("\n\n")}\n\n## Top Comments\n${commentBlock}`;
 }

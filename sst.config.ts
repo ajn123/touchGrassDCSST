@@ -21,6 +21,7 @@ export default $config({
     const { auth } = await import("./infra/auth");
     const { queue } = await import("./infra/queue");
     const {
+      articleGenerationCron,
       cron,
       washingtonianCron,
       copyProdToDevCron,
@@ -71,6 +72,7 @@ export default $config({
       meetupdcCron: meetupdcCron,
       dcsportsCron: dcsportsCron,
       generateMissingImagesCron: generateMissingImagesCron,
+      articleGenerationCron: articleGenerationCron,
       NormalizeEventStepFunction: normalizeEventStepFunction,
     };
   },

@@ -1,7 +1,7 @@
 import { api } from "./api";
 import { db } from "./db";
 import { EmailConfig } from "./email";
-import { OPENROUTER_API_KEY, OPENWEBNINJA_API_KEY } from "./secrets";
+import { GOOGLE_MAPS_API_KEY, OPENROUTER_API_KEY, OPENWEBNINJA_API_KEY } from "./secrets";
 import { normalizeEventStepFunction } from "./step_functions";
 import { bucket } from "./storage";
 import {
@@ -94,7 +94,17 @@ const newsletterCron = new sst.aws.Cron("newsletterCron", {
   schedule: "cron(0 14 ? * THU *)", // Every Thursday at 10 AM EST (14:00 UTC)
 });
 
+const articleGenerationCron = new sst.aws.Cron("articleGenerationCron", {
+  function: {
+    handler: "packages/functions/src/articles/generateArticle.handler",
+    link: [db, OPENROUTER_API_KEY, GOOGLE_MAPS_API_KEY],
+    timeout: "5 minutes",
+  },
+  schedule: "cron(0 10 ? * MON *)", // Every Monday at 6 AM EST (10:00 UTC)
+});
+
 export {
+  articleGenerationCron,
   clockoutdcCron,
   copyProdToDevCron,
   cron,

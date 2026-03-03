@@ -1594,6 +1594,53 @@ export class TouchGrassDynamoDB {
       return {};
     }
   }
+
+  // ============================================================================
+  // PRODUCT OPERATIONS
+  // ============================================================================
+
+  async getProducts(): Promise<any[]> {
+    try {
+      const command = new QueryCommand({
+        TableName: this.tableName,
+        IndexName: "publicEventsIndex",
+        KeyConditionExpression: "#isPublic = :isPublic",
+        FilterExpression: "begins_with(#pk, :productPrefix)",
+        ExpressionAttributeNames: {
+          "#isPublic": "isPublic",
+          "#pk": "pk",
+        },
+        ExpressionAttributeValues: {
+          ":isPublic": { S: "true" },
+          ":productPrefix": { S: "PRODUCT#" },
+        },
+      });
+
+      const result = await this.client.send(command);
+      return result.Items?.map((item) => unmarshall(item)) || [];
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      return [];
+    }
+  }
+
+  async getProductBySlug(slug: string): Promise<any | null> {
+    try {
+      const command = new GetItemCommand({
+        TableName: this.tableName,
+        Key: {
+          pk: { S: `PRODUCT#${slug}` },
+          sk: { S: `PRODUCT#${slug}` },
+        },
+      });
+
+      const result = await this.client.send(command);
+      return result.Item ? unmarshall(result.Item) : null;
+    } catch (error) {
+      console.error("Error fetching product by slug:", error);
+      return null;
+    }
+  }
 }
 
 // ============================================================================

@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npx sst:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "WebFetch(domain:www.dcimprov.com)",
+      "Bash(npx vitest:*)",
+      "Bash(npm run:*)",
+      "WebSearch",
+      "WebFetch(domain:developer.wmata.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(sst shell:*)",
+      "Bash(npx tsc:*)",
+      "WebFetch(domain:www.dccomedyloft.com)",
+      "WebFetch(domain:www.amazon.com)",
+      "Bash(pip3 install:*)",
+      "Bash(mkdir:*)",
+      "Bash(pio run:*)"
+    ]
+  }
+}

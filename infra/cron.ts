@@ -9,6 +9,7 @@ import {
   DCComedyLoftTask,
   DCImprovTask,
   EventbriteTask,
+  KennedyCenterTask,
   WashingtonianTask,
 } from "./tasks";
 
@@ -61,6 +62,20 @@ const copyProdToDevCron = new sst.aws.Cron("copyProdToDevCron", {
   schedule: "cron(0 2 * * ? *)", // Daily at 2 AM UTC (10 PM EST previous day)
 });
 
+const dcSportsCron = new sst.aws.Cron("dcSportsCron", {
+  function: {
+    handler: "packages/functions/src/events/dcsports.handler",
+    link: [db, normalizeEventStepFunction],
+    timeout: "2 minutes",
+  },
+  schedule: "rate(1 day)",
+});
+
+const kennedyCenterCron = new sst.aws.Cron("kennedyCenterCron", {
+  task: KennedyCenterTask,
+  schedule: "rate(7 days)",
+});
+
 const generateMissingImagesCron = new sst.aws.Cron("generateMissingImagesCron", {
   function: {
     handler: "packages/functions/src/events/generateMissingImages.handler",
@@ -85,8 +100,10 @@ export {
   cron,
   dccomedyloftCron,
   dcimprovCron,
+  dcSportsCron,
   eventbriteCron,
   generateMissingImagesCron,
+  kennedyCenterCron,
   newsletterCron,
   washingtonianCron,
 };

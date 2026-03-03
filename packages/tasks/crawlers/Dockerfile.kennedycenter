@@ -1,0 +1,31 @@
+FROM apify/actor-node-puppeteer-chrome:20
+
+# Switch to root for package installation
+USER root
+
+# Install additional dependencies if needed
+RUN apt-get update && apt-get install -y \
+    curl \
+    procps \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create app directory
+WORKDIR /app
+
+# Copy crawler package.json to install dependencies
+COPY packages/tasks/crawlers/package.json ./package.json
+
+# Install dependencies
+RUN npm install
+
+# Install playwright globally (crawlee uses playwright)
+RUN npm install -g playwright
+
+# Install Playwright browsers
+RUN npx playwright install chromium
+
+# Copy the crawler code
+COPY packages/tasks/crawlers/kennedycenter.ts ./
+
+# Set default command to run the Kennedy Center crawler
+CMD ["npx", "tsx", "./kennedycenter.ts"]

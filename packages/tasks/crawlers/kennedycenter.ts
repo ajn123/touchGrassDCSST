@@ -2,7 +2,99 @@ import { SFNClient, StartExecutionCommand } from "@aws-sdk/client-sfn";
 import { PlaywrightCrawler } from "crawlee";
 import { Resource } from "sst";
 
-class KennedyCenterEvent {
+// ============================================================================
+// EXPORTED PARSING UTILITIES (testable without Playwright)
+// ============================================================================
+
+export function parseDate(dateStr: string): string {
+  try {
+    if (!dateStr) return "";
+    const cleaned = dateStr.trim();
+
+    // Handle "March 15, 2026" or "Mar 15, 2026"
+    const fullDateMatch = cleaned.match(
+      /(\w+)\s+(\d{1,2})(?:,?\s*(\d{4}))?/i
+    );
+    if (fullDateMatch) {
+      const monthNames: Record<string, string> = {
+        january: "01", february: "02", march: "03", april: "04",
+        may: "05", june: "06", july: "07", august: "08",
+        september: "09", october: "10", november: "11", december: "12",
+        jan: "01", feb: "02", mar: "03", apr: "04",
+        jun: "06", jul: "07", aug: "08", sep: "09", oct: "10", nov: "11", dec: "12",
+      };
+      const month = monthNames[fullDateMatch[1].toLowerCase()];
+      if (month) {
+        const day = String(parseInt(fullDateMatch[2])).padStart(2, "0");
+        const today = new Date();
+        const year = fullDateMatch[3] || today.getFullYear().toString();
+        const parsedDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        // If date is in the past and no year specified, try next year
+        if (parsedDate < today && !fullDateMatch[3]) {
+          return `${today.getFullYear() + 1}-${month}-${day}`;
+        }
+        return `${year}-${month}-${day}`;
+      }
+    }
+
+    // Handle ISO format
+    const isoMatch = cleaned.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if (isoMatch) return isoMatch[0];
+
+    return "";
+  } catch (error) {
+    console.error("Error parsing date:", error);
+    return "";
+  }
+}
+
+export function parseTime(timeStr: string): string | undefined {
+  if (!timeStr) return undefined;
+  const cleaned = timeStr.trim().toLowerCase();
+
+  // Handle "7:30 PM" or "7:30pm"
+  const timeMatch = cleaned.match(/(\d{1,2}(?::\d{2})?)\s*([ap]m)/i);
+  if (timeMatch) return `${timeMatch[1]}${timeMatch[2]}`;
+
+  // Handle 24-hour format
+  const time24Match = cleaned.match(/(\d{1,2}):(\d{2})/);
+  if (time24Match) {
+    const hour = parseInt(time24Match[1]);
+    const minute = time24Match[2];
+    const ampm = hour >= 12 ? "pm" : "am";
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minute}${ampm}`;
+  }
+
+  return undefined;
+}
+
+export function parsePrice(text: string): string | undefined {
+  if (!text) return undefined;
+  const lower = text.toLowerCase().trim();
+  if (/(^|\b)free(\b|$)/.test(lower)) return "free";
+  const money = text.match(/\$\s*([0-9]+(?:\.[0-9]{2})?)/);
+  if (money) return money[1];
+  return undefined;
+}
+
+export function mapCategory(category: string): string {
+  const lowerCat = category.toLowerCase();
+  if (lowerCat.includes("comedy")) return "Comedy";
+  // Check "musical" before "music" since "musical" contains "music"
+  if (lowerCat.includes("theater") || lowerCat.includes("theatre") || lowerCat.includes("musical") || lowerCat.includes("play")) return "Theater";
+  if (lowerCat.includes("jazz") || lowerCat.includes("music") || lowerCat.includes("concert") || lowerCat.includes("orchestra") || lowerCat.includes("symphony")) return "Music";
+  if (lowerCat.includes("dance") || lowerCat.includes("ballet")) return "Arts";
+  if (lowerCat.includes("family") || lowerCat.includes("kids")) return "Community";
+  if (lowerCat.includes("film")) return "Arts";
+  return "Arts";
+}
+
+// ============================================================================
+// EVENT CLASS
+// ============================================================================
+
+export class KennedyCenterEvent {
   title: string;
   date: string;
   time?: string;
@@ -39,92 +131,13 @@ class KennedyCenterEvent {
   }
 }
 
+// ============================================================================
+// CRAWLER CLASS
+// ============================================================================
+
 class KennedyCenterCrawler {
   private events: KennedyCenterEvent[] = [];
   private readonly MAX_EVENTS = 50;
-
-  private parseDate(dateStr: string): string {
-    try {
-      if (!dateStr) return "";
-      const cleaned = dateStr.trim();
-
-      // Handle "March 15, 2026" or "Mar 15, 2026"
-      const fullDateMatch = cleaned.match(
-        /(\w+)\s+(\d{1,2})(?:,?\s*(\d{4}))?/i
-      );
-      if (fullDateMatch) {
-        const monthNames: Record<string, string> = {
-          january: "01", february: "02", march: "03", april: "04",
-          may: "05", june: "06", july: "07", august: "08",
-          september: "09", october: "10", november: "11", december: "12",
-          jan: "01", feb: "02", mar: "03", apr: "04",
-          jun: "06", jul: "07", aug: "08", sep: "09", oct: "10", nov: "11", dec: "12",
-        };
-        const month = monthNames[fullDateMatch[1].toLowerCase()];
-        if (month) {
-          const day = String(parseInt(fullDateMatch[2])).padStart(2, "0");
-          const today = new Date();
-          const year = fullDateMatch[3] || today.getFullYear().toString();
-          const parsedDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-          // If date is in the past and no year specified, try next year
-          if (parsedDate < today && !fullDateMatch[3]) {
-            return `${today.getFullYear() + 1}-${month}-${day}`;
-          }
-          return `${year}-${month}-${day}`;
-        }
-      }
-
-      // Handle ISO format
-      const isoMatch = cleaned.match(/(\d{4})-(\d{2})-(\d{2})/);
-      if (isoMatch) return isoMatch[0];
-
-      return "";
-    } catch (error) {
-      console.error("Error parsing date:", error);
-      return "";
-    }
-  }
-
-  private parseTime(timeStr: string): string | undefined {
-    if (!timeStr) return undefined;
-    const cleaned = timeStr.trim().toLowerCase();
-
-    // Handle "7:30 PM" or "7:30pm"
-    const timeMatch = cleaned.match(/(\d{1,2}(?::\d{2})?)\s*([ap]m)/i);
-    if (timeMatch) return `${timeMatch[1]}${timeMatch[2]}`;
-
-    // Handle 24-hour format
-    const time24Match = cleaned.match(/(\d{1,2}):(\d{2})/);
-    if (time24Match) {
-      const hour = parseInt(time24Match[1]);
-      const minute = time24Match[2];
-      const ampm = hour >= 12 ? "pm" : "am";
-      const hour12 = hour % 12 || 12;
-      return `${hour12}:${minute}${ampm}`;
-    }
-
-    return undefined;
-  }
-
-  private parsePrice(text: string): string | undefined {
-    if (!text) return undefined;
-    const lower = text.toLowerCase().trim();
-    if (/(^|\b)free(\b|$)/.test(lower)) return "free";
-    const money = text.match(/\$\s*([0-9]+(?:\.[0-9]{2})?)/);
-    if (money) return money[1];
-    return undefined;
-  }
-
-  private mapCategory(category: string): string {
-    const lowerCat = category.toLowerCase();
-    if (lowerCat.includes("comedy")) return "Comedy";
-    if (lowerCat.includes("jazz") || lowerCat.includes("music") || lowerCat.includes("concert") || lowerCat.includes("orchestra") || lowerCat.includes("symphony")) return "Music";
-    if (lowerCat.includes("theater") || lowerCat.includes("theatre") || lowerCat.includes("play") || lowerCat.includes("musical")) return "Theater";
-    if (lowerCat.includes("dance") || lowerCat.includes("ballet")) return "Arts";
-    if (lowerCat.includes("family") || lowerCat.includes("kids")) return "Community";
-    if (lowerCat.includes("film")) return "Arts";
-    return "Arts";
-  }
 
   async crawlEvents(): Promise<KennedyCenterEvent[]> {
     console.log("Starting Kennedy Center event crawl with Playwright...");
@@ -143,7 +156,7 @@ class KennedyCenterCrawler {
             waitUntil: "networkidle",
             timeout: 60000,
           });
-          // Wait longer for React SPA to hydrate
+          // Wait for page to hydrate
           await page.waitForTimeout(5000);
 
           // Debug: log page title and link count
@@ -190,36 +203,28 @@ class KennedyCenterCrawler {
             const extractedEvents: any[] = [];
             const seenUrls = new Set<string>();
 
-            // Find all links to event detail pages
             const eventLinks = Array.from(document.querySelectorAll('a[href*="/whats-on/"]'));
-            console.log(`[DEBUG] Found ${eventLinks.length} links matching /whats-on/`);
 
             for (const link of eventLinks) {
               const href = link.getAttribute("href") || "";
-              // Skip navigation/category links, only want detail pages with multiple path segments
               const pathSegments = href.replace(/^https?:\/\/[^/]+/, "").split("/").filter(Boolean);
-              if (pathSegments.length < 3) continue; // e.g. /whats-on/explore/ is too short
+              if (pathSegments.length < 3) continue;
 
               const fullUrl = href.startsWith("http") ? href : `https://www.kennedy-center.org${href}`;
               if (seenUrls.has(fullUrl)) continue;
               seenUrls.add(fullUrl);
 
-              // Get the containing card/parent element for context
               const container = link.closest("li, article, section, div") || link;
 
-              // Extract title: prefer heading inside the link or container
               const titleEl = link.querySelector("h1, h2, h3, h4, h5") ||
                 container.querySelector("h1, h2, h3, h4, h5");
               let title = titleEl?.textContent?.trim() || link.textContent?.trim() || "";
-              // Clean up excessive whitespace
               title = title.replace(/\s+/g, " ").trim();
               if (!title || title.length < 3 || title.length > 200) continue;
 
-              // Extract date from <time> elements or datetime attributes
               const timeEl = container.querySelector("time") || link.querySelector("time");
               let dateText = timeEl?.getAttribute("datetime") || timeEl?.textContent?.trim() || "";
 
-              // Also check for date-like text in the container
               if (!dateText) {
                 const containerText = container.textContent || "";
                 const dateMatch = containerText.match(
@@ -228,15 +233,12 @@ class KennedyCenterCrawler {
                 if (dateMatch) dateText = dateMatch[0];
               }
 
-              // Extract image
               const imgEl = container.querySelector("img") || link.querySelector("img");
               const imageUrl = imgEl?.getAttribute("src") || imgEl?.getAttribute("data-src") || "";
 
-              // Extract description
               const descEl = container.querySelector("p");
               const description = descEl?.textContent?.trim()?.substring(0, 300) || "";
 
-              // Extract category/genre
               const categoryEl = container.querySelector("[class*='genre'], [class*='category'], [class*='type'], span");
               const category = categoryEl?.textContent?.trim() || "";
 
@@ -257,7 +259,7 @@ class KennedyCenterCrawler {
 
           console.log(`[Links] Found ${linkEvents.length} events from page links`);
 
-          // Scroll to load lazy content and try again if few results
+          // Scroll to load lazy content if few results
           if (linkEvents.length < 5) {
             console.log("[DEBUG] Few events found, scrolling to load more...");
             for (let i = 0; i < 8; i++) {
@@ -281,7 +283,7 @@ class KennedyCenterCrawler {
           for (const e of allRawEvents) {
             if (this.events.length >= this.MAX_EVENTS) break;
 
-            const parsedDate = this.parseDate(e.date);
+            const parsedDate = parseDate(e.date);
             if (!parsedDate) continue;
 
             // Skip past events
@@ -291,17 +293,17 @@ class KennedyCenterCrawler {
             // Skip duplicates
             if (this.events.some((existing) => existing.title === e.title && existing.date === parsedDate)) continue;
 
-            const category = this.mapCategory(e.category || "Arts");
+            const category = mapCategory(e.category || "Arts");
 
             const event = new KennedyCenterEvent(
               e.title,
               parsedDate,
-              this.parseTime(e.time),
+              parseTime(e.time),
               e.location || "2700 F Street NW, Washington, DC 20566",
               e.description,
               e.url,
               category,
-              this.parsePrice(e.price),
+              parsePrice(e.price),
               "Kennedy Center",
               e.image_url
             );
@@ -312,7 +314,6 @@ class KennedyCenterCrawler {
           console.log(`Found ${this.events.length} total events after filtering`);
         } catch (error) {
           console.error("Error extracting events:", error);
-          // Save debug screenshot on failure
           try {
             await page.screenshot({ path: "/tmp/kc-debug.png", fullPage: true });
             console.log("[DEBUG] Screenshot saved to /tmp/kc-debug.png");
@@ -426,15 +427,12 @@ class KennedyCenterCrawler {
   }
 }
 
-async function main() {
+// Only run when executed directly (not when imported by tests)
+const isMainModule = typeof process !== "undefined" && process.argv[1]?.endsWith("kennedycenter.ts");
+if (isMainModule) {
   const crawler = new KennedyCenterCrawler();
-  try {
-    await crawler.run();
-    process.exit(0);
-  } catch (error) {
+  crawler.run().then(() => process.exit(0)).catch((error) => {
     console.error("Kennedy Center Crawler failed:", error);
     process.exit(1);
-  }
+  });
 }
-
-main();

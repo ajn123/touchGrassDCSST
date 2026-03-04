@@ -159,6 +159,34 @@ A daily Lambda cron (`generateMissingImagesCron`) also backfills real SVG placeh
 
 **Frontend queries** (`packages/frontend/src/lib/dynamodb/dynamodb-groups.ts`): `getGroups()`, `getPublicGroups()`, `getGroupsByCategory()`, `searchGroups()`, `createGroup()`, `deleteGroup()`
 
+## SEO & AI Indexing
+
+**Root layout** (`packages/frontend/src/app/layout.tsx`):
+- `metadataBase: new URL("https://touchgrassdc.com")` — resolves all relative OG image URLs
+- `title.template: "%s | TouchGrass DC"` — child pages only set `title: "Page Name"`, layout appends `| TouchGrass DC`
+- Default OG, Twitter Card, and robots config inherited by all pages
+
+**Dynamic metadata** (via `generateMetadata()`):
+- Event detail pages — title, description, OG image from event data + `Event` JSON-LD schema
+- Group detail pages — title, description, OG from group data + `Organization` JSON-LD schema
+- Article detail pages — title, excerpt, OG image, published time + `Article` JSON-LD schema
+
+**Static metadata** (via `export const metadata`):
+- Homepage, articles listing, groups listing, comedy, about pages
+
+**Structured data** (JSON-LD `<script type="application/ld+json">`):
+- Homepage: `WebSite` + `SearchAction` schema
+- Events: `Event` schema (name, startDate, location, offers)
+- Groups: `Organization` schema (name, description, address)
+- Articles: `Article` schema (headline, datePublished, author, publisher)
+
+**Discovery files**:
+- `sitemap.ts` — dynamic sitemap with all events, articles, groups, and static pages
+- `robots.ts` — allows crawling, blocks `/admin`, `/api/`, `/auth/`
+- `public/llms.txt` — AI model indexing file describing site content and structure
+
+**When adding new pages**: Add `export const metadata: Metadata` (static pages) or `export async function generateMetadata()` (dynamic pages). For detail pages with rich content, add JSON-LD structured data using the appropriate schema.org type.
+
 ## Conventions
 
 - TypeScript throughout; ES modules (`"type": "module"` in functions package)

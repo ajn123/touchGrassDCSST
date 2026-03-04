@@ -2,6 +2,50 @@ import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
 import { NextRequest, NextResponse } from "next/server";
 import { Resource } from "sst";
 
+/**
+ * Round-robin pick events across categories so the user sees variety.
+ * Events within each category keep their original order (score or date).
+ */
+function diversifyByCategory(events: any[], limit: number): any[] {
+  // Group by primary category
+  const buckets = new Map<string, any[]>();
+  for (const event of events) {
+    const cat = Array.isArray(event.category)
+      ? event.category[0] || "General"
+      : event.category || "General";
+    if (!buckets.has(cat)) buckets.set(cat, []);
+    buckets.get(cat)!.push(event);
+  }
+
+  // Round-robin across categories
+  const result: any[] = [];
+  const seen = new Set<string>();
+  const categoryQueues = Array.from(buckets.values());
+  const indices = new Array(categoryQueues.length).fill(0);
+
+  while (result.length < limit) {
+    let added = false;
+    for (let i = 0; i < categoryQueues.length; i++) {
+      if (result.length >= limit) break;
+      const queue = categoryQueues[i];
+      while (indices[i] < queue.length) {
+        const event = queue[indices[i]];
+        indices[i]++;
+        const id = event.pk || event.title;
+        if (!seen.has(id)) {
+          seen.add(id);
+          result.push(event);
+          added = true;
+          break;
+        }
+      }
+    }
+    if (!added) break; // All categories exhausted
+  }
+
+  return result;
+}
+
 interface RecommendationRequest {
   categoryPreferences?: string[];
   clickHistory?: { eventId: string; category?: string }[];
@@ -34,14 +78,14 @@ export async function POST(request: NextRequest) {
       allCategorySignals.length > 0 || clickHistory.length > 0;
 
     if (!hasPersonalization) {
-      // No user signals yet — return upcoming events sorted by date as a fallback
+      // No user signals yet — return a diverse mix of upcoming events
       const upcomingAll = await db.getCurrentAndFutureEvents();
       const today = new Date().toISOString().split("T")[0];
       const upcoming = upcomingAll
         .filter((e) => e.start_date && e.start_date >= today)
-        .sort((a, b) => (a.start_date || "").localeCompare(b.start_date || ""))
-        .slice(0, limit);
-      return NextResponse.json({ events: upcoming, hasPersonalization: false });
+        .sort((a, b) => (a.start_date || "").localeCompare(b.start_date || ""));
+      const diverse = diversifyByCategory(upcoming, limit);
+      return NextResponse.json({ events: diverse, hasPersonalization: false });
     }
 
     // Fetch events for each preferred category and merge
@@ -134,7 +178,8 @@ export async function POST(request: NextRequest) {
       return (a.start_date || "").localeCompare(b.start_date || "");
     });
 
-    const topEvents = scored.slice(0, limit);
+    // Diversify across categories — round-robin so the user sees variety
+    const topEvents = diversifyByCategory(scored, limit);
 
     return NextResponse.json({
       events: topEvents,

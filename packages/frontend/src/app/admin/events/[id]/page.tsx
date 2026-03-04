@@ -1,6 +1,7 @@
 "use client";
 
 import { useUser } from "@/contexts/UserContext";
+import { isAdminEmail } from "@/lib/admin-utils";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -31,14 +32,7 @@ export default function AdminEventDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
-  // Check if user is admin
-  const isAdmin =
-    user?.email &&
-    [
-      "hi@touchgrassdc.com",
-      "hello@touchgrassdc.com",
-      "admin@example.com",
-    ].includes(user.email.toLowerCase());
+  const isAdmin = isAdminEmail(user?.email);
 
   useEffect(() => {
     if (!loading && !user) {

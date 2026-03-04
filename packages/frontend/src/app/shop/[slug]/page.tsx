@@ -3,12 +3,48 @@ import { ShopPageTracker } from "@/components/ShopPageTracker";
 import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
 import { resolveImageUrl, shouldBeUnoptimized } from "@/lib/image-utils";
 import type { Product } from "@/lib/shop-types";
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Resource } from "sst";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const db = new TouchGrassDynamoDB(Resource.Db.name);
+  const product = (await db.getProductBySlug(slug)) as Product | null;
+
+  if (!product) {
+    return { title: "Product Not Found" };
+  }
+
+  const description = product.description
+    ? product.description.substring(0, 160)
+    : `${product.title} — available at TouchGrass DC Shop`;
+
+  return {
+    title: product.title,
+    description,
+    openGraph: {
+      title: product.title,
+      description,
+      url: `https://touchgrassdc.com/shop/${product.slug}`,
+      siteName: "TouchGrass DC",
+      images: product.image_url ? [{ url: product.image_url }] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.title,
+      description,
+    },
+  };
+}
 
 export default async function ProductDetailPage({
   params,

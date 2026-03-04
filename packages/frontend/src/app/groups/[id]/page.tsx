@@ -9,6 +9,7 @@ import {
   transformSchedulesForDisplay,
 } from "@/lib/dynamodb/dynamodb-groups";
 import { ShareButton } from "@/components/ShareButton";
+import { isAdminEmail } from "@/lib/admin-utils";
 import { resolveImageUrl } from "@/lib/image-utils";
 import type { Metadata } from "next";
 
@@ -32,6 +33,12 @@ export async function generateMetadata({
     ? group.description.substring(0, 160).replace(/<[^>]*>/g, "")
     : `${group.title} — a community group in the DC area. ${categories}`;
 
+  const imageUrl = resolveImageUrl(
+    group.image_url,
+    Array.isArray(group.category) ? group.category[0] : group.category,
+    group.title,
+  );
+
   return {
     title: group.title,
     description,
@@ -40,6 +47,7 @@ export async function generateMetadata({
       description,
       url: `https://touchgrassdc.com/groups/${encodeURIComponent(group.title)}`,
       siteName: "TouchGrass DC",
+      images: imageUrl && !imageUrl.startsWith("data:") ? [{ url: imageUrl }] : [],
     },
     twitter: {
       card: "summary",
@@ -57,18 +65,8 @@ export default async function GroupPage({
   const user = await auth();
   const awaitedParams = await params;
 
-  // Check if user is admin
-  const isAdmin =
-    user &&
-    user.properties &&
-    user.properties.id &&
-    [
-      "hi@touchgrassdc.com",
-      "hello@touchgrassdc.com",
-      "admin@example.com",
-    ].includes(user.properties.id.toLowerCase());
+  const isAdmin = isAdminEmail(user?.properties?.id);
 
-  //console.log("🔍 Group ID:", decodeURIComponent(awaitedParams.id));
   const groupTitle = decodeURIComponent(awaitedParams.id);
   const group = await getGroup(groupTitle);
 
@@ -89,10 +87,6 @@ export default async function GroupPage({
     console.log("🔍 Using fallback schedules from group data");
     transformedSchedules = group.schedules;
   }
-
-  // console.log("🔍 Group:", group);
-  // console.log("🔍 Schedules:", groupSchedules);
-  // console.log("🔍 Transformed Schedules:", transformedSchedules);
 
   if (!group) {
     return (

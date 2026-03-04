@@ -1,4 +1,17 @@
 import { AddEventForm } from "@/components/AddEventForm";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Submit an Event",
+  description:
+    "Share your event with the DC community. Add concerts, meetups, sports, and more to TouchGrass DC.",
+  openGraph: {
+    title: "Submit an Event | TouchGrass DC",
+    description:
+      "Share your event with the Washington DC community.",
+    url: "https://touchgrassdc.com/add-event",
+  },
+};
 
 export default function AddEventPage() {
   return (

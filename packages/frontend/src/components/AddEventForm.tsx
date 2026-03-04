@@ -1,6 +1,7 @@
 "use client";
 
 import { useUser } from "@/contexts/UserContext";
+import { isAdminEmail } from "@/lib/admin-utils";
 import { useEffect, useState } from "react";
 import { ImageUploadWithState } from "./ImageUploadWithState";
 
@@ -63,15 +64,7 @@ export function AddEventForm() {
 
   const { user } = useUser();
 
-  console.log("user", user);
-  // Check if user is admin based on allowed emails
-  const isAdmin =
-    user?.email &&
-    [
-      "hi@touchgrassdc.com",
-      "hello@touchgrassdc.com",
-      "admin@example.com", // Replace with actual admin email
-    ].includes(user.email.toLowerCase());
+  const isAdmin = isAdminEmail(user?.email);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};

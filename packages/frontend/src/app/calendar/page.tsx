@@ -1,4 +1,17 @@
 import MonthlyCalendar from "@/components/MonthlyCalendar";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Event Calendar",
+  description:
+    "Browse Washington DC events by month. Find concerts, comedy, theater, sports, and community events on our interactive calendar.",
+  openGraph: {
+    title: "Event Calendar | TouchGrass DC",
+    description:
+      "Browse DC events organized by date. Find something to do every day.",
+    url: "https://touchgrassdc.com/calendar",
+  },
+};
 
 export default function CalendarPage() {
   return (

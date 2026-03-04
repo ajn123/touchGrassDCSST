@@ -19,14 +19,7 @@ export const metadata: Metadata = {
 };
 
 export default async function GroupsPage() {
-  // Use getPublicGroups which filters at the database level
   const publicGroups = await getPublicGroups();
-
-  console.log(`📊 Groups page: Found ${publicGroups.length} public groups`);
-  console.log(
-    `📊 Groups page: Group titles:`,
-    publicGroups.map((g) => g.title)
-  );
 
   return <GroupsClient groups={publicGroups as any} />;
 }

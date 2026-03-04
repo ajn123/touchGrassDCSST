@@ -7,6 +7,7 @@ import { EventPageTracker } from "@/components/EventPageTracker";
 import EventMap from "@/components/EventMap";
 import { ReportWrongInfoButton } from "@/components/ReportWrongInfoButton";
 import { ShareButton } from "@/components/ShareButton";
+import { isAdminEmail } from "@/lib/admin-utils";
 import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
 import { resolveImageUrl } from "@/lib/image-utils";
 import type { Metadata } from "next";
@@ -69,16 +70,7 @@ export default async function ItemPage({
   const user = await auth();
   const awaitedParams = await params;
 
-  // Check if user is admin
-  const isAdmin =
-    user &&
-    user.properties &&
-    user.properties.id &&
-    [
-      "hi@touchgrassdc.com",
-      "hello@touchgrassdc.com",
-      "admin@example.com",
-    ].includes(user.properties.id.toLowerCase());
+  const isAdmin = isAdminEmail(user?.properties?.id);
 
   const WHITELIST: any = [];
 

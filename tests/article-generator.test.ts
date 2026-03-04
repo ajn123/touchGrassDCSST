@@ -51,16 +51,16 @@ describe("Article Topics", () => {
 });
 
 describe("getUnsplashSearchUrl", () => {
-  it("returns a URL with the query encoded", () => {
+  it("returns a seeded picsum URL with the query as seed", () => {
     const url = getUnsplashSearchUrl("coffee shop latte");
-    expect(url).toContain("source.unsplash.com");
-    expect(url).toContain("1200x630");
-    expect(url).toContain("coffee%20shop%20latte");
+    expect(url).toContain("picsum.photos/seed/");
+    expect(url).toContain("1200/630");
+    expect(url).toContain("coffee-shop-latte");
   });
 
-  it("encodes special characters", () => {
+  it("converts special characters to hyphens", () => {
     const url = getUnsplashSearchUrl("food & drink");
-    expect(url).toContain("food%20%26%20drink");
+    expect(url).toContain("food---drink");
   });
 
   it("returns consistent results for same query", () => {
@@ -311,6 +311,7 @@ describe("buildPrompt", () => {
     title: "Best Coffee Shops in DC",
     redditQueries: ["best coffee DC"],
     googlePlacesQuery: "best coffee shops Washington DC",
+    coverImageQuery: "coffee shop latte",
     promptContext: "Focus on independent shops.",
     category: "Food & Drink",
   };

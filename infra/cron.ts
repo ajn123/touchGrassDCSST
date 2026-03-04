@@ -94,6 +94,15 @@ const newsletterCron = new sst.aws.Cron("newsletterCron", {
   schedule: "cron(0 14 ? * THU *)", // Every Thursday at 10 AM EST (14:00 UTC)
 });
 
+const dailyAnalyticsCron = new sst.aws.Cron("dailyAnalyticsCron", {
+  function: {
+    handler: "packages/functions/src/analytics/dailyReport.handler",
+    link: [db, EmailConfig],
+    timeout: "2 minutes",
+  },
+  schedule: "cron(0 13 * * ? *)", // Daily at 8 AM EST (13:00 UTC)
+});
+
 const articleGenerationCron = new sst.aws.Cron("articleGenerationCron", {
   function: {
     handler: "packages/functions/src/articles/generateArticle.handler",
@@ -108,6 +117,7 @@ export {
   clockoutdcCron,
   copyProdToDevCron,
   cron,
+  dailyAnalyticsCron,
   dccomedyloftCron,
   dcimprovCron,
   dcSportsCron,

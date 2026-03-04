@@ -23,6 +23,7 @@ export default $config({
     const {
       articleGenerationCron,
       cron,
+      dailyAnalyticsCron,
       washingtonianCron,
       copyProdToDevCron,
       kennedycenterCron,
@@ -51,6 +52,7 @@ export default $config({
       Cron: cron,
       washingtonianCron: washingtonianCron,
       ...(copyProdToDevCron && { copyProdToDevCron }),
+      dailyAnalyticsCron: dailyAnalyticsCron,
       newsletterCron: newsletterCron,
       Api: api,
       Bucket: bucket,

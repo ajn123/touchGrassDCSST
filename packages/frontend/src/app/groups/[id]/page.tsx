@@ -8,6 +8,7 @@ import {
   GroupSchedule,
   transformSchedulesForDisplay,
 } from "@/lib/dynamodb/dynamodb-groups";
+import { ShareButton } from "@/components/ShareButton";
 import { resolveImageUrl } from "@/lib/image-utils";
 import type { Metadata } from "next";
 
@@ -158,6 +159,13 @@ export default async function GroupPage({
       {/* Public View - Enhanced display */}
       <EntityDetail
         title={group.title}
+        rightActionNode={
+          <ShareButton
+            title={group.title}
+            text={`Check out ${group.title} on TouchGrass DC`}
+            url={`https://touchgrassdc.com/groups/${encodeURIComponent(group.title)}`}
+          />
+        }
         imageUrl={resolveImageUrl(group.image_url) || undefined}
         cost={group.cost}
         socials={group.socials}

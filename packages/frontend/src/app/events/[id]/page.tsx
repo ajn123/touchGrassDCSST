@@ -6,6 +6,7 @@ import { EntityDetail } from "@/components/EntityDetail";
 import { EventPageTracker } from "@/components/EventPageTracker";
 import EventMap from "@/components/EventMap";
 import { ReportWrongInfoButton } from "@/components/ReportWrongInfoButton";
+import { ShareButton } from "@/components/ShareButton";
 import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
 import { resolveImageUrl } from "@/lib/image-utils";
 import type { Metadata } from "next";
@@ -188,7 +189,14 @@ export default async function ItemPage({
       <EntityDetail
         title={item.title}
         rightActionNode={
-          <ReportWrongInfoButton eventTitle={item.title} eventId={item.pk} />
+          <div className="flex gap-2 flex-wrap">
+            <ShareButton
+              title={item.title}
+              text={`Check out ${item.title} on TouchGrass DC`}
+              url={`https://touchgrassdc.com/events/${encodeURIComponent(awaitedParams.id)}`}
+            />
+            <ReportWrongInfoButton eventTitle={item.title} eventId={item.pk} />
+          </div>
         }
         imageUrl={resolveImageUrl(item.image_url)}
         cost={item.cost}

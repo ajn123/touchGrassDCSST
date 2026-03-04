@@ -1,4 +1,5 @@
 import ArticleCard from "@/components/ArticleCard";
+import { ShareButton } from "@/components/ShareButton";
 import { getArticle, getArticles } from "@/lib/dynamodb/dynamodb-articles";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -180,11 +181,16 @@ export default async function ArticlePage({
           </div>
 
           <h1
-            className="text-3xl md:text-4xl font-bold leading-tight"
+            className="text-3xl md:text-4xl font-bold leading-tight mb-4"
             style={{ color: "var(--text-primary)" }}
           >
             {article.title}
           </h1>
+          <ShareButton
+            title={article.title}
+            text={article.excerpt}
+            url={`https://touchgrassdc.com/articles/${slug}`}
+          />
         </div>
 
         {/* Cover Image */}

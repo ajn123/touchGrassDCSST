@@ -79,6 +79,25 @@ export default function GroupsClient({ groups }: { groups: Group[] }) {
           <p className="text-lg">Discover and join groups in the DC area</p>
         </div>
 
+        <Link
+          href="/find-my-group"
+          className="block mb-6 p-4 rounded-lg border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/30 hover:shadow-md transition-shadow"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-semibold text-emerald-800 dark:text-emerald-300">
+                New to DC? Not sure where to start?
+              </p>
+              <p className="text-sm text-emerald-700 dark:text-emerald-400">
+                Take our quick quiz to find groups that match your interests.
+              </p>
+            </div>
+            <span className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap ml-4">
+              Find My Group
+            </span>
+          </div>
+        </Link>
+
         <div className="rounded-lg shadow-xl p-6 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>

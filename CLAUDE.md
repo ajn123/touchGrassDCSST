@@ -162,6 +162,35 @@ A daily Lambda cron (`generateMissingImagesCron`) also backfills real SVG placeh
 
 **Frontend queries** (`packages/frontend/src/lib/dynamodb/dynamodb-groups.ts`): `getGroups()`, `getPublicGroups()`, `getGroupsByCategory()`, `searchGroups()`, `createGroup()`, `deleteGroup()`
 
+## Find My Group
+
+Interactive 3-step quiz at `/find-my-group` that helps newcomers discover DC community groups matching their interests.
+
+**Flow**: (1) Select interest categories → (2) Optional schedule/time/cost preferences → (3) Scored group results
+
+**Scoring** (`packages/frontend/src/lib/groupMatchingScore.ts`):
+- Category match (0–60 pts): primary signal, scaled by overlap ratio
+- Schedule match (0–20 pts): day-of-week overlap
+- Time match (0–10 pts): morning/evening preference
+- Cost match (0–10 pts): free preference bonus
+- Returns `{ score, reasons[] }` per group — pure functions, no React dependency
+
+**Persistence** (`packages/frontend/src/lib/groupQuizPreferences.ts`):
+- Saves quiz answers to `localStorage["touchgrass_group_quiz"]`
+- On return visit, jumps directly to results with saved preferences
+- "Retake Quiz" clears localStorage and resets to step 1
+
+**Components** (`packages/frontend/src/components/quiz/`):
+- `ProgressBar.tsx` — 3-step visual indicator
+- `StepInterests.tsx` — category toggle grid (Active & Outdoors / Social & Cultural)
+- `StepPreferences.tsx` — day chips, time radio, cost radio
+- `StepResults.tsx` — scored group cards with match % badge and reason tags
+
+**Integration**:
+- Header nav link (desktop + mobile) with lightbulb icon, accent color
+- CTA banner on `/groups` page: "New to DC? Take our quiz"
+- Included in sitemap
+
 ## SEO & AI Indexing
 
 **Root layout** (`packages/frontend/src/app/layout.tsx`):

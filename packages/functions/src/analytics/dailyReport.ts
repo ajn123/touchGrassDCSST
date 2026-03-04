@@ -18,6 +18,7 @@ const ADMIN_EMAILS = ["hi@touchgrassdc.com", "hello@touchgrassdc.com"];
 interface AnalyticsRecord {
   page: string;
   ip: string;
+  visitorId: string;
   userAgent: string;
   referer: string;
   timestamp: string;
@@ -109,6 +110,7 @@ async function queryAnalyticsRange(
         records.push({
           page: props.page || "",
           ip: props.ip || "",
+          visitorId: props.visitorId || "",
           userAgent: props.userAgent || "",
           referer: props.referer || "",
           timestamp: props.timestamp || "",
@@ -134,13 +136,21 @@ function normalizePage(page: string): string {
   }
 }
 
+/** Get a unique identifier for a record: visitorId cookie (preferred) or IP (fallback) */
+function getVisitorKey(record: AnalyticsRecord): string | null {
+  if (record.visitorId && record.visitorId.trim()) return record.visitorId;
+  if (record.ip && record.ip.trim()) return record.ip;
+  return null;
+}
+
 function computeDailyStats(records: AnalyticsRecord[], dateLabel: string): DailyStats {
-  const uniqueIPs = new Set<string>();
+  const uniqueVisitors = new Set<string>();
   const pageCounts = new Map<string, number>();
   const referrerCounts = new Map<string, number>();
 
   for (const record of records) {
-    if (record.ip && record.ip.trim()) uniqueIPs.add(record.ip);
+    const key = getVisitorKey(record);
+    if (key) uniqueVisitors.add(key);
 
     const page = normalizePage(record.page);
     pageCounts.set(page, (pageCounts.get(page) || 0) + 1);
@@ -166,35 +176,36 @@ function computeDailyStats(records: AnalyticsRecord[], dateLabel: string): Daily
 
   return {
     date: dateLabel,
-    uniqueVisitors: uniqueIPs.size,
+    uniqueVisitors: uniqueVisitors.size,
     totalHits: records.length,
     topPages,
     topReferrers,
   };
 }
 
-function groupByDayUniqueIPs(records: AnalyticsRecord[]): number[] {
-  const ipsByDay = new Map<string, Set<string>>();
+function groupByDayUniqueVisitors(records: AnalyticsRecord[]): number[] {
+  const visitorsByDay = new Map<string, Set<string>>();
 
   for (const record of records) {
-    if (!record.ip || !record.ip.trim()) continue;
+    const key = getVisitorKey(record);
+    if (!key) continue;
     const date = record.timestamp
       ? getEasternDateString(new Date(record.timestamp))
       : "unknown";
     if (date === "unknown") continue;
-    if (!ipsByDay.has(date)) ipsByDay.set(date, new Set());
-    ipsByDay.get(date)!.add(record.ip);
+    if (!visitorsByDay.has(date)) visitorsByDay.set(date, new Set());
+    visitorsByDay.get(date)!.add(key);
   }
 
-  return Array.from(ipsByDay.values()).map((ips) => ips.size);
+  return Array.from(visitorsByDay.values()).map((v) => v.size);
 }
 
 function computeWeeklyTrend(
   thisWeekRecords: AnalyticsRecord[],
   lastWeekRecords: AnalyticsRecord[]
 ): WeeklyTrend {
-  const thisWeekDaily = groupByDayUniqueIPs(thisWeekRecords);
-  const lastWeekDaily = groupByDayUniqueIPs(lastWeekRecords);
+  const thisWeekDaily = groupByDayUniqueVisitors(thisWeekRecords);
+  const lastWeekDaily = groupByDayUniqueVisitors(lastWeekRecords);
 
   const thisWeekAvg =
     thisWeekDaily.length > 0
@@ -271,17 +282,20 @@ function detectWarnings(
     });
   }
 
-  // Bot detection: single IP > 50% of traffic
+  // Bot detection: single visitor > 50% of traffic
   if (stats.totalHits > 10) {
-    const ipCounts = new Map<string, number>();
+    const visitorCounts = new Map<string, number>();
     for (const r of yesterdayRecords) {
-      if (r.ip) ipCounts.set(r.ip, (ipCounts.get(r.ip) || 0) + 1);
+      const key = getVisitorKey(r);
+      if (key) visitorCounts.set(key, (visitorCounts.get(key) || 0) + 1);
     }
-    for (const [ip, count] of ipCounts) {
+    for (const [id, count] of visitorCounts) {
       if (count / stats.totalHits > 0.5) {
+        // Show IP if available for identification, otherwise show visitor ID prefix
+        const label = yesterdayRecords.find(r => getVisitorKey(r) === id)?.ip || id.substring(0, 8);
         warnings.push({
           level: "warning",
-          message: `Single IP ${ip} generated ${count}/${stats.totalHits} hits (${Math.round((count / stats.totalHits) * 100)}% of traffic) — possible bot.`,
+          message: `Single visitor (${label}) generated ${count}/${stats.totalHits} hits (${Math.round((count / stats.totalHits) * 100)}% of traffic) — possible bot.`,
         });
         break;
       }

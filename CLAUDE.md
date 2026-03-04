@@ -138,8 +138,8 @@ See `.env.example`. Key vars: `GOOGLE_MAPS_API_KEY`, `NEXT_PUBLIC_GOOGLE_MAPS_AP
 
 `packages/frontend/src/lib/image-utils.ts` — `resolveImageUrl(image_url, category, title, venue)`:
 - If `image_url` is set, returns it directly (http/https) or resolves from `/images/` (static)
-- If missing, generates a **seeded picsum URL** (`https://picsum.photos/seed/{title}/400/300`) so each event gets a unique but consistent placeholder image
-- `shouldBeUnoptimized(url)` returns true for external URLs (used to bypass Next.js image optimization)
+- If missing, generates an **inline SVG data URI** placeholder showing the event title, category badge, and venue on a dark branded background — no external requests needed
+- `shouldBeUnoptimized(url)` returns true for external URLs and `data:` URIs (used to bypass Next.js image optimization)
 
 A daily Lambda cron (`generateMissingImagesCron`) also backfills real SVG placeholder images to S3 for any events without `image_url`, using `generateStyledEventSvgBuffer` from `@touchgrass/shared-utils`.
 
@@ -188,6 +188,20 @@ A daily Lambda cron (`generateMissingImagesCron`) also backfills real SVG placeh
 - `public/llms.txt` — AI model indexing file describing site content and structure
 
 **When adding new pages**: Add `export const metadata: Metadata` (static pages) or `export async function generateMetadata()` (dynamic pages). For detail pages with rich content, add JSON-LD structured data using the appropriate schema.org type.
+
+## Sharing
+
+`packages/frontend/src/components/ShareButton.tsx` — reusable client component for sharing pages:
+- **Mobile**: uses Web Share API (`navigator.share`) to open native share sheet (iMessage, WhatsApp, etc.)
+- **Desktop**: falls back to clipboard copy with "Copied!" confirmation
+- Props: `title`, `text?`, `url?` (defaults to current page URL)
+
+Added to all detail pages:
+- Event pages — alongside `ReportWrongInfoButton` in `EntityDetail.rightActionNode`
+- Group pages — as `rightActionNode` in `EntityDetail`
+- Article pages — below the title in the article header
+
+OG meta tags on all detail pages ensure shared links show rich previews with title, description, and images.
 
 ## Conventions
 

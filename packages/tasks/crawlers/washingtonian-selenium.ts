@@ -60,7 +60,21 @@ class WashingtonianPlaywrightCrawler {
   private readonly CRAWL_DAYS = 21; // Number of days to crawl (3 weeks)
 
   async crawlEvents(): Promise<WashingtonianEvent[]> {
-    console.log("🕷️ Starting Washingtonian event crawl with Playwright...");
+    console.log("🕷️ Starting Washingtonian event crawl (two-pass)...");
+
+    const partialEvents = await this.crawlListingPages();
+    console.log(`📋 Pass 1 complete: ${partialEvents.length} events from listings`);
+
+    if (partialEvents.length === 0) return [];
+
+    const enrichedEvents = await this.crawlDetailPages(partialEvents);
+    console.log(`📝 Pass 2 complete: enriched ${enrichedEvents.filter(e => e.description).length}/${enrichedEvents.length} events with descriptions`);
+
+    return enrichedEvents;
+  }
+
+  async crawlListingPages(): Promise<WashingtonianEvent[]> {
+    console.log("🕷️ Pass 1: Crawling listing pages...");
 
     this.events = [];
 
@@ -247,7 +261,7 @@ class WashingtonianPlaywrightCrawler {
                     venue: venue,
                     distance: distance,
                     url: fullUrl,
-                    description: fullText,
+                    description: "", // descriptions extracted in pass 2
                   });
                 } catch (error) {
                   console.log("Error extracting event:", error);
@@ -355,6 +369,121 @@ class WashingtonianPlaywrightCrawler {
       console.error("❌ Crawler failed:", error);
       return [];
     }
+  }
+
+  async crawlDetailPages(events: WashingtonianEvent[]): Promise<WashingtonianEvent[]> {
+    console.log("🕷️ Pass 2: Crawling detail pages for descriptions...");
+
+    // Deduplicate URLs — multi-day events share the same detail page
+    const urlToEvents = new Map<string, WashingtonianEvent[]>();
+    for (const event of events) {
+      if (!event.url) continue;
+      const existing = urlToEvents.get(event.url) || [];
+      existing.push(event);
+      urlToEvents.set(event.url, existing);
+    }
+
+    const uniqueUrls = Array.from(urlToEvents.keys());
+    console.log(`🔗 ${uniqueUrls.length} unique detail URLs (from ${events.length} events)`);
+
+    if (uniqueUrls.length === 0) return events;
+
+    const requests = uniqueUrls.map((url, i) => ({
+      url,
+      uniqueKey: `washingtonian-detail-${i}`,
+    }));
+
+    const descriptions = new Map<string, string>();
+
+    const requestList = await RequestList.open(null, requests);
+
+    const crawler = new PlaywrightCrawler({
+      requestList,
+      maxRequestsPerCrawl: uniqueUrls.length,
+      maxConcurrency: 2,
+      minConcurrency: 1,
+      requestHandlerTimeoutSecs: 30,
+      requestHandler: async ({ page, request }) => {
+        try {
+          await page.goto(request.url, {
+            waitUntil: "domcontentloaded",
+            timeout: 20000,
+          });
+
+          // Wait for the SPA content to render
+          await page.waitForTimeout(3000);
+
+          const description = await page.evaluate(() => {
+            // Try specific Washingtonian calendar selectors first
+            const selectors = [
+              ".csDescription",
+              "[class*='description']",
+              ".csDetails p",
+              ".csDetailBody",
+              ".csDetailInfo",
+            ];
+
+            for (const selector of selectors) {
+              const el = document.querySelector(selector);
+              if (el) {
+                const text = el.textContent?.trim();
+                if (text && text.length > 30) return text;
+              }
+            }
+
+            // Fallback: find the longest paragraph with meaningful content
+            const paragraphs = document.querySelectorAll("p");
+            let longest = "";
+            for (const p of paragraphs) {
+              const text = p.textContent?.trim() || "";
+              if (text.length > longest.length && text.length > 40) {
+                longest = text;
+              }
+            }
+            return longest || "";
+          });
+
+          if (description) {
+            descriptions.set(request.url, description);
+            console.log(`✅ Got description for: ${request.url.substring(0, 80)}... (${description.length} chars)`);
+          } else {
+            console.log(`⚠️ No description found for: ${request.url.substring(0, 80)}...`);
+          }
+        } catch (error) {
+          console.log(`⚠️ Failed to get description for ${request.url}: ${error}`);
+        }
+      },
+      launchContext: {
+        launchOptions: {
+          headless: true,
+          args: [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-gpu",
+            "--window-size=1280,720",
+            "--disable-web-security",
+            "--memory-pressure-off",
+            "--max_old_space_size=256",
+          ],
+        },
+      },
+    });
+
+    try {
+      await crawler.run();
+    } catch (error) {
+      console.error("⚠️ Detail page crawler encountered errors:", error);
+    }
+
+    // Merge descriptions back into events
+    for (const event of events) {
+      if (event.url && descriptions.has(event.url)) {
+        event.description = descriptions.get(event.url);
+      }
+    }
+
+    return events;
   }
 
   async saveEvents(events: WashingtonianEvent[]): Promise<void> {

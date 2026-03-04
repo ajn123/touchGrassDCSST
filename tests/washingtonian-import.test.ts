@@ -20,6 +20,15 @@ describe("Washingtonian crawler module exports", () => {
     expect(typeof instance.crawlEvents).toBe("function");
   });
 
+  it("has crawlListingPages and crawlDetailPages methods for two-pass crawl", async () => {
+    const mod = await import(
+      "../packages/tasks/crawlers/washingtonian-selenium"
+    );
+    const instance = new mod.WashingtonianPlaywrightCrawler();
+    expect(typeof instance.crawlListingPages).toBe("function");
+    expect(typeof instance.crawlDetailPages).toBe("function");
+  });
+
   it("washingtonian.ts can import the class with alias", async () => {
     // This verifies the import fix: WashingtonianPlaywrightCrawler as WashingtonianSeleniumCrawler
     const mod = await import(

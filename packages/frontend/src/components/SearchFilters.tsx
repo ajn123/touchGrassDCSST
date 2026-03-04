@@ -2,6 +2,8 @@
 
 import {
   Calendar,
+  ChevronDown,
+  ChevronUp,
   DollarSign,
   Filter,
   MapPin,
@@ -42,6 +44,7 @@ export default function SearchFilters({
   categories,
   initialFilters,
 }: SearchFiltersProps) {
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [filters, setFilters] = useState<SearchFilters>({
     query: "",
     categories: [],
@@ -179,16 +182,32 @@ export default function SearchFilters({
 
   return (
     <div className="rounded-lg shadow-md p-6 h-fit sticky top-24">
-      {/* Header */}
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold flex items-center mb-3">
-          <Filter className="w-5 h-5 mr-2" />
-          Advanced Search
-        </h3>
+      {/* Header with mobile toggle */}
+      <div className="mb-4 lg:mb-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold flex items-center">
+            <Filter className="w-5 h-5 mr-2" />
+            Filters
+            {hasActiveFilters() && (
+              <span className="ml-2 w-2 h-2 bg-blue-500 rounded-full inline-block" />
+            )}
+          </h3>
+          <button
+            onClick={() => setFiltersOpen(!filtersOpen)}
+            className="lg:hidden p-1 rounded hover:bg-gray-100 transition-colors"
+            aria-label={filtersOpen ? "Collapse filters" : "Expand filters"}
+          >
+            {filtersOpen ? (
+              <ChevronUp className="w-5 h-5" />
+            ) : (
+              <ChevronDown className="w-5 h-5" />
+            )}
+          </button>
+        </div>
         {hasActiveFilters() && (
           <button
             onClick={resetFilters}
-            className="bg-red-400 hover:bg-red-600 px-4 py-4 rounded-md font-medium text-sm flex items-center transition-colors duration-200 shadow-sm hover:shadow-md"
+            className="mt-3 bg-red-400 hover:bg-red-600 px-4 py-2 rounded-md font-medium text-sm flex items-center transition-colors duration-200 shadow-sm hover:shadow-md"
           >
             <RefreshCw className="w-4 h-4 mr-2" />
             Reset Filters
@@ -196,8 +215,8 @@ export default function SearchFilters({
         )}
       </div>
 
-      {/* Search Content */}
-      <div className="space-y-6">
+      {/* Search Content — collapsible on mobile, always visible on lg+ */}
+      <div className={`space-y-6 ${filtersOpen ? "block" : "hidden"} lg:block`}>
         {/* Text Search */}
         <div>
           <label className="block text-sm font-medium mb-2">

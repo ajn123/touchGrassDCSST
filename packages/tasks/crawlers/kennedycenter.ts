@@ -69,6 +69,39 @@ export function parseTime(timeStr: string): string | undefined {
   return undefined;
 }
 
+/**
+ * Convert a UTC ISO date string (e.g. "2026-03-15T23:30:00Z") to Eastern date and time.
+ * An event at 1:00 AM UTC is 8:00 PM Eastern the previous day.
+ */
+export function parseISODateToEastern(isoDate: string): { date: string; time: string } | null {
+  try {
+    const d = new Date(isoDate);
+    if (isNaN(d.getTime())) return null;
+
+    const dateStr = d.toLocaleDateString("en-US", {
+      timeZone: "America/New_York",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }); // "03/04/2026"
+
+    const timeStr = d.toLocaleTimeString("en-US", {
+      timeZone: "America/New_York",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    }); // "7:00 PM"
+
+    // "03/04/2026" → "2026-03-04"
+    const [month, day, year] = dateStr.split("/");
+    const date = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+
+    return { date, time: timeStr.toLowerCase() };
+  } catch {
+    return null;
+  }
+}
+
 export function parsePrice(text: string): string | undefined {
   if (!text) return undefined;
   const lower = text.toLowerCase().trim();
@@ -283,8 +316,21 @@ class KennedyCenterCrawler {
           for (const e of allRawEvents) {
             if (this.events.length >= this.MAX_EVENTS) break;
 
-            const parsedDate = parseDate(e.date);
-            if (!parsedDate) continue;
+            // Detect ISO dates (from JSON-LD) vs human-readable dates (from DOM)
+            const isISO = /^\d{4}-\d{2}-\d{2}T/.test(e.date);
+            let parsedDate: string;
+            let parsedTime: string | undefined;
+
+            if (isISO) {
+              const eastern = parseISODateToEastern(e.date);
+              if (!eastern) continue;
+              parsedDate = eastern.date;
+              parsedTime = eastern.time;
+            } else {
+              parsedDate = parseDate(e.date);
+              if (!parsedDate) continue;
+              parsedTime = parseTime(e.time);
+            }
 
             // Skip past events
             const eventDate = new Date(parsedDate + "T00:00:00");
@@ -298,7 +344,7 @@ class KennedyCenterCrawler {
             const event = new KennedyCenterEvent(
               e.title,
               parsedDate,
-              parseTime(e.time),
+              parsedTime,
               e.location || "2700 F Street NW, Washington, DC 20566",
               e.description,
               e.url,

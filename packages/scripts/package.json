@@ -92,7 +92,9 @@
     "migrate:categories": "sst shell tsx src/migrate-categories.ts",
     "migrate:categories:apply": "sst shell tsx src/migrate-categories.ts apply",
     "migrate:categories:prod": "sst shell --stage production tsx src/migrate-categories.ts",
-    "migrate:categories:prod:apply": "sst shell --stage production tsx src/migrate-categories.ts apply"
+    "migrate:categories:prod:apply": "sst shell --stage production tsx src/migrate-categories.ts apply",
+    "generate:articles": "sst shell tsx src/generate-three-articles.ts",
+    "generate:articles:prod": "sst shell --stage production tsx src/generate-three-articles.ts"
   },
   "devDependencies": {
     "@types/node": "^22",

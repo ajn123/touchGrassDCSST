@@ -97,7 +97,7 @@ const newsletterCron = new sst.aws.Cron("newsletterCron", {
 const articleGenerationCron = new sst.aws.Cron("articleGenerationCron", {
   function: {
     handler: "packages/functions/src/articles/generateArticle.handler",
-    link: [db, OPENROUTER_API_KEY, GOOGLE_MAPS_API_KEY],
+    link: [db, OPENROUTER_API_KEY, GOOGLE_MAPS_API_KEY, bucket],
     timeout: "5 minutes",
   },
   schedule: "cron(0 10 ? * MON *)", // Every Monday at 6 AM EST (10:00 UTC)

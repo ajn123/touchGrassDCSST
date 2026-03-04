@@ -3,6 +3,7 @@ import {
   parseDate,
   parseTime,
   parsePrice,
+  parseISODateToEastern,
   mapCategory,
   KennedyCenterEvent,
 } from "../packages/tasks/crawlers/kennedycenter";
@@ -222,6 +223,56 @@ describe("Kennedy Center crawler parsing", () => {
       expect(mapCategory("COMEDY")).toBe("Comedy");
       expect(mapCategory("Jazz Night")).toBe("Music");
       expect(mapCategory("THEATER")).toBe("Theater");
+    });
+  });
+
+  describe("parseISODateToEastern", () => {
+    it("converts UTC evening to Eastern same day", () => {
+      // 11:30 PM UTC = 7:30 PM EST (same day, winter)
+      const result = parseISODateToEastern("2026-01-15T23:30:00Z");
+      expect(result).not.toBeNull();
+      expect(result!.date).toBe("2026-01-15");
+      expect(result!.time).toBe("6:30 pm");
+    });
+
+    it("converts UTC early morning to Eastern previous day", () => {
+      // 1:00 AM UTC = 8:00 PM EST previous day
+      const result = parseISODateToEastern("2026-01-16T01:00:00Z");
+      expect(result).not.toBeNull();
+      expect(result!.date).toBe("2026-01-15");
+      expect(result!.time).toBe("8:00 pm");
+    });
+
+    it("converts UTC midnight to Eastern previous day", () => {
+      // Midnight UTC = 7:00 PM EST previous day
+      const result = parseISODateToEastern("2026-03-15T00:00:00Z");
+      expect(result).not.toBeNull();
+      expect(result!.date).toBe("2026-03-14");
+      expect(result!.time).toBe("8:00 pm");
+    });
+
+    it("handles EDT (summer time) correctly", () => {
+      // 11:30 PM UTC in July = 7:30 PM EDT (UTC-4)
+      const result = parseISODateToEastern("2026-07-15T23:30:00Z");
+      expect(result).not.toBeNull();
+      expect(result!.date).toBe("2026-07-15");
+      expect(result!.time).toBe("7:30 pm");
+    });
+
+    it("handles afternoon UTC correctly", () => {
+      // 6:00 PM UTC = 1:00 PM EST
+      const result = parseISODateToEastern("2026-01-15T18:00:00Z");
+      expect(result).not.toBeNull();
+      expect(result!.date).toBe("2026-01-15");
+      expect(result!.time).toBe("1:00 pm");
+    });
+
+    it("returns null for invalid date", () => {
+      expect(parseISODateToEastern("not-a-date")).toBeNull();
+    });
+
+    it("returns null for empty string", () => {
+      expect(parseISODateToEastern("")).toBeNull();
     });
   });
 

@@ -3,14 +3,20 @@ import {
   GetItemCommand,
   PutItemCommand,
 } from "@aws-sdk/client-dynamodb";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
+import { generateStyledArticleSvgBuffer } from "@touchgrass/shared-utils";
 import { Handler } from "aws-lambda";
 import { Resource } from "sst";
 import { gatherGooglePlacesContent, formatGooglePlacesForPrompt } from "./google-places";
 import { gatherRedditContent, formatRedditContentForPrompt } from "./reddit";
-import { getTopicForWeek, generateArticleSlug, getUnsplashSearchUrl, type ArticleTopic } from "./topics";
+import { getTopicForWeek, generateArticleSlug, type ArticleTopic } from "./topics";
 
 const dynamoClient = new DynamoDBClient({
+  region: process.env.AWS_REGION || "us-east-1",
+});
+
+const s3Client = new S3Client({
   region: process.env.AWS_REGION || "us-east-1",
 });
 
@@ -18,6 +24,89 @@ interface ArticleOutput {
   title: string;
   content: string;
   excerpt: string;
+}
+
+/**
+ * Retry a function with exponential backoff.
+ */
+async function callWithRetry<T>(
+  fn: () => Promise<T>,
+  maxAttempts = 3,
+  baseDelayMs = 1000,
+): Promise<T> {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (attempt === maxAttempts) throw error;
+      const delay = baseDelayMs * Math.pow(2, attempt - 1);
+      console.warn(`Attempt ${attempt}/${maxAttempts} failed, retrying in ${delay}ms...`, error);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+  throw new Error("callWithRetry: unreachable");
+}
+
+/**
+ * Attempt to repair broken JSON from LLM output where HTML content
+ * contains unescaped double quotes (e.g., <a href="url">).
+ */
+export function repairArticleJson(raw: string): { title: string; content: string; excerpt: string } {
+  // Strategy: extract the three fields by finding their key positions
+  // and using the next key (or closing brace) as the delimiter
+  const fields = ["title", "content", "excerpt"];
+  const fieldPositions: { key: string; keyIdx: number; valueStart: number }[] = [];
+
+  for (const field of fields) {
+    const pattern = `"${field}"`;
+    const keyIdx = raw.indexOf(pattern);
+    if (keyIdx === -1) throw new Error(`Field "${field}" not found in JSON`);
+    const colonIdx = raw.indexOf(":", keyIdx + pattern.length);
+    // Find the opening quote of the value
+    const valueStart = raw.indexOf('"', colonIdx + 1) + 1;
+    fieldPositions.push({ key: field, keyIdx, valueStart });
+  }
+
+  // Sort by position in the string
+  fieldPositions.sort((a, b) => a.keyIdx - b.keyIdx);
+
+  const result: Record<string, string> = {};
+
+  for (let i = 0; i < fieldPositions.length; i++) {
+    const { key, valueStart } = fieldPositions[i];
+
+    let valueEnd: number;
+    if (i < fieldPositions.length - 1) {
+      // Find the boundary: look backwards from the next field's key for the pattern: ","
+      const nextKeyIdx = fieldPositions[i + 1].keyIdx;
+      // The value ends at the last " before the comma-whitespace-"nextKey" pattern
+      const beforeNext = raw.substring(0, nextKeyIdx);
+      // Find the comma that separates this field from the next
+      const commaIdx = beforeNext.lastIndexOf(",");
+      // The closing quote of the value is just before the comma (possibly with whitespace)
+      const segment = raw.substring(0, commaIdx);
+      valueEnd = segment.lastIndexOf('"');
+    } else {
+      // Last field: find the closing } and work backwards
+      const closingBrace = raw.lastIndexOf("}");
+      const segment = raw.substring(0, closingBrace);
+      valueEnd = segment.lastIndexOf('"');
+    }
+
+    result[key] = raw.substring(valueStart, valueEnd)
+      // Re-escape any unescaped quotes for clean storage
+      .replace(/\\"/g, '"') // normalize escaped quotes first
+      .replace(/"/g, '\\"'); // then escape all
+
+    // For storage, we actually want the unescaped version
+    result[key] = raw.substring(valueStart, valueEnd).replace(/\\"/g, '"');
+  }
+
+  return {
+    title: result.title || "",
+    content: result.content || "",
+    excerpt: result.excerpt || "",
+  };
 }
 
 /**
@@ -79,9 +168,15 @@ WRITING RULES:
 FORMAT: Return ONLY valid JSON (no markdown fences, no extra text) with this structure:
 {
   "title": "A catchy, specific title (not generic — e.g., 'The 8 Coffee Shops DC Redditors Won't Shut Up About')",
-  "content": "Full article as HTML using <h2>, <h3>, <p>, <ul>, <li> tags. Include multiple sections. End with a <h2>The Bottom Line</h2> summary section.",
+  "content": "Full article as HTML using <h2>, <h3>, <p>, <ul>, <li>, <strong>, <em> tags. Include multiple sections. End with a <h2>The Bottom Line</h2> summary section.",
   "excerpt": "A 1-2 sentence teaser that makes people want to click (under 200 chars)"
-}`;
+}
+
+CRITICAL JSON RULES:
+- All double quotes inside the "content" HTML MUST be escaped as \\"
+- Or better: use SINGLE QUOTES for all HTML attributes (e.g., <a href='url'> not <a href="url">)
+- Do NOT use unescaped double quotes anywhere inside string values
+- The output must be parseable by JSON.parse()`;
 }
 
 /**
@@ -106,7 +201,7 @@ async function saveArticle(
   topic: ArticleTopic,
   article: ArticleOutput,
   sources: { title: string; url: string }[],
-  places: { name: string; rating: number; address: string }[],
+  places: { name: string; rating: number; address: string; website?: string }[],
   imageUrl: string,
 ): Promise<void> {
   const timestamp = Date.now();
@@ -162,24 +257,40 @@ export const handler: Handler = async () => {
 
   // 2. Fetch Google Places content (if applicable)
   let googlePromptText = "";
-  let googlePlaces: { name: string; rating: number; address: string }[] = [];
+  let googlePlaces: { name: string; rating: number; address: string; website?: string }[] = [];
   if (topic.googlePlacesQuery) {
     console.log(`Fetching Google Places for: "${topic.googlePlacesQuery}"`);
     const googleContent = await gatherGooglePlacesContent(topic.googlePlacesQuery);
     googlePromptText = formatGooglePlacesForPrompt(googleContent);
+    // Build a map of detailed place websites by name
+    const websiteByName = new Map<string, string>();
+    for (const dp of googleContent.detailedPlaces) {
+      if (dp.website) websiteByName.set(dp.name, dp.website);
+    }
     googlePlaces = googleContent.places.map((p) => ({
       name: p.name,
       rating: p.rating,
       address: p.address,
+      website: websiteByName.get(p.name),
     }));
     console.log(`Google Places: ${googleContent.places.length} places, ${googleContent.detailedPlaces.length} with reviews`);
   }
 
-  // 3. Build prompt and call OpenRouter
+  // 3. Build prompt and call OpenRouter (with retry)
   const prompt = buildPrompt(topic, redditPromptText, googlePromptText);
   console.log(`Calling OpenRouter (prompt length: ${prompt.length} chars)`);
 
-  const aiResponse = await callOpenRouter(prompt);
+  let aiResponse: string;
+  try {
+    aiResponse = await callWithRetry(() => callOpenRouter(prompt));
+  } catch (error) {
+    console.error(JSON.stringify({
+      error: error instanceof Error ? error.message : String(error),
+      context: { topic: topic.slug, slug, step: "openrouter" },
+      timestamp: new Date().toISOString(),
+    }));
+    throw error;
+  }
 
   // 4. Parse the article JSON
   const cleaned = aiResponse.replace(/```json\n?|\n?```/g, "").trim();
@@ -187,16 +298,39 @@ export const handler: Handler = async () => {
   try {
     article = JSON.parse(cleaned);
   } catch (e) {
-    console.error("Failed to parse OpenRouter response:", cleaned.substring(0, 500));
-    throw new Error(`Failed to parse article JSON: ${e}`);
+    console.warn("JSON.parse failed, attempting repair...", (e as Error).message);
+    try {
+      article = repairArticleJson(cleaned);
+      console.log("JSON repair succeeded");
+    } catch (repairError) {
+      console.error("Failed to parse OpenRouter response:", cleaned.substring(0, 500));
+      throw new Error(`Failed to parse article JSON: ${e}`);
+    }
   }
 
   if (!article.title || !article.content || !article.excerpt) {
     throw new Error(`Article missing required fields: ${JSON.stringify(Object.keys(article))}`);
   }
 
-  // 5. Generate cover image URL
-  const imageUrl = getUnsplashSearchUrl(topic.coverImageQuery);
+  // 5. Generate SVG cover image and upload to S3
+  const svgBuffer = generateStyledArticleSvgBuffer({
+    title: article.title,
+    category: topic.category,
+    subtitle: article.excerpt,
+  });
+  const bucketName = Resource.MediaBucket.name;
+  const s3Key = `article-images/${slug}.svg`;
+  await s3Client.send(
+    new PutObjectCommand({
+      Bucket: bucketName,
+      Key: s3Key,
+      Body: svgBuffer,
+      ContentType: "image/svg+xml",
+      CacheControl: "public, max-age=31536000",
+    })
+  );
+  const imageUrl = `https://${bucketName}.s3.amazonaws.com/${s3Key}`;
+  console.log(`Uploaded cover image: ${s3Key}`);
 
   // 6. Save to DynamoDB
   await saveArticle(slug, topic, article, redditContent.sourceLinks, googlePlaces, imageUrl);

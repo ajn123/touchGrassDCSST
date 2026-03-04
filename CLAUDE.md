@@ -143,6 +143,8 @@ See `.env.example`. Key vars: `GOOGLE_MAPS_API_KEY`, `NEXT_PUBLIC_GOOGLE_MAPS_AP
 
 A daily Lambda cron (`generateMissingImagesCron`) also backfills real SVG placeholder images to S3 for any events without `image_url`, using `generateStyledEventSvgBuffer` from `@touchgrass/shared-utils`.
 
+**Article cover images** use `generateStyledArticleSvgBuffer` from `@touchgrass/shared-utils` — generates 1200x630 OG-standard SVGs with article title, category badge, and site branding. Uploaded to S3 at `article-images/{slug}.svg` during article generation (both Lambda cron and `generate-three-articles.ts` script).
+
 ## Groups
 
 `groups.json` contains curated community groups, run clubs, and social organizations in the DMV area. Groups are seeded into DynamoDB via `packages/scripts/src/seed-groups.ts`.

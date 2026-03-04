@@ -14,6 +14,7 @@ export interface PlaceDetails {
   name: string;
   rating: number;
   address: string;
+  website?: string;
   reviews: { text: string; rating: number; authorName: string }[];
 }
 
@@ -61,7 +62,7 @@ export async function searchPlaces(query: string, limit = 10): Promise<PlaceResu
  */
 export async function getPlaceDetails(placeId: string): Promise<PlaceDetails | null> {
   const apiKey = getApiKey();
-  const fields = "name,rating,formatted_address,reviews";
+  const fields = "name,rating,formatted_address,reviews,website";
   const url = `${PLACES_API_BASE}/details/json?place_id=${placeId}&fields=${fields}&key=${apiKey}`;
 
   const response = await fetch(url);
@@ -80,6 +81,7 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceDetails | n
     name: result.name || "",
     rating: result.rating || 0,
     address: result.formatted_address || "",
+    website: result.website || undefined,
     reviews: (result.reviews || []).map((r: any) => ({
       text: r.text || "",
       rating: r.rating || 0,

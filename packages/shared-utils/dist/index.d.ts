@@ -145,6 +145,24 @@ export declare function validateEvent(event: any): {
  * Sanitize event data for safe storage
  */
 export declare function sanitizeEvent(event: any): any;
+/**
+ * Generate a styled SVG placeholder image for an event.
+ * Returns a Buffer containing UTF-8 encoded SVG XML.
+ */
+export declare function generateStyledEventSvgBuffer({ title, category, venue, }: {
+    title?: string;
+    category?: string;
+    venue?: string;
+}): Buffer;
+/**
+ * Generate a styled SVG cover image for an article.
+ * Returns a Buffer containing UTF-8 encoded SVG XML (1200x630, OG standard).
+ */
+export declare function generateStyledArticleSvgBuffer({ title, category, subtitle, }: {
+    title?: string;
+    category?: string;
+    subtitle?: string;
+}): Buffer;
 declare const _default: {
     parseDate: typeof parseDate;
     parseDateTime: typeof parseDateTime;

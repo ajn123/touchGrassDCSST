@@ -20,11 +20,12 @@ export function getCoverImageUrl(topic: ArticleTopic, slug: string): string {
 }
 
 /**
- * Generate an Unsplash source redirect URL that returns a random photo
- * matching the search query. No API key needed.
+ * Generate a seeded cover image URL for an article topic.
+ * Uses picsum.photos with a seed derived from the query for consistent results.
  */
 export function getUnsplashSearchUrl(query: string): string {
-  return `https://source.unsplash.com/1200x630/?${encodeURIComponent(query)}`;
+  const seed = query.replace(/[^a-z0-9]/gi, "-").toLowerCase();
+  return `https://picsum.photos/seed/${seed}/1200/630`;
 }
 
 export const ARTICLE_TOPICS: ArticleTopic[] = [

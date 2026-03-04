@@ -191,28 +191,48 @@ export const handler: Handler = async () => {
   try {
     const allEvents: any[] = [];
 
+    const failedTeams: string[] = [];
+
     for (const team of DC_TEAMS) {
       console.log(`Fetching schedule for ${team.name}...`);
 
-      try {
-        const response = await fetch(team.endpoint);
-        if (!response.ok) {
-          console.error(
-            `ESPN API error for ${team.name}: ${response.status}`
-          );
-          continue;
+      let success = false;
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          const response = await fetch(team.endpoint);
+          if (!response.ok) {
+            throw new Error(`ESPN API error: ${response.status}`);
+          }
+
+          const data = await response.json();
+          const events = parseESPNSchedule(data, team);
+          console.log(`Found ${events.length} upcoming games for ${team.name}`);
+          allEvents.push(...events);
+          success = true;
+          break;
+        } catch (error) {
+          if (attempt < 2) {
+            console.warn(`Attempt ${attempt}/2 failed for ${team.name}, retrying in 1s...`);
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          } else {
+            console.error(`Failed to fetch ${team.name} schedule after 2 attempts:`, error);
+            failedTeams.push(team.name);
+          }
         }
-
-        const data = await response.json();
-        const events = parseESPNSchedule(data, team);
-        console.log(`Found ${events.length} upcoming games for ${team.name}`);
-        allEvents.push(...events);
-
-        // Small delay between requests
-        await new Promise((resolve) => setTimeout(resolve, 500));
-      } catch (error) {
-        console.error(`Failed to fetch ${team.name} schedule:`, error);
       }
+
+      // Small delay between teams
+      if (success) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+    }
+
+    if (failedTeams.length > 0) {
+      console.error(JSON.stringify({
+        error: `ESPN fetch failed for teams: ${failedTeams.join(", ")}`,
+        context: { failedTeams, totalTeams: DC_TEAMS.length },
+        timestamp: new Date().toISOString(),
+      }));
     }
 
     // Sort by date and limit
@@ -285,7 +305,11 @@ export const handler: Handler = async () => {
       }),
     };
   } catch (error) {
-    console.error("DC Sports handler error:", error);
+    console.error(JSON.stringify({
+      error: error instanceof Error ? error.message : String(error),
+      context: { handler: "dcsports" },
+      timestamp: new Date().toISOString(),
+    }));
     return {
       statusCode: 500,
       body: JSON.stringify({

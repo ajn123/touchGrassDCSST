@@ -1,13 +1,13 @@
+import ArticleCard from "@/components/ArticleCard";
 import Categories from "@/components/Categories";
-import FeaturedGroups from "@/components/FeaturedGroups";
-import MonthlyCalendar from "@/components/MonthlyCalendar";
 import PersonalizedEvents from "@/components/PersonalizedEvents";
 import SearchBar from "@/components/SearchBar";
+import { getArticles } from "@/lib/dynamodb/dynamodb-articles";
 import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
 import { getCategoriesFromEvents } from "@/lib/filter-events";
 import type { Metadata } from "next";
-import { revalidatePath } from "next/cache";
 import Image from "next/image";
+import Link from "next/link";
 import { Resource } from "sst";
 
 export const dynamic = "force-dynamic";
@@ -29,19 +29,6 @@ interface Category {
   category: string;
 }
 
-async function submitForm(formData: FormData) {
-  "use server";
-
-  // Get the image key from form data
-  const imageKey = formData.get("imageKey") as string;
-
-  console.log("Form submission with image key:", imageKey);
-
-  const db = new TouchGrassDynamoDB(Resource.Db.name);
-  const response = await db.createEvent(formData);
-  revalidatePath("/");
-}
-
 export default async function Home() {
   // This runs on the server during rendering (like useEffect but server-side)
   const db = new TouchGrassDynamoDB(Resource.Db.name);
@@ -55,6 +42,12 @@ export default async function Home() {
   
   // Convert to the format expected by Categories component
   const categories: Category[] = categoryStrings.map((cat) => ({ category: cat }));
+
+  // Fetch latest articles
+  const allArticles = await getArticles();
+  const latestArticles = allArticles
+    .sort((a, b) => b.publishedAt - a.publishedAt)
+    .slice(0, 3);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -112,25 +105,55 @@ export default async function Home() {
       {/* Personalized Events - client component that hydrates after SSR */}
       <PersonalizedEvents />
 
-      {/* Compact Calendar Section */}
-      <MonthlyCalendar variant="compact" />
-
-      {/* Featured Groups Section */}
-      <FeaturedGroups />
-
-      {/* Homepage Map Section }
-      
-      <section className="py-16 px-4 max-w-7xl mx-auto">
-        <HomepageMap />
-      </section>
-
-      */}
-
+      {/* Browse by Category */}
       <Categories categories={categories as Category[]} />
 
-      {/* Analytics handled centrally in middleware */}
-
-      {/* <RecurringEvent /> */}
+      {/* Latest Articles */}
+      {latestArticles.length > 0 && (
+        <section className="py-16 px-4 max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <h2
+              className="text-3xl font-bold"
+              style={{ color: "var(--text-primary)" }}
+            >
+              Latest Articles
+            </h2>
+            <Link
+              href="/articles"
+              className="text-sm font-medium flex items-center"
+              style={{ color: "var(--accent-primary)" }}
+            >
+              View all
+              <svg
+                className="w-4 h-4 ml-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {latestArticles.map((article) => (
+              <ArticleCard
+                key={article.slug}
+                slug={article.slug}
+                title={article.title}
+                excerpt={article.excerpt}
+                category={article.category}
+                publishedAt={article.publishedAt}
+                imageUrl={article.image_url}
+              />
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }

@@ -888,6 +888,62 @@ export function generateStyledEventSvgBuffer({
   return Buffer.from(svg, "utf-8");
 }
 
+/**
+ * Generate a styled SVG cover image for an article.
+ * Returns a Buffer containing UTF-8 encoded SVG XML (1200x630, OG standard).
+ */
+export function generateStyledArticleSvgBuffer({
+  title,
+  category,
+  subtitle,
+}: {
+  title?: string;
+  category?: string;
+  subtitle?: string;
+}): Buffer {
+  const color = CATEGORY_COLORS[category ?? ""] ?? CATEGORY_COLORS["General"];
+  const safeTitle = escapeXml(title || "Untitled Article");
+  const safeCategory = escapeXml(category || "General");
+  const safeSubtitle = escapeXml(subtitle || "");
+
+  const titleLines = wrapText(safeTitle, 36, 3);
+  const lineHeight = 64;
+  const titleStartY = 210;
+
+  const titleSvg = titleLines
+    .map(
+      (line, i) =>
+        `<text x="64" y="${titleStartY + i * lineHeight}" fill="#f8fafc" font-family="system-ui,-apple-system,sans-serif" font-size="48" font-weight="700" letter-spacing="-0.5">${line}</text>`
+    )
+    .join("\n  ");
+
+  const subtitleY = titleStartY + titleLines.length * lineHeight + 24;
+  const subtitleSvg = safeSubtitle
+    ? `<text x="64" y="${subtitleY}" fill="#94a3b8" font-family="system-ui,-apple-system,sans-serif" font-size="24">${escapeXml(wrapText(safeSubtitle, 50, 1)[0])}</text>`
+    : "";
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="50%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="0" y="0" width="1200" height="6" fill="${color}"/>
+  <rect x="0" y="624" width="1200" height="6" fill="${color}"/>
+  <rect x="64" y="80" rx="16" width="${safeCategory.length * 12 + 48}" height="36" fill="${color}" fill-opacity="0.2"/>
+  <text x="88" y="104" fill="${color}" font-family="system-ui,-apple-system,sans-serif" font-size="16" font-weight="600" letter-spacing="0.5">${safeCategory}</text>
+  <text x="64" y="156" fill="#64748b" font-family="system-ui,-apple-system,sans-serif" font-size="14" font-weight="500" letter-spacing="2">TOUCHGRASS DC ARTICLE</text>
+  ${titleSvg}
+  ${subtitleSvg}
+  <text x="64" y="596" fill="#334155" font-family="system-ui,-apple-system,sans-serif" font-size="18">touchgrassdc.com</text>
+</svg>`;
+
+  return Buffer.from(svg, "utf-8");
+}
+
 // ============================================================================
 // EXPORTS
 // ============================================================================

@@ -90,6 +90,15 @@ declare module "sst" {
       "sender": string
       "type": "sst.aws.Email"
     }
+    "kennedyCenterTask": {
+      "assignPublicIp": boolean
+      "cluster": string
+      "containers": any
+      "securityGroups": any
+      "subnets": any
+      "taskDefinition": string
+      "type": "sst.aws.Task"
+    }
     "normaizeEventStepFunction": {
       "arn": string
       "type": "sst.aws.StepFunctions"

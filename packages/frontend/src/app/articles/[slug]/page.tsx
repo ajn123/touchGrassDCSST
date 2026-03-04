@@ -3,6 +3,12 @@ import { getArticle, getArticles } from "@/lib/dynamodb/dynamodb-articles";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import sanitizeHtml from "sanitize-html";
+
+const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
+  allowedTags: ["h2", "h3", "p", "ul", "ol", "li", "a", "strong", "em", "br", "span", "blockquote"],
+  allowedAttributes: { a: ["href", "target", "rel"], "*": ["class"] },
+};
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -114,6 +120,7 @@ export default async function ArticlePage({
       "@type": "Organization",
       name: "TouchGrass DC",
       url: "https://touchgrassdc.com",
+      description: "AI-assisted content based on real community discussions and reviews",
     },
     publisher: {
       "@type": "Organization",
@@ -194,17 +201,91 @@ export default async function ArticlePage({
           </div>
         )}
 
+        {/* AI Disclosure */}
+        <div
+          className="flex items-start gap-2 rounded-lg px-4 py-3 text-sm mb-8"
+          style={{
+            backgroundColor: "var(--bg-tertiary)",
+            borderWidth: "1px",
+            borderColor: "var(--border-primary)",
+            color: "var(--text-tertiary)",
+          }}
+        >
+          <span className="text-base leading-5" aria-hidden="true">&#10024;</span>
+          <span>
+            This article was written with AI assistance using real community
+            discussions and reviews as source material.
+          </span>
+        </div>
+
         {/* Article Content */}
         <div
           className="prose prose-lg max-w-none article-content"
           style={{ color: "var(--text-primary)" }}
-          dangerouslySetInnerHTML={{ __html: article.content }}
+          dangerouslySetInnerHTML={{
+            __html: sanitizeHtml(article.content, SANITIZE_OPTIONS),
+          }}
         />
+
+        {/* Places Mentioned */}
+        {article.places && article.places.length > 0 && (
+          <div
+            className="mt-12 pt-8"
+            style={{ borderTopWidth: "1px", borderColor: "var(--border-primary)" }}
+          >
+            <h2
+              className="text-lg font-bold mb-2"
+              style={{ color: "var(--text-primary)" }}
+            >
+              Places Mentioned
+            </h2>
+            <p className="text-sm mb-4" style={{ color: "var(--text-tertiary)" }}>
+              Explore the places mentioned in this article
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {article.places
+                .filter((p) => p.name && p.rating > 0)
+                .map((place, i) => {
+                  const href =
+                    place.website ||
+                    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${place.name} ${place.address}`)}`;
+                  return (
+                    <a
+                      key={i}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-lg p-3 block transition-colors"
+                      style={{
+                        backgroundColor: "var(--bg-tertiary)",
+                        borderWidth: "1px",
+                        borderColor: "var(--border-primary)",
+                      }}
+                    >
+                      <p
+                        className="font-medium text-sm"
+                        style={{ color: "var(--accent-primary)" }}
+                      >
+                        {place.name}
+                        <span className="inline-block ml-1 text-xs">&#8599;</span>
+                      </p>
+                      <p
+                        className="text-xs mt-1"
+                        style={{ color: "var(--text-tertiary)" }}
+                      >
+                        {place.rating}/5 — {place.address}
+                      </p>
+                    </a>
+                  );
+                })}
+            </div>
+          </div>
+        )}
 
         {/* Sources Section */}
         {article.sources && article.sources.length > 0 && (
           <div
-            className="mt-12 pt-8"
+            className="mt-8 pt-6"
             style={{ borderTopWidth: "1px", borderColor: "var(--border-primary)" }}
           >
             <h2
@@ -232,49 +313,6 @@ export default async function ArticlePage({
                 </li>
               ))}
             </ul>
-          </div>
-        )}
-
-        {/* Places Referenced */}
-        {article.places && article.places.length > 0 && (
-          <div
-            className="mt-8 pt-6"
-            style={{ borderTopWidth: "1px", borderColor: "var(--border-primary)" }}
-          >
-            <h2
-              className="text-lg font-bold mb-4"
-              style={{ color: "var(--text-primary)" }}
-            >
-              Places Mentioned
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {article.places
-                .filter((p) => p.name && p.rating > 0)
-                .map((place, i) => (
-                  <div
-                    key={i}
-                    className="rounded-lg p-3"
-                    style={{
-                      backgroundColor: "var(--bg-tertiary)",
-                      borderWidth: "1px",
-                      borderColor: "var(--border-primary)",
-                    }}
-                  >
-                    <p
-                      className="font-medium text-sm"
-                      style={{ color: "var(--text-primary)" }}
-                    >
-                      {place.name}
-                    </p>
-                    <p
-                      className="text-xs mt-1"
-                      style={{ color: "var(--text-tertiary)" }}
-                    >
-                      {place.rating}/5 — {place.address}
-                    </p>
-                  </div>
-                ))}
-            </div>
           </div>
         )}
       </article>

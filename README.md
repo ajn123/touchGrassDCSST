@@ -1,115 +1,87 @@
-# Monorepo Template
+# TouchGrass DC
 
-A template to create a monorepo SST v3 project. [Learn more](https://sst.dev/docs/set-up-a-monorepo).
+A serverless event aggregation platform for Washington, DC. Crawls event sources (comedy clubs, Eventbrite, Washingtonian, Kennedy Center, Smithsonian, etc.), normalizes them via Step Functions, and serves them through a Next.js frontend — all deployed via [SST](https://sst.dev).
+
+**Live site**: [touchgrassdc.com](https://touchgrassdc.com)
+
+## Architecture
+
+**Monorepo** using npm workspaces:
+
+| Package | Purpose |
+|---------|---------|
+| `packages/frontend` | Next.js 15 / React 19 app (Tailwind CSS) |
+| `packages/functions` | Lambda handlers (Hono API, analytics, newsletters, articles) |
+| `packages/tasks` | ECS Fargate crawler containers (Playwright/Cheerio) |
+| `packages/scripts` | DB seeding, migrations, data management utilities |
+| `packages/shared-utils` | Shared TypeScript utilities (`@touchgrass/shared-utils`) |
+| `packages/auth` | OpenAuth email-based authentication |
+| `packages/user_analytics` | SQS-backed user action tracking |
+
+**Infrastructure** (`infra/`): DynamoDB single-table, API Gateway V2, S3, SES, SQS, ECS Fargate, Step Functions, EventBridge crons.
 
 ## Features
 
-### Event Search with Field Projection
+- **Event aggregation** — automated crawlers for 8+ DC event sources with Step Function normalization pipeline
+- **Personalized recommendations** — client-side signals (click history, category preferences) with category-diverse round-robin ranking
+- **Interactive map** — Google Maps integration showing all events with location data
+- **Search** — full-text event search with field projection for efficient queries
+- **Groups** — curated community groups, run clubs, and social organizations
+- **Articles** — AI-generated weekly articles about DC events and culture
+- **Weekly newsletter** — automated email digest via SES
+- **Daily analytics report** — unique visitors, weekly trends, top pages, referrers, and anomaly warnings
+- **Visitor tracking** — persistent cookie-based unique visitor identification
+- **SEO** — structured data (JSON-LD), dynamic OG images, sitemap, robots.txt, llms.txt
+- **Sharing** — Web Share API on mobile, clipboard fallback on desktop
 
-The events API supports field projection to return only specific fields, improving performance and reducing data transfer.
+## Getting Started
 
-**Usage:**
-
-```bash
-# Return only title, location, and cost fields
-GET /api/events?fields=title,location,cost
-
-# Return only title and cost fields with a search query
-GET /api/events?q=concert&fields=title,cost
-```
-
-**Supported Fields:** title, location, cost, description, venue, date, category, isPublic, createdAt, updatedAt
-
-**Implementation:** Uses DynamoDB's `ProjectionExpression` for efficient database queries.
-
-### Interactive Events Map
-
-A comprehensive homepage map component that displays all events with location data on a single Google Map.
-
-**Features:**
-
-- Interactive map with custom markers for each event
-- Automatic bounds adjustment to show all locations
-- Rich info windows with event details
-- Efficient data fetching using field projection
-- Responsive design for all screen sizes
-
-**Usage:** Automatically integrated into the homepage, showing all public events with coordinates.
-
-## Get started
-
-1. Use this template to [create your own repo](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
-
-2. Clone the new repo.
-
-   ```bash
-   git clone <REPO_URL> MY_APP
-   cd MY_APP
-   ```
-
-3. Rename the files in the project to the name of your app.
-
-   ```bash
-   npx replace-in-file '/monorepo-template/g' 'MY_APP' '**/*.*' --verbose
-   ```
-
-4. Deploy!
-
+1. Install dependencies:
    ```bash
    npm install
-   npx sst deploy
    ```
 
-5. Optionally, enable [_git push to deploy_](https://sst.dev/docs/console/#autodeploy).
-
-## Usage
-
-This template uses [npm Workspaces](https://docs.npmjs.com/cli/v8/using-npm/workspaces). It has 3 packages to start with and you can add more it.
-
-1. `core/`
-
-   This is for any shared code. It's defined as modules. For example, there's the `Example` module.
-
-   ```ts
-   export module Example {
-     export function hello() {
-       return "Hello, world!";
-     }
-   }
-   ```
-
-   That you can use across other packages using.
-
-   ```ts
-   import { Example } from "@aws-monorepo/core/example";
-
-   Example.hello();
-   ```
-
-   We also have [Vitest](https://vitest.dev/) configured for testing this package with the `sst shell` CLI.
-
+2. Start local development:
    ```bash
-   npm test
+   npx sst dev
    ```
 
-2. `functions/`
-
-   This is for your Lambda functions and it uses the `core` package as a local dependency.
-
-3. `scripts/`
-
-   This is for any scripts that you can run on your SST app using the `sst shell` CLI and [`tsx`](https://www.npmjs.com/package/tsx). For example, you can run the example script using:
-
+3. Deploy:
    ```bash
-   npm run shell src/example.ts
+   npx sst deploy                    # dev stage
+   npx sst deploy --stage production # production
    ```
 
-### Infrastructure
+## Commands
 
-The `infra/` directory allows you to logically split the infrastructure of your app into separate files. This can be helpful as your app grows.
+```bash
+# Development
+npx sst dev              # Start local dev with SST
+npx sst build            # Build with SST
+npx sst deploy           # Deploy to AWS
+npx sst test             # Run tests (Vitest)
+npx sst console          # Open SST Console
+npx sst diff             # Preview deployment changes
 
-In the template, we have an `api.ts`, and `storage.ts`. These export the created resources. And are imported in the `sst.config.ts`.
+# Crawlers (local execution)
+npm run crawl:dcimprov              # Dev stage
+npm run crawl:dcimprov:prod         # Production stage
+npm run crawl:dccomedyloft          # Dev stage
+npm run crawl:dccomedyloft:prod     # Production stage
 
----
+# Database
+npm run script:seed      # Seed database with sample data
+```
 
-**Join our community** [Discord](https://sst.dev/discord) | [YouTube](https://www.youtube.com/c/sst-dev) | [X.com](https://x.com/SST_dev)
+## Environment Variables
+
+See `.env.example`. Key vars: `GOOGLE_MAPS_API_KEY`, `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`, `AWS_REGION`, `DB_NAME`. SST-managed secrets include `OPENWEBNINJA_API_KEY` and `OPENROUTER_API_KEY`.
+
+## Data Flow
+
+1. **Crawlers** (ECS tasks) scrape event sources on scheduled crons
+2. Events are sent to **Step Functions** for normalization and validation
+3. Normalized events are saved to **DynamoDB** (single-table design)
+4. **Next.js frontend** fetches events from API Gateway with field projection support
+5. **Middleware** tracks page views via persistent visitor cookies → SQS → DynamoDB
+6. **Daily Lambda** computes analytics and sends email reports via SES

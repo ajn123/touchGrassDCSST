@@ -117,6 +117,7 @@ Client-side personalization using localStorage signals — no auth required.
 **API** (`packages/frontend/src/app/api/recommendations/route.ts` — Next.js, queries DynamoDB directly):
 - **With signals**: queries `eventCategoryIndex` GSI per category, deduplicates, scores by preference match (+3), click similarity (+2), recency (+1), and penalizes already-viewed events (-1)
 - **No signals (new user)**: falls back to `getCurrentAndFutureEvents()` sorted by date
+- **Category diversity**: `diversifyByCategory()` round-robins across category buckets so results show variety instead of clustering on one category
 
 **Component** (`packages/frontend/src/components/PersonalizedEvents.tsx`):
 - Always fetches on mount — no early-return gate
@@ -170,11 +171,12 @@ A daily Lambda cron (`generateMissingImagesCron`) also backfills real SVG placeh
 
 **Dynamic metadata** (via `generateMetadata()`):
 - Event detail pages — title, description, OG image from event data + `Event` JSON-LD schema
-- Group detail pages — title, description, OG from group data + `Organization` JSON-LD schema
+- Group detail pages — title, description, OG image from group data + `Organization` JSON-LD schema
 - Article detail pages — title, excerpt, OG image, published time + `Article` JSON-LD schema
+- Shop product pages — title, description, OG image from product data
 
 **Static metadata** (via `export const metadata`):
-- Homepage, articles listing, groups listing, comedy, about pages
+- Homepage, articles listing, groups listing, comedy, about, calendar, add-event, signup-emails pages
 
 **Structured data** (JSON-LD `<script type="application/ld+json">`):
 - Homepage: `WebSite` + `SearchAction` schema
@@ -202,6 +204,38 @@ Added to all detail pages:
 - Article pages — below the title in the article header
 
 OG meta tags on all detail pages ensure shared links show rich previews with title, description, and images.
+
+## Analytics & Visitor Tracking
+
+**Visitor identification** (`packages/frontend/src/middleware.ts`):
+- Persistent `tg_vid` cookie (UUID v4) set on first visit — httpOnly, secure, sameSite lax, 1-year expiry
+- Included in every analytics payload as `properties.visitorId`
+- Avoids double-counting from shared IPs (VPNs, corporate networks)
+
+**Page view tracking** (middleware → SQS → DynamoDB):
+- Middleware fires `POST /api/analytics/track` for every HTML GET request
+- Stored as `pk: ANALYTICS#USER_VISIT`, `sk: TIME#<ms>` with properties: page, visitorId, userAgent, referer, ip
+- Homepage visits recorded as `action: USER_VISIT`; other pages as `action: USER_ACTION`
+
+**Daily analytics email** (`packages/functions/src/analytics/dailyReport.ts`):
+- Lambda cron at 8 AM EST daily (`cron(0 13 * * ? *)`)
+- Queries last 14 days via `sk BETWEEN TIME#<14daysAgoMs> AND TIME#<nowMs>` — efficient range query
+- Computes: unique visitors (by visitorId, IP fallback), total hits, top 10 pages, top 5 external referrers
+- Weekly trend: compares 7-day avg vs previous 7-day avg (up/down/flat with ±5% threshold)
+- Warnings: zero visitors, >30% traffic drop, suspicious referrers (spam patterns), single visitor >50% traffic (bot)
+- Dark-themed HTML email sent via SES to admin addresses
+- Linked resources: `db`, `EmailConfig`
+
+**Admin dashboard** (`packages/frontend/src/app/admin/`):
+- Visits-by-day charts, event/group/article counts
+- Statistics API at `/api/statistics`
+
+## Admin Utilities
+
+`packages/frontend/src/lib/admin-utils.ts`:
+- `ADMIN_EMAILS` — centralized list of admin email addresses
+- `isAdminEmail(email)` — checks if an email is an admin; used in event detail pages, group pages, add-event form, and admin routes
+- Replaces previously hardcoded email arrays across multiple files
 
 ## Conventions
 

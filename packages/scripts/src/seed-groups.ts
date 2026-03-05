@@ -1,4 +1,9 @@
 import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
+import {
+  DynamoDBDocumentClient,
+  QueryCommand,
+  DeleteCommand,
+} from "@aws-sdk/lib-dynamodb";
 import { SFNClient, StartExecutionCommand } from "@aws-sdk/client-sfn";
 import * as fs from "fs";
 import * as path from "path";
@@ -85,13 +90,58 @@ async function seedGroups() {
     const items: any[] = [];
     let skippedCount = 0;
     let newGroupsCount = 0;
+    let updatedCount = 0;
+
+    // Create a document client for cleaning up stale schedules
+    const docClient = DynamoDBDocumentClient.from(client);
 
     // Process each group
     for (const group of groupsData) {
       const groupPk = `GROUP#${group.title}`;
 
-      // Skip if GROUP_INFO already exists (only check GROUP_INFO, not schedule items)
+      // If GROUP_INFO already exists, clean up stale schedules before re-inserting
       if (existingGroupIds.has(groupPk)) {
+        // Build set of valid schedule SKs from current groups.json
+        const validSks = new Set<string>();
+        if (group.schedules) {
+          for (const schedule of group.schedules) {
+            for (const day of schedule.days) {
+              const sortKey = `SCHEDULE#${day}_${schedule.time.replace(
+                /[:\s]/g,
+                ""
+              )}_${schedule.location?.replace(/[^a-zA-Z0-9]/g, "")}`;
+              validSks.add(sortKey);
+            }
+          }
+        }
+
+        // Query existing schedules for this group
+        const existingSchedules = await docClient.send(
+          new QueryCommand({
+            TableName: tableName,
+            KeyConditionExpression: "pk = :pk AND begins_with(sk, :sched)",
+            ExpressionAttributeValues: {
+              ":pk": groupPk,
+              ":sched": "SCHEDULE#",
+            },
+          })
+        );
+
+        // Delete stale schedules not in current groups.json
+        for (const item of existingSchedules.Items || []) {
+          if (!validSks.has(item.sk)) {
+            console.log(
+              `🗑️  Deleting stale schedule for ${group.title}: ${item.sk}`
+            );
+            await docClient.send(
+              new DeleteCommand({
+                TableName: tableName,
+                Key: { pk: item.pk, sk: item.sk },
+              })
+            );
+          }
+        }
+
         console.log(
           `⏭️  Skipping existing group: ${group.title} (GROUP_INFO already exists)`
         );

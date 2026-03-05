@@ -57,6 +57,9 @@ export function EntityDetail({
   description,
   rightActionNode,
 }: EntityDetailProps) {
+  const hasLargeSchedule =
+    Array.isArray(schedules) && schedules.length >= 3;
+
   return (
     <div className="border-t pt-6 mb-10">
       <div className="flex items-center justify-between mb-6">
@@ -66,18 +69,26 @@ export function EntityDetail({
 
       {/* Image and Details Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Image Section */}
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={title}
-            className="w-full rounded-lg shadow-md"
-          />
-        ) : (
-          <div className="w-full h-64 rounded-lg flex items-center justify-center">
-            <span>No image available</span>
-          </div>
-        )}
+        {/* Image Section + Description when schedule is large */}
+        <div>
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={title}
+              className="w-full rounded-lg shadow-md"
+            />
+          ) : (
+            <div className="w-full h-64 rounded-lg flex items-center justify-center">
+              <span>No image available</span>
+            </div>
+          )}
+
+          {hasLargeSchedule && description && (
+            <div className="mt-6">
+              <Description description={description} />
+            </div>
+          )}
+        </div>
 
         <div className="grid grid-cols-1">
           <div className="space-y-4">
@@ -95,12 +106,16 @@ export function EntityDetail({
         </div>
       </div>
 
-      <hr className="my-6 border-t border-gray-800" />
+      {!hasLargeSchedule && (
+        <>
+          <hr className="my-6 border-t border-gray-800" />
 
-      {description && (
-        <div className="mb-6">
-          <Description description={description} />
-        </div>
+          {description && (
+            <div className="mb-6">
+              <Description description={description} />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

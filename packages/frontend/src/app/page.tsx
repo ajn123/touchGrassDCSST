@@ -2,6 +2,7 @@ import ArticleCard from "@/components/ArticleCard";
 import Categories from "@/components/Categories";
 import PersonalizedEvents from "@/components/PersonalizedEvents";
 import SearchBar from "@/components/SearchBar";
+import WeekendEvents from "@/components/WeekendEvents";
 import { getArticles } from "@/lib/dynamodb/dynamodb-articles";
 import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
 import { getCategoriesFromEvents } from "@/lib/filter-events";
@@ -42,6 +43,19 @@ export default async function Home() {
   
   // Convert to the format expected by Categories component
   const categories: Category[] = categoryStrings.map((cat) => ({ category: cat }));
+
+  // Filter events happening this weekend (Fri/Sat/Sun)
+  const weekendDates = getWeekendDates();
+  const weekendEvents = events
+    .filter((e: any) => e.start_date && weekendDates.includes(e.start_date))
+    .sort((a: any, b: any) => {
+      const dateCmp = (a.start_date || "").localeCompare(b.start_date || "");
+      if (dateCmp !== 0) return dateCmp;
+      return (a.start_time || "").localeCompare(b.start_time || "");
+    });
+
+  // Diversify by category: round-robin so cards aren't all the same type
+  const diversifiedWeekend = diversifyByCategory(weekendEvents, 8);
 
   // Fetch latest articles
   const allArticles = await getArticles();
@@ -105,6 +119,9 @@ export default async function Home() {
       {/* Personalized Events - client component that hydrates after SSR */}
       <PersonalizedEvents />
 
+      {/* Happening This Weekend */}
+      <WeekendEvents events={diversifiedWeekend} />
+
       {/* Browse by Category */}
       <Categories categories={categories as Category[]} />
 
@@ -156,4 +173,81 @@ export default async function Home() {
       )}
     </main>
   );
+}
+
+/** Returns YYYY-MM-DD strings for this weekend's Fri, Sat, Sun in Eastern Time. */
+function getWeekendDates(): string[] {
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const now = new Date();
+  const todayStr = fmt.format(now); // "YYYY-MM-DD"
+  const today = new Date(todayStr + "T12:00:00");
+  const dow = today.getDay(); // 0=Sun, 5=Fri, 6=Sat
+
+  // Calculate days until Friday
+  let daysToFri = (5 - dow + 7) % 7;
+  // If it's Mon-Thu, jump to the upcoming Friday
+  // If it's Fri/Sat/Sun, we're in the current weekend
+  if (dow === 0) {
+    // Sunday — show just today
+    return [todayStr];
+  }
+  if (dow === 6) {
+    // Saturday — show Sat + Sun
+    const sun = new Date(today);
+    sun.setDate(sun.getDate() + 1);
+    return [todayStr, fmt.format(sun)];
+  }
+  if (dow === 5) {
+    daysToFri = 0; // already Friday
+  }
+
+  const fri = new Date(today);
+  fri.setDate(fri.getDate() + daysToFri);
+  const sat = new Date(fri);
+  sat.setDate(sat.getDate() + 1);
+  const sun = new Date(fri);
+  sun.setDate(sun.getDate() + 2);
+
+  return [fmt.format(fri), fmt.format(sat), fmt.format(sun)];
+}
+
+/** Round-robin across categories so results show variety. */
+function diversifyByCategory(events: any[], limit: number): any[] {
+  const buckets = new Map<string, any[]>();
+  for (const event of events) {
+    const cat = Array.isArray(event.category)
+      ? event.category[0] || "General"
+      : event.category || "General";
+    if (!buckets.has(cat)) buckets.set(cat, []);
+    buckets.get(cat)!.push(event);
+  }
+  const result: any[] = [];
+  const seen = new Set<string>();
+  const queues = Array.from(buckets.values());
+  const indices = new Array(queues.length).fill(0);
+
+  while (result.length < limit) {
+    let added = false;
+    for (let i = 0; i < queues.length; i++) {
+      if (result.length >= limit) break;
+      while (indices[i] < queues[i].length) {
+        const event = queues[i][indices[i]];
+        indices[i]++;
+        const id = event.pk || event.title;
+        if (!seen.has(id)) {
+          seen.add(id);
+          result.push(event);
+          added = true;
+          break;
+        }
+      }
+    }
+    if (!added) break;
+  }
+  return result;
 }

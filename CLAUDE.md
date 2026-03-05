@@ -50,7 +50,7 @@ Scripts in `packages/scripts/` can be run with: `sst run packages/scripts/src/<s
 - `tasks.ts` — ECS Fargate task definitions for crawlers
 - `cron.ts` — EventBridge schedules (crawlers run every 7 days)
 - `step_functions.ts` — Event normalization pipeline
-- `storage.ts` — S3 bucket
+- `storage.ts` — S3 bucket (public access enabled)
 - `email.ts` / `auth.ts` — SES + OpenAuth
 - `queue.ts` — SQS for analytics
 
@@ -139,7 +139,8 @@ See `.env.example`. Key vars: `GOOGLE_MAPS_API_KEY`, `NEXT_PUBLIC_GOOGLE_MAPS_AP
 
 `packages/frontend/src/lib/image-utils.ts` — `resolveImageUrl(image_url, category, title, venue)`:
 - If `image_url` is set, returns it directly (http/https) or resolves from `/images/` (static)
-- If missing, generates an **inline SVG data URI** placeholder showing the event title, category badge, and venue on a dark branded background — no external requests needed
+- If missing, generates an **inline SVG data URI** placeholder showing the event title (large 52px bold text), category badge with colored background, and venue on a dark branded background with subtle decorative circle — no external requests needed
+- SVG colors use `%23` encoding for `#` in data URIs
 - `shouldBeUnoptimized(url)` returns true for external URLs and `data:` URIs (used to bypass Next.js image optimization)
 
 A daily Lambda cron (`generateMissingImagesCron`) also backfills real SVG placeholder images to S3 for any events without `image_url`, using `generateStyledEventSvgBuffer` from `@touchgrass/shared-utils`.

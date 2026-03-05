@@ -70,14 +70,24 @@ export default async function ItemPage({
   const user = await auth();
   const awaitedParams = await params;
 
-  const isAdmin = isAdminEmail(user?.properties?.id);
+  const isAdmin = isAdminEmail(user ? user.properties?.id : undefined);
 
   const WHITELIST: any = [];
 
   const item = await getEvent(awaitedParams.id);
 
   if (!item) {
-    return <div>Item not found</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Event Not Found</h1>
+          <p className="mb-4">The event you&apos;re looking for doesn&apos;t exist or may have passed.</p>
+          <a href="/events" className="text-green-400 hover:text-green-300 underline">
+            Browse upcoming events
+          </a>
+        </div>
+      </div>
+    );
   }
 
   // Check if event is public - if not, only admins can see it

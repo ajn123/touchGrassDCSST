@@ -1,5 +1,5 @@
 export const bucket = new sst.aws.Bucket("MediaBucket", {
-  public: false,
+  public: true,
   cors: [
     {
       allowedHeaders: ["*"],

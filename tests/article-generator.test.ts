@@ -81,7 +81,8 @@ describe("getWeekNumber", () => {
   });
 
   it("week 1 is in early January", () => {
-    const week = getWeekNumber(new Date("2026-01-05"));
+    // Use local date constructor to avoid UTC→local timezone shift
+    const week = getWeekNumber(new Date(2026, 0, 5));
     expect(week).toBe(2); // Jan 5 2026 is a Monday in week 2
   });
 
@@ -101,8 +102,9 @@ describe("getTopicForWeek", () => {
   });
 
   it("returns the same topic for dates in the same week", () => {
-    const monday = getTopicForWeek(new Date("2026-03-02"));
-    const wednesday = getTopicForWeek(new Date("2026-03-04"));
+    // Use local date constructor to avoid UTC→local timezone shift
+    const monday = getTopicForWeek(new Date(2026, 2, 2));
+    const wednesday = getTopicForWeek(new Date(2026, 2, 4));
     expect(monday.slug).toBe(wednesday.slug);
   });
 

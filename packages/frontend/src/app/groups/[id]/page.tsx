@@ -65,7 +65,7 @@ export default async function GroupPage({
   const user = await auth();
   const awaitedParams = await params;
 
-  const isAdmin = isAdminEmail(user?.properties?.id);
+  const isAdmin = isAdminEmail(user ? user.properties?.id : undefined);
 
   const groupTitle = decodeURIComponent(awaitedParams.id);
   const group = await getGroup(groupTitle);
@@ -160,7 +160,11 @@ export default async function GroupPage({
             url={`https://touchgrassdc.com/groups/${encodeURIComponent(group.title)}`}
           />
         }
-        imageUrl={resolveImageUrl(group.image_url) || undefined}
+        imageUrl={resolveImageUrl(
+          group.image_url,
+          Array.isArray(group.category) ? group.category[0] : group.category,
+          group.title,
+        ) || undefined}
         cost={group.cost}
         socials={group.socials}
         location={group.location}

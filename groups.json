@@ -781,5 +781,905 @@
       "website": "https://boulderingproject.com/partners-page-eckington/"
     },
     "isPublic": true
+  },
+
+  {
+    "title": "Pacers Running",
+    "description": "DC's flagship run shop hosts free group runs from multiple locations across the DMV. With runs departing from Georgetown, 14th Street, Navy Yard, Arlington, and Alexandria, there's always a Pacers run near you. All paces welcome.",
+    "category": ["Running", "Sports"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "schedules": [
+      {
+        "days": ["Monday"],
+        "recurrence_type": "weekly",
+        "time": "Check website for times",
+        "location": "Various Pacers locations (Georgetown, 14th St, Navy Yard, Arlington, Alexandria)"
+      },
+      {
+        "days": ["Wednesday"],
+        "recurrence_type": "weekly",
+        "time": "Check website for times",
+        "location": "Various Pacers locations"
+      },
+      {
+        "days": ["Saturday"],
+        "recurrence_type": "weekly",
+        "time": "Check website for times",
+        "location": "Various Pacers locations"
+      }
+    ],
+    "socials": {
+      "website": "https://www.pacersrunning.com/pages/fun-runs",
+      "instagram": "https://www.instagram.com/pacersrunning/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "November Project DC",
+    "description": "A free fitness movement that meets rain or shine for intense outdoor workouts three days a week. Mondays at Malcolm X Park, Wednesdays at the Lincoln Memorial, and Fridays at rotating locations. Show up, work hard, and join one of the most welcoming fitness communities in DC.",
+    "category": ["Running", "Fitness"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "schedules": [
+      {
+        "days": ["Monday"],
+        "recurrence_type": "weekly",
+        "time": "6:30 AM",
+        "location": "Joan of Arc Statue, Malcolm X Park, Washington, DC"
+      },
+      {
+        "days": ["Wednesday"],
+        "recurrence_type": "weekly",
+        "time": "6:20 AM",
+        "location": "Reflecting Pool Steps, Lincoln Memorial, Washington, DC"
+      },
+      {
+        "days": ["Friday"],
+        "recurrence_type": "weekly",
+        "time": "6:30 AM",
+        "location": "Rotating — check Instagram for details"
+      }
+    ],
+    "socials": {
+      "website": "https://november-project.com/washington-dc/",
+      "instagram": "https://www.instagram.com/novemberprojectdc/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Georgetown Running Company Run Club",
+    "description": "Weekly group run departing from the Georgetown Running Company store. A casual, social run through Georgetown and along the C&O Canal towpath. All paces welcome, with post-run socializing at nearby spots.",
+    "category": ["Running", "Sports"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "schedules": [
+      {
+        "days": ["Wednesday"],
+        "recurrence_type": "weekly",
+        "time": "6:30 PM",
+        "location": "Georgetown Running Company, 3401 M St NW, Washington, DC"
+      }
+    ],
+    "socials": {
+      "website": "https://georgetownrunningcompany.com/",
+      "instagram": "https://www.instagram.com/georgetownrunco/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Lululemon Run Clubs DC",
+    "description": "Free weekly run clubs hosted by various Lululemon stores across the DC area. Each store offers its own schedule and route. Great for meeting fellow runners in a social, low-pressure environment.",
+    "category": ["Running", "Social"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://www.lululemon.com/stores",
+      "instagram": "https://www.instagram.com/lululemon/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Heartbreak Run Club",
+    "description": "A vibrant DC-area run club with a strong social media community. Known for themed runs, post-run socials, and an energetic atmosphere. Follow their Instagram for weekly meetup details and locations.",
+    "category": ["Running", "Social"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "instagram": "https://www.instagram.com/heartbreakrunclub/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Bethesda Running Club",
+    "description": "A community running club based in Bethesda, Maryland serving runners of all abilities. Organizes group runs, training programs, and social events in the Bethesda and greater Montgomery County area.",
+    "category": ["Running", "Sports"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://www.bethesdarunningclub.org/"
+    },
+    "isPublic": true
+  },
+
+  {
+    "title": "East City Bookshop Book Club",
+    "description": "Capitol Hill's beloved independent bookstore hosts a monthly book club open to all readers. Selections span fiction, nonfiction, and local authors. Check their website for the current pick and meeting dates.",
+    "category": ["Book Club"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://www.eastcitybookshop.com/book-clubs",
+      "instagram": "https://www.instagram.com/eastcitybookshop/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Loyalty Bookstores Book Club",
+    "description": "An independent bookstore in Petworth and Silver Spring that centers diverse voices. Their monthly book club features works by authors of color and from marginalized communities. Welcoming space for all readers.",
+    "category": ["Book Club"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://www.loyaltybookstores.com/",
+      "instagram": "https://www.instagram.com/loyaltybookstores/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Lost City Books Book Club",
+    "description": "An independent used bookstore in Adams Morgan that hosts a monthly book club. Known for eclectic selections and a cozy, community-driven atmosphere. Check their events page for upcoming meetings.",
+    "category": ["Book Club"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://www.lostcitybooks.com/",
+      "instagram": "https://www.instagram.com/lostcitybooks/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Capitol Hill Books Reading Groups",
+    "description": "The beloved, floor-to-ceiling packed used bookstore on Capitol Hill organizes reading groups for book lovers. A DC literary institution since 1991. Check their website for current group schedules.",
+    "category": ["Book Club"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://www.capitolhillbooks-dc.com/",
+      "instagram": "https://www.instagram.com/capitolhillbooks/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Kramers Book Clubs",
+    "description": "The iconic Dupont Circle bookstore-café hosts multiple book clubs covering fiction, nonfiction, and more. A DC literary landmark since 1976 with a vibrant community of readers. Check their events calendar for details.",
+    "category": ["Book Club", "Social"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://www.kramers.com/book-clubs",
+      "instagram": "https://www.instagram.com/kramersdc/"
+    },
+    "isPublic": true
+  },
+
+  {
+    "title": "New Columbia Swing",
+    "description": "DC's home for swing dancing with Friday and Saturday evening dances featuring live bands and DJs. Beginner lessons included before each dance. No partner or experience needed — just come ready to have fun.",
+    "category": ["Dance", "Social"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "10-20"
+    },
+    "schedules": [
+      {
+        "days": ["Friday"],
+        "recurrence_type": "weekly",
+        "time": "8:00 PM",
+        "location": "Check website for venue"
+      },
+      {
+        "days": ["Saturday"],
+        "recurrence_type": "weekly",
+        "time": "8:00 PM",
+        "location": "Check website for venue"
+      }
+    ],
+    "socials": {
+      "website": "https://newcolumbiaswing.com/",
+      "instagram": "https://www.instagram.com/newcolumbiaswing/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Friday Night Dancers DC",
+    "description": "A free outdoor social dance gathering on Friday evenings in DC. Styles range from salsa and bachata to swing and freestyle. A welcoming, open-air dance community — no partner needed.",
+    "category": ["Dance", "Social"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "schedules": [
+      {
+        "days": ["Friday"],
+        "recurrence_type": "weekly",
+        "time": "Evening — check social media for times",
+        "location": "Outdoor locations in DC — check social media"
+      }
+    ],
+    "socials": {
+      "instagram": "https://www.instagram.com/fridaynightdancersdc/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Glen Echo Park Partner Dancing",
+    "description": "Historic Glen Echo Park hosts partner dancing Friday through Sunday evenings including swing, contra, Cajun, and ballroom. The iconic Spanish Ballroom and Bumper Car Pavilion provide a magical setting. Beginner lessons often included.",
+    "category": ["Dance", "Social"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "10-20"
+    },
+    "schedules": [
+      {
+        "days": ["Friday"],
+        "recurrence_type": "weekly",
+        "time": "8:00 PM",
+        "location": "Glen Echo Park, 7300 MacArthur Blvd, Glen Echo, MD"
+      },
+      {
+        "days": ["Saturday"],
+        "recurrence_type": "weekly",
+        "time": "8:00 PM",
+        "location": "Glen Echo Park, 7300 MacArthur Blvd, Glen Echo, MD"
+      },
+      {
+        "days": ["Sunday"],
+        "recurrence_type": "weekly",
+        "time": "7:00 PM",
+        "location": "Glen Echo Park, 7300 MacArthur Blvd, Glen Echo, MD"
+      }
+    ],
+    "socials": {
+      "website": "https://glenechopark.org/partner-dancing"
+    },
+    "isPublic": true
+  },
+
+  {
+    "title": "DC Gay Flag Football League",
+    "description": "One of the largest LGBTQ+ flag football leagues in the country. Seasonal play on Saturdays with multiple skill divisions. A welcoming, competitive, and social community for all experience levels.",
+    "category": ["Sports", "LGBTQ+"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "50-80"
+    },
+    "schedules": [
+      {
+        "days": ["Saturday"],
+        "recurrence_type": "weekly",
+        "time": "Seasonal — check website",
+        "location": "Various DC fields"
+      }
+    ],
+    "socials": {
+      "website": "https://dcgffl.org/",
+      "instagram": "https://www.instagram.com/dcgffl/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Stonewall Sports DC",
+    "description": "An LGBTQ+ and ally social sports league offering seasonal leagues in kickball, dodgeball, bocce, volleyball, and more. Focused on community, fun, and inclusivity with post-game socials at local bars.",
+    "category": ["Sports", "Social", "LGBTQ+"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "40-80"
+    },
+    "socials": {
+      "website": "https://www.stonewallsports.org/dc",
+      "instagram": "https://www.instagram.com/stonewallsportsdc/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Stonewall Kickball DC",
+    "description": "DC's premier LGBTQ+ kickball league plays on Sundays during the season. Known for its spirited post-game bar parties and strong community bonds. All skill levels welcome — the emphasis is on fun and inclusivity.",
+    "category": ["Sports", "LGBTQ+"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "40-70"
+    },
+    "schedules": [
+      {
+        "days": ["Sunday"],
+        "recurrence_type": "weekly",
+        "time": "Seasonal — check website",
+        "location": "Various DC fields"
+      }
+    ],
+    "socials": {
+      "website": "https://dckickball.stonewallsports.org/",
+      "instagram": "https://www.instagram.com/stonewallkickballdc/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Team DC",
+    "description": "An umbrella organization supporting LGBTQ+ sports teams and athletes in the DC metro area. Connects you to dozens of LGBTQ+-friendly sports leagues and teams across every sport imaginable.",
+    "category": ["Sports", "LGBTQ+"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://www.teamdc.org/",
+      "instagram": "https://www.instagram.com/teamdc_/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Gay for Good DC",
+    "description": "A volunteer organization that mobilizes the LGBTQ+ community and allies for monthly service projects across the DC area. Projects range from park cleanups to food bank shifts. A great way to give back and meet people.",
+    "category": ["Volunteer", "LGBTQ+"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "schedules": [
+      {
+        "days": ["Saturday"],
+        "recurrence_type": "monthly",
+        "time": "Check website for times",
+        "location": "Various locations in DC"
+      }
+    ],
+    "socials": {
+      "website": "https://www.gayforgood.org/dc/",
+      "instagram": "https://www.instagram.com/gayforgooddc/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Gay Men's Chorus of Washington",
+    "description": "One of the premier LGBTQ+ choruses in the country, performing choral music since 1981. Rehearsals on Tuesday evenings. Open to singers of all skill levels who identify as male. Multiple performances throughout the year.",
+    "category": ["Arts", "LGBTQ+"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "0-50"
+    },
+    "schedules": [
+      {
+        "days": ["Tuesday"],
+        "recurrence_type": "weekly",
+        "time": "7:00 PM",
+        "location": "Check website for rehearsal location"
+      }
+    ],
+    "socials": {
+      "website": "https://gmcw.org/",
+      "instagram": "https://www.instagram.com/gmcwdc/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "The DC Center",
+    "description": "The DC area's community center for the LGBTQ+ community offering daily drop-in hours, support groups, social events, and resources. A welcoming space for everyone in the LGBTQ+ community and allies.",
+    "category": ["Social", "LGBTQ+"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://thedccenter.org/",
+      "instagram": "https://www.instagram.com/thedccenter/"
+    },
+    "isPublic": true
+  },
+
+  {
+    "title": "FXA Sports",
+    "description": "Formerly known as Federal Sports, FXA offers coed and single-gender recreational sports leagues across DC, Maryland, and Virginia. Sports include soccer, flag football, softball, volleyball, and more with post-game socials.",
+    "category": ["Sports", "Social"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "50-90"
+    },
+    "socials": {
+      "website": "https://fxasports.com/",
+      "instagram": "https://www.instagram.com/fxasports/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "District Soccer",
+    "description": "Adult recreational soccer leagues in Washington, DC with divisions for all skill levels. Seasonal play with both coed and single-gender options. A fun way to stay active and meet fellow soccer fans in the city.",
+    "category": ["Sports", "Social"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "50-80"
+    },
+    "socials": {
+      "website": "https://www.districtsoccer.com/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "WATA Tennis",
+    "description": "The Washington Area Tennis Association organizes seasonal tennis leagues, tournaments, and social events for adult players across the DC metro area. Divisions from beginner to advanced.",
+    "category": ["Sports"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "30-60"
+    },
+    "socials": {
+      "website": "https://watadc.org/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Rogue Cornhole DC",
+    "description": "A social cornhole league in DC that combines competition with community. Weekly games at local bars and venues with post-game socializing. No experience needed — teams of all skill levels welcome.",
+    "category": ["Sports", "Social"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "30-50"
+    },
+    "socials": {
+      "website": "https://roguecornhole.com/",
+      "instagram": "https://www.instagram.com/roguecornhole/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Play Play DC",
+    "description": "A social sports and events company in DC offering a variety of recreational leagues, tournaments, and social events. Sports include volleyball, kickball, soccer, and more. Focused on fun and meeting new people.",
+    "category": ["Sports", "Social"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "30-60"
+    },
+    "socials": {
+      "website": "https://playplaydc.com/",
+      "instagram": "https://www.instagram.com/playplaydc/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Capital Rowing Club",
+    "description": "A community rowing club on the Potomac River open to adults of all experience levels. Offers learn-to-row programs, competitive teams, and recreational rowing. Morning practices with stunning views of the DC monuments.",
+    "category": ["Sports"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "50-100"
+    },
+    "schedules": [
+      {
+        "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        "recurrence_type": "weekly",
+        "time": "Early morning — check website",
+        "location": "Anacostia River, Washington, DC"
+      }
+    ],
+    "socials": {
+      "website": "https://www.capitalrowing.org/",
+      "instagram": "https://www.instagram.com/capitalrowing/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Potomac Boat Club",
+    "description": "One of DC's oldest athletic organizations, founded in 1859. Located on the Georgetown waterfront, the club offers rowing, paddling, and social events. A historic institution on the Potomac River.",
+    "category": ["Sports"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "50-100"
+    },
+    "socials": {
+      "website": "https://www.potomacboatclub.org/"
+    },
+    "isPublic": true
+  },
+
+  {
+    "title": "Sierra Club Potomac Region",
+    "description": "The local chapter of the nation's largest grassroots environmental organization. Organizes weekend hikes, nature outings, conservation volunteer events, and educational programs throughout the DC, Maryland, and Virginia region.",
+    "category": ["Outdoors", "Hiking"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "0-20"
+    },
+    "schedules": [
+      {
+        "days": ["Saturday", "Sunday"],
+        "recurrence_type": "weekly",
+        "time": "Check website for times",
+        "location": "Various trails in DC, MD, VA"
+      }
+    ],
+    "socials": {
+      "website": "https://www.sierraclub.org/virginia/",
+      "instagram": "https://www.instagram.com/sierraclub/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Potomac Appalachian Trail Club",
+    "description": "PATC maintains over 1,000 miles of trails including 240 miles of the Appalachian Trail. Organizes hiking, backpacking, trail maintenance, and cabin trips. One of the most active outdoor clubs in the Mid-Atlantic since 1927.",
+    "category": ["Outdoors", "Hiking"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "0-40"
+    },
+    "schedules": [
+      {
+        "days": ["Saturday", "Sunday"],
+        "recurrence_type": "weekly",
+        "time": "Check website for trip schedule",
+        "location": "Various trailheads in DC, MD, VA, WV"
+      }
+    ],
+    "socials": {
+      "website": "https://www.patc.net/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Washington Women Outdoors",
+    "description": "A nonprofit outdoor adventure club for women in the DC area offering hiking, backpacking, kayaking, skiing, and more. Trips range from beginner-friendly day hikes to challenging multi-day backcountry adventures.",
+    "category": ["Outdoors", "Hiking", "Social"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "0-30"
+    },
+    "socials": {
+      "website": "https://washingtonwomenoutdoors.org/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Potomac Mountain Club",
+    "description": "A DC-area outdoor recreation club focused on rock climbing, hiking, and mountaineering. Organizes weekend climbing trips, hiking outings, and climbing gym meetups. Welcomes all skill levels from beginners to experienced climbers.",
+    "category": ["Outdoors", "Hiking", "Climbing"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "0-20"
+    },
+    "socials": {
+      "website": "https://www.potomacmountainclub.org/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Mid-Atlantic Off-Road Enthusiasts",
+    "description": "MORE builds and maintains mountain bike trails throughout the DC metro area and organizes group rides for all skill levels. One of the largest mountain biking clubs on the East Coast with trails in Maryland and Virginia.",
+    "category": ["Cycling", "Outdoors"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "0-35"
+    },
+    "socials": {
+      "website": "https://more-mtb.org/",
+      "instagram": "https://www.instagram.com/moremtb/"
+    },
+    "isPublic": true
+  },
+
+  {
+    "title": "Streets Calling Bike Club DC",
+    "description": "A community cycling group in DC that organizes weekly social rides through the city. Open to all riders and bike types. A welcoming crew focused on exploring DC neighborhoods together on two wheels.",
+    "category": ["Cycling", "Social"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "instagram": "https://www.instagram.com/streetscallingdc/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "DC Bike Party",
+    "description": "A free, monthly group bike ride through the streets of DC on the second Friday of every month. Hundreds of riders cruise together at a leisurely pace with music and good vibes. All bikes and riders welcome.",
+    "category": ["Cycling", "Social"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "schedules": [
+      {
+        "days": ["Friday"],
+        "recurrence_type": "monthly",
+        "time": "7:00 PM — 2nd Friday of each month",
+        "location": "Check social media for start location"
+      }
+    ],
+    "socials": {
+      "website": "https://dcbikeparty.com/",
+      "instagram": "https://www.instagram.com/dcbikeparty/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "District Cycling Collective",
+    "description": "A community-driven cycling group in DC that organizes weekly rides, advocacy events, and social gatherings for cyclists of all levels. Focused on making cycling more accessible and fun in the District.",
+    "category": ["Cycling", "Sports"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "instagram": "https://www.instagram.com/districtcyclingcollective/"
+    },
+    "isPublic": true
+  },
+
+  {
+    "title": "One Brick DC",
+    "description": "A volunteer network that makes it easy to give back without a long-term commitment. Monthly volunteer events across DC ranging from park cleanups to food bank shifts. Meet like-minded people while making a difference.",
+    "category": ["Volunteer", "Social"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://dc.onebrick.org/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "GatherDC",
+    "description": "A community organization that brings DC residents together through social events, volunteer opportunities, and neighborhood meetups. Regular happy hours, game nights, and community service projects.",
+    "category": ["Social", "Volunteer"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://gatherdc.org/",
+      "instagram": "https://www.instagram.com/gatherdc/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "City Blossoms",
+    "description": "A DC-based nonprofit that creates kid-driven green spaces in under-resourced neighborhoods. Volunteer opportunities include garden builds, planting days, and youth program support. Seasonal events throughout the year.",
+    "category": ["Volunteer", "Outdoors"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://cityblossoms.org/",
+      "instagram": "https://www.instagram.com/cityblossoms/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Cultivate the City",
+    "description": "An urban farming nonprofit in DC that operates rooftop farms and community gardens. Volunteer to help grow fresh produce for the community. Seasonal volunteer days and workshops throughout the growing season.",
+    "category": ["Volunteer", "Outdoors"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://cultivatethecity.com/",
+      "instagram": "https://www.instagram.com/cultivatethecity/"
+    },
+    "isPublic": true
+  },
+
+  {
+    "title": "DC Social Collective",
+    "description": "A social group that organizes events for young professionals in DC including happy hours, brunches, fitness classes, and cultural outings. A great way to expand your social circle in the District.",
+    "category": ["Social"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "10-30"
+    },
+    "socials": {
+      "instagram": "https://www.instagram.com/dcsocialcollective/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Pasta Social Club",
+    "description": "A supper club that brings strangers together over homemade pasta in DC. Monthly dinners at rotating venues where you meet new people while enjoying freshly made Italian dishes. Tickets sell out fast.",
+    "category": ["Social"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "30-60"
+    },
+    "socials": {
+      "instagram": "https://www.instagram.com/pastasocialclub/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Chess on Tap",
+    "description": "A casual chess meetup at DC-area bars where players of all skill levels gather for games over drinks. No chess set needed — boards are provided. A fun, low-key way to sharpen your game and meet people.",
+    "category": ["Board Games", "Social"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "instagram": "https://www.instagram.com/chessontap/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Washington Improv Theater",
+    "description": "DC's nonprofit improv theater offering classes, shows, and a welcoming community of performers. Take a class to learn improv comedy or catch a show any night of the week. No experience needed to start.",
+    "category": ["Arts", "Social"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "15-25"
+    },
+    "socials": {
+      "website": "https://www.witdc.org/",
+      "instagram": "https://www.instagram.com/witdc/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Capitol Hill Writers Group",
+    "description": "A monthly gathering of writers on Capitol Hill sharing work and providing constructive feedback. Open to writers of all genres and experience levels — fiction, nonfiction, poetry, and more.",
+    "category": ["Arts", "Education"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "meetup": "https://www.meetup.com/capitol-hill-writers/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "DC Writers' Salon",
+    "description": "A supportive community for DC-area writers offering monthly meetups, workshops, and writing sessions. Whether you're working on a novel, screenplay, or blog, this group provides motivation and feedback.",
+    "category": ["Arts", "Education"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "meetup": "https://www.meetup.com/dc-writers-salon/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "Congressional Chorus",
+    "description": "A premier community chorus in DC that brings together singers from across the metro area. Tuesday evening rehearsals with multiple concerts per season at iconic DC venues. Auditions held seasonally — all voice parts welcome.",
+    "category": ["Arts"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "0-50"
+    },
+    "schedules": [
+      {
+        "days": ["Tuesday"],
+        "recurrence_type": "weekly",
+        "time": "7:00 PM",
+        "location": "Check website for rehearsal location"
+      }
+    ],
+    "socials": {
+      "website": "https://www.congressionalchorus.org/",
+      "instagram": "https://www.instagram.com/congressionalchorus/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "City Choir of Washington",
+    "description": "A vibrant community choir open to singers of all backgrounds and skill levels. Weekly rehearsals and performances throughout the year featuring diverse choral repertoire. No audition required.",
+    "category": ["Arts"],
+    "cost": {
+      "type": "variable",
+      "currency": "USD",
+      "amount": "0-50"
+    },
+    "socials": {
+      "website": "https://www.citychoirofwashington.org/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "National Capital Astronomers",
+    "description": "An amateur astronomy club serving the DC area since 1937. Monthly meetings with guest speakers, telescope viewings, and star parties at nearby dark-sky locations. Perfect for space enthusiasts of all levels.",
+    "category": ["Education"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://capitalastronomers.org/"
+    },
+    "isPublic": true
+  },
+  {
+    "title": "National Capital Area Garden Clubs",
+    "description": "A federation of garden clubs in the DC metro area organizing monthly meetings, garden tours, flower shows, and educational programs. Connect with fellow gardening enthusiasts across the region.",
+    "category": ["Outdoors", "Social"],
+    "cost": {
+      "type": "free",
+      "currency": "USD",
+      "amount": 0
+    },
+    "socials": {
+      "website": "https://www.ncagardenclubs.org/"
+    },
+    "isPublic": true
   }
 ]

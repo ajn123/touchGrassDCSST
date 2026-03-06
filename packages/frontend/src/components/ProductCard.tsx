@@ -33,7 +33,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
   return (
     <Link href={`/shop/${product.slug}`}>
-      <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 hover:scale-105 transform h-full flex flex-col">
+      <div className="rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] transform h-full flex flex-col border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60">
         <div className="relative h-48 flex-shrink-0">
           {!imageError ? (
             <Image
@@ -82,14 +82,14 @@ export default function ProductCard({ product }: { product: Product }) {
           <span className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
             {product.category}
           </span>
-          <h3 className="text-xl font-semibold mb-2 text-black line-clamp-2 min-h-[3rem]">
+          <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100 line-clamp-2 min-h-[3rem]">
             {product.title}
           </h3>
-          <p className="text-gray-600 mb-4 flex-1 line-clamp-2 min-h-[2.5rem]">
+          <p className="text-gray-600 dark:text-gray-400 mb-4 flex-1 line-clamp-2 min-h-[2.5rem]">
             {product.shortDescription}
           </p>
           <div className="mt-auto flex items-baseline gap-2">
-            <span className="text-lg font-bold text-gray-900">
+            <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
               ${product.price.toFixed(2)}
             </span>
             {product.compareAtPrice && (

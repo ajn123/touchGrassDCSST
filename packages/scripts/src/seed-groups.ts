@@ -128,8 +128,11 @@ async function seedGroups() {
         );
 
         // Delete stale schedules not in current groups.json
+        const existingScheduleSks = new Set(
+          (existingSchedules.Items || []).map((item) => item.sk as string)
+        );
         for (const item of existingSchedules.Items || []) {
-          if (!validSks.has(item.sk)) {
+          if (!validSks.has(item.sk as string)) {
             console.log(
               `🗑️  Deleting stale schedule for ${group.title}: ${item.sk}`
             );
@@ -139,6 +142,38 @@ async function seedGroups() {
                 Key: { pk: item.pk, sk: item.sk },
               })
             );
+          }
+        }
+
+        // Add missing schedule items for existing groups
+        if (group.schedules && group.schedules.length > 0) {
+          for (const schedule of group.schedules) {
+            for (const day of schedule.days) {
+              const sortKey = `SCHEDULE#${day}_${schedule.time.replace(
+                /[:\s]/g,
+                ""
+              )}_${schedule.location?.replace(/[^a-zA-Z0-9]/g, "")}`;
+              if (!existingScheduleSks.has(sortKey)) {
+                console.log(
+                  `📅 Adding missing schedule for ${group.title}: ${sortKey}`
+                );
+                items.push({
+                  pk: `GROUP#${group.title}`,
+                  sk: sortKey,
+                  title: group.title,
+                  category:
+                    group.category && group.category.length > 0
+                      ? group.category.join(",")
+                      : "Uncategorized",
+                  isPublic: (group.isPublic ?? true).toString(),
+                  scheduleDay: day,
+                  scheduleTime: schedule.time,
+                  scheduleLocation: schedule.location,
+                  createdAt: Date.now(),
+                });
+                updatedCount++;
+              }
+            }
           }
         }
 

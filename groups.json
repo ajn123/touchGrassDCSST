@@ -16,8 +16,8 @@
     "category": [
       "Running"
     ],
-    "description": "A running group in Ballston.  Meets in front of the Compass Coffee in Ballston.  Check the intagram for more details",
-    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSVwO3bqazv0vCQWFYQ5-TX4JQgQ-K5rp6KA&s",
+    "description": "A running group in Ballston.  Meets in front of the Compass Coffee in Ballston.  Check the Instagram for more details",
+    "image_url": "",
     "cost": {
       "type": "free",
       "currency": "USD",
@@ -52,7 +52,7 @@
     "socials": {
       "website": "https://www.citygirlswhowalkdc.org/",
       "discord": "https://discord.com/invite/7axRj2mdbE",
-      "instagram": "https://www.instagram.com/citygirlsdc/?hl=en"
+      "instagram": "https://www.instagram.com/citygirlsdc/"
     },
     "description": "DC’s free social club for women.  They have some coed events as well.  Check the website for more details",
     "category": [
@@ -68,7 +68,7 @@
   {
     "title": "Clarendon Run Club",
     "description": "A run club in clarendon.  Meets in front of Tatte (2805 Clarendon Blvd)",
-    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT73ru5MCh6bPDryTviCqFbK1dFLv7Y6x6UiA&s",
+    "image_url": "",
     "socials": {
       "instagram": "https://www.instagram.com/clarendonrunclub/"
     },
@@ -116,13 +116,14 @@
         "time": "7:00 PM",
         "location": "Eastern Senior High School Track, Washington, DC"
       },
-      {
+{
         "days": [
           "Saturday"
         ],
         "recurrence_type": "weekly",
-        "time": "9:00 AM",
-        "location": "Various coffee shops across DC — check website"
+        "time": "8:00 AM",
+        "location": "Various coffee shops and small businesses across DC — check website",
+        "notes": "8 AM in summer, 9-10 AM other seasons. 3-mile route always available."
       }
     ],
     "socials": {
@@ -146,7 +147,7 @@
     },
     "socials": {
       "website": "https://www.districtrunningcollective.com/",
-      "instagram": "https://www.instagram.com/districtrunningcollective/?hl=en"
+      "instagram": "https://www.instagram.com/districtrunningcollective/"
     },
     "schedules": [
       {
@@ -170,7 +171,7 @@
   },
   {
     "title": "Dudes In The District",
-    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ5yAP-4Z7PUT4T1Kg-Z608YAhoTo1qyDyeSw&s",
+    "image_url": "",
     "socials": {
       "website": "https://www.dudesinthedistrict.com/",
       "instagram": "https://www.instagram.com/dudesinthedistrict/",
@@ -190,9 +191,7 @@
   {
     "title": "Washington Area Frisbee Club",
     "category": [
-      "Sports",
-      "Frisbee",
-      "Ultimate"
+      "Sports"
     ],
     "image_url": "https://dcfray.com/wp-content/uploads/2018/10/frisbee.jpg",
     "socials": {
@@ -202,7 +201,7 @@
     "isPublic": true
   },
   {
-    "title": "Labrynth Board Game Night",
+    "title": "Labyrinth Board Game Night",
     "image_url": "https://d3flpus5evl89n.cloudfront.net/611434a2e9d13377b7079d53/611435dfe9d13377b7079ef9/scaled_384.jpg",
     "description": "A group of people who meet up to play board games.  Check the website for more details Thursday is open gaming night here at Labyrinth! Registration is not required but seating is limited. To make the most of our available seating this event will be on a first come, first served basis.",
     "socials": {
@@ -214,7 +213,8 @@
           "Thursday"
         ],
         "recurrence_type": "weekly",
-        "time": "6:00 PM - 10:00 PM"
+        "time": "6:00 PM - 10:00 PM",
+        "location": "Labyrinth Games & Puzzles, 645 Pennsylvania Ave SE, Washington, DC"
       }
     ],
     "category": [
@@ -311,9 +311,7 @@
   {
     "title": "Volo Sports",
     "image_url": "https://www.myamericanave.com/media/1512/vince-fleming-azvpxrydijk-unsplash-1.jpg?width=700&mode=crop&quality=80",
-    "description": "Volo Sports is a social sports club that offers a wide range of sports activities for adults. They offer basketball, volleyball, and soccer and more! (check the wesbite for more details)  They also offer a variety of social events, such as happy hours and game nights.",
-    "start_date": "",
-    "end_date": "",
+    "description": "Volo Sports is a social sports league in DC offering kickball, dodgeball, basketball, volleyball, soccer, and more. Seasons run year-round with post-game happy hours at local bars. Check the website for current leagues and registration.",
     "category": [
       "Sports",
       "Social"
@@ -334,8 +332,8 @@
       "Sports",
       "Social"
     ],
-    "description": "DC Fray is a social sports club that offers a wide range of sports activities for adults. They offer basketball, volleyball, and soccer and more! (check the wesbite for more details)  They also offer a variety of social events, such as happy hours and game nights.",
-    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQyITNzEMaafpG7b_hTvKjqeR9OV96uAgbGMA&s",
+    "description": "DC Fray organizes social sports leagues, tournaments, and events across the DC area. Play cornhole, kickball, flag football, skeeball, and more while meeting new people. They also host happy hours, game nights, and themed social events.",
+    "image_url": "",
     "cost": {
       "type": "variable",
       "currency": "USD",
@@ -343,15 +341,14 @@
     },
     "socials": {
       "website": "https://www.dcfray.com/",
-      "instagram": "https://www.instagram.com/dcfray/?hl=en"
+      "instagram": "https://www.instagram.com/dcfray/"
     },
     "isPublic": true
   },
   {
     "title": "Politics and Prose Book Clubs",
     "category": [
-      "Book Club",
-      "Group"
+      "Book Club"
     ],
     "image_url": "https://upload.wikimedia.org/wikipedia/en/a/a7/Politics_and_Prose.jpg",
     "location": "Politics and Prose, Washington, DC",
@@ -365,7 +362,7 @@
     "title": "Time Left DC",
     "image_url": "https://s3-eu-west-1.amazonaws.com/tpd/logos/65faf27ff7667ef7bae3232c/0x0.png",
     "socials": {
-      "website": "https://timeleft.com//"
+      "website": "https://timeleft.com/"
     },
     "description": "Time Left is a way to meet new people in DC.  Book your seat now and meet 5 strangers over dinner, all matched by our personality algorithm.",
     "category": [
@@ -384,7 +381,7 @@
       "Dating"
     ],
     "description": "A meetup group for singles in DC.  Check the website for more details",
-    "image_url": "https://www.meetup.com/_next/static/media/placeholder.b90fcd9a.jpg",
+    "image_url": "",
     "cost": {
       "type": "free",
       "currency": "USD",
@@ -408,7 +405,7 @@
       "amount": "30-50"
     },
     "socials": {
-      "website": "https://cityswoon.com/speed-dating-washingtondc.jsp?gad_source=1&gclid=Cj0KCQiA_Yq-BhC9ARIsAA6fbAiHc1e24Wd23FyP3WuRobpVma7-OfUnvdgB9BButZLcrAepcfw9nRgaAn1YEALw_wcB#topOfEvents"
+      "website": "https://cityswoon.com/speed-dating-washingtondc.jsp"
     },
     "isPublic": true
   },
@@ -434,7 +431,7 @@
     "category": [
       "Dating"
     ],
-    "description": "Pitch A Friend is a social event that allows you to meet new people in a fun and interactive way.  Pitching your friend power-point stytle.  The event is free to attend and $5 to sign up to pitch your friend.  Check the website for more details",
+    "description": "Pitch A Friend is a social event that allows you to meet new people in a fun and interactive way.  Pitching your friend power-point style.  The event is free to attend and $5 to sign up to pitch your friend.  Check the website for more details",
     "image_url": "paf.png",
     "cost": {
       "type": "variable",
@@ -443,7 +440,7 @@
     },
     "socials": {
       "website": "https://pitchafriend.com/dc",
-      "instagram": "https://www.instagram.com/pitchafriend.dc/#"
+      "instagram": "https://www.instagram.com/pitchafriend.dc/"
     },
     "isPublic": true
   },

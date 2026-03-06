@@ -97,7 +97,7 @@ export default function FeaturedGroup({ group }: { group: Group }) {
 
   return (
     <Link href={`/groups/${encodeURIComponent(groupTitle)}`}>
-      <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 hover:scale-105 transform h-full flex flex-col min-h-[400px] border border-black">
+      <div className="rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] transform h-full flex flex-col min-h-[400px] border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60">
         <div className="relative h-48 flex-shrink-0">
           {group.image_url ? (
             <>
@@ -178,20 +178,20 @@ export default function FeaturedGroup({ group }: { group: Group }) {
           </div>
 
           {/* Title */}
-          <h3 className="text-xl font-semibold mb-2 text-black line-clamp-2 min-h-[3rem]">
+          <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100 line-clamp-2 min-h-[3rem]">
             {group.title}
           </h3>
 
           {/* Description */}
           {group.description && (
-            <p className="text-gray-600 mb-4 flex-1 line-clamp-2 min-h-[2.5rem]">
+            <p className="text-gray-600 dark:text-gray-400 mb-4 flex-1 line-clamp-2 min-h-[2.5rem]">
               {group.description}
             </p>
           )}
 
           {/* Schedule Information */}
           <div className="mt-auto">
-            <div className="flex items-center text-sm text-gray-600">
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
               <svg
                 className="w-4 h-4 mr-2"
                 fill="none"

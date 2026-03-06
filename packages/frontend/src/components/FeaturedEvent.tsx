@@ -88,7 +88,7 @@ export default function FeaturedEvent({ event }: { event: Event }) {
 
   return (
     <Link href={`/events/${eventTitle}`}>
-      <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 hover:scale-105 transform h-full flex flex-col">
+      <div className="rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] transform h-full flex flex-col border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60">
         <div className="relative h-48 flex-shrink-0">
           <>
             {/* Actual image — uses branded SVG placeholder when image_url is missing */}
@@ -140,10 +140,10 @@ export default function FeaturedEvent({ event }: { event: Event }) {
             </div>
           )}
 
-          <h3 className="text-xl font-semibold mb-2 text-black line-clamp-2 min-h-[3rem]">
+          <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100 line-clamp-2 min-h-[3rem]">
             {event.title}
           </h3>
-          <p className="text-gray-600 mb-4 flex-1 line-clamp-2 min-h-[2.5rem]">
+          <p className="text-gray-600 dark:text-gray-400 mb-4 flex-1 line-clamp-2 min-h-[2.5rem]">
             {[event.venue, event.location]
               .find((v) => v && !v.toLowerCase().includes("unknown")) || ""}
           </p>

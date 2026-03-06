@@ -136,8 +136,7 @@ function GroupResultCard({ scoredGroup }: { scoredGroup: ScoredGroup }) {
 
   return (
     <Link href={`/groups/${encodeURIComponent(group.title)}`}>
-      <div className="rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] transform h-full flex flex-col border"
-        style={{ borderColor: "var(--border-color, #000)", backgroundColor: "var(--bg-primary)" }}
+      <div className="rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] transform h-full flex flex-col border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60"
       >
         {/* Image */}
         <div className="relative h-44">

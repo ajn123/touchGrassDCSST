@@ -36,7 +36,7 @@ export default function Categories({
               disableLinks ? (
                 <span
                   key={index}
-                  className="px-3 bg-green-100 text-green-800 text-sm rounded-full font-medium border border-black"
+                  className="px-3 bg-green-100 dark:bg-emerald-900/30 text-green-800 dark:text-emerald-300 text-sm rounded-full font-medium border border-green-200 dark:border-emerald-700"
                 >
                   {cat}
                 </span>
@@ -51,7 +51,7 @@ export default function Categories({
                       )}&sortBy=date&sortOrder=asc`
                     )
                   }
-                  className="px-3 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer border border-black"
+                  className="px-3 bg-green-100 dark:bg-emerald-900/30 text-green-800 dark:text-emerald-300 text-sm rounded-full font-medium hover:bg-green-200 dark:hover:bg-emerald-800/40 transition-colors cursor-pointer border border-green-200 dark:border-emerald-700"
                 >
                   {cat}
                 </button>
@@ -61,7 +61,7 @@ export default function Categories({
               disableLinks ? (
                 <span
                   key={index}
-                  className="px-3 py-2 bg-green-100 text-green-800 text-sm rounded-full font-medium border border-black"
+                  className="px-3 py-2 bg-green-100 dark:bg-emerald-900/30 text-green-800 dark:text-emerald-300 text-sm rounded-full font-medium border border-green-200 dark:border-emerald-700"
                 >
                   {cat.trim()}
                 </span>
@@ -76,7 +76,7 @@ export default function Categories({
                       )}&sortBy=date&sortOrder=asc`
                     )
                   }
-                  className="px-3 py-2 bg-green-100 text-green-800 text-sm rounded-full font-medium hover:bg-green-200 transition-colors cursor-pointer border border-black"
+                  className="px-3 py-2 bg-green-100 dark:bg-emerald-900/30 text-green-800 dark:text-emerald-300 text-sm rounded-full font-medium hover:bg-green-200 dark:hover:bg-emerald-800/40 transition-colors cursor-pointer border border-green-200 dark:border-emerald-700"
                 >
                   {cat.trim()}
                 </button>
@@ -110,7 +110,7 @@ export default function Categories({
                     ? "white"
                     : "#374151 border border-gray-200 dark:border-gray-700",
                 }}
-                className="w-full bg-white rounded-lg shadow-md p-6 text-center cursor-pointer hover:shadow-lg transition-shadow transform hover:scale-105 duration-300 slow-transition border border-black"
+                className="w-full rounded-xl shadow-md p-6 text-center cursor-pointer hover:shadow-lg transition-all transform hover:scale-105 duration-300 slow-transition border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60"
               >
                 <h3 className="text-lg font-semibold">{category.category}</h3>
               </button>
@@ -123,8 +123,8 @@ export default function Categories({
                 className="hover:text-blue-500"
                 onClick={() => {}}
               >
-                <div className="bg-white rounded-lg shadow-md p-6 text-center cursor-pointer hover:shadow-lg transition-shadow transform hover:scale-105 duration-300 slow-transition border border-black">
-                  <h3 className="text-lg font-semibold text-gray-800 hover:text-blue-500">
+                <div className="rounded-xl shadow-md p-6 text-center cursor-pointer hover:shadow-lg transition-all transform hover:scale-105 duration-300 slow-transition border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60">
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 hover:text-blue-500">
                     {category.category}
                   </h3>
                 </div>

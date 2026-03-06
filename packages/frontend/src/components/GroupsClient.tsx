@@ -186,7 +186,7 @@ export default function GroupsClient({ groups }: { groups: Group[] }) {
             {filteredGroups.map((group) => (
               <div
                 key={group.pk}
-                className="rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden border"
+                className="rounded-xl shadow-md hover:shadow-xl transition-all duration-200 overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60 hover:scale-[1.02] transform"
               >
                 <Link
                   href={`/groups/${encodeURIComponent(group.title)}`}

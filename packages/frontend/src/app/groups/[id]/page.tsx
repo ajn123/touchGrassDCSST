@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 import { auth } from "@/app/actions";
 import { AdminEntityPanel } from "@/components/AdminEntityPanel";
 import DetailPageContainer from "@/components/DetailPageContainer";

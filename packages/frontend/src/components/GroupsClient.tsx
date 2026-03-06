@@ -2,7 +2,8 @@
 
 import Categories from "@/components/Categories";
 import { Socials } from "@/components/Socials";
-import { resolveImageUrl } from "@/lib/image-utils";
+import { resolveImageUrl, shouldBeUnoptimized } from "@/lib/image-utils";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
@@ -192,15 +193,18 @@ export default function GroupsClient({ groups }: { groups: Group[] }) {
                   href={`/groups/${encodeURIComponent(group.title)}`}
                   className="block"
                 >
-                  <div className="aspect-w-16 aspect-h-9 cursor-pointer">
+                  <div className="relative h-48 cursor-pointer">
                     {group.image_url ? (
-                      <img
+                      <Image
                         src={
                           resolveImageUrl(group.image_url) ||
                           "/images/placeholder.jpg"
                         }
                         alt={group.title}
-                        className="w-full h-48 object-cover hover:opacity-90 transition-opacity"
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover hover:opacity-90 transition-opacity"
+                        unoptimized={shouldBeUnoptimized(resolveImageUrl(group.image_url) || "")}
                       />
                     ) : (
                       <div className="w-full h-48 bg-gray-200 flex items-center justify-center theme-hover-medium transition-colors">

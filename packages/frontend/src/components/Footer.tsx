@@ -13,7 +13,7 @@ export default function Footer() {
           {/* Brand Section */}
           <div className="col-span-1 md:col-span-2 lg:col-span-1">
             <Link href="/" className="text-2xl footer-brand">
-              DC Events
+              TouchGrass DC
             </Link>
             <p className="mt-2 text-sm footer-text">
               Discover the best events happening in Washington DC
@@ -145,7 +145,7 @@ export default function Footer() {
               <p>Discover what's happening in the capital</p>
               <div className="mt-4">
                 <p className="text-xs">
-                  © {new Date().getFullYear()} DC Events. All rights reserved.
+                  © {new Date().getFullYear()} TouchGrass DC. All rights reserved.
                 </p>
               </div>
             </div>

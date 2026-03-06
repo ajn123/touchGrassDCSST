@@ -123,7 +123,7 @@ export default function SearchBar() {
 
       {/* Search Results Dropdown */}
       {showResults && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 max-h-96 overflow-y-auto z-50">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 max-h-96 overflow-y-auto z-50">
           {/* Search Results */}
           {results && results.hits.length > 0 && (
             <>
@@ -131,7 +131,7 @@ export default function SearchBar() {
               {results.hits.filter((item) => item.type === "event").length >
                 0 && (
                 <div className="p-3">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2 px-2">
+                  <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 px-2">
                     Events (
                     {
                       results.hits.filter((item) => item.type === "event")
@@ -143,20 +143,20 @@ export default function SearchBar() {
                     .filter((item) => item.type === "event")
                     .slice(0, 5)
                     .map((event, index) => (
-                      <div
+                      <button
                         key={`event-${index}`}
                         onClick={() => handleResultClick(event, "event")}
-                        className="flex items-center p-2 theme-hover-light rounded-md cursor-pointer transition-colors"
+                        className="flex items-center p-2 theme-hover-light rounded-md cursor-pointer transition-colors w-full text-left"
                       >
-                        <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                          <span className="text-blue-600 text-sm">📅</span>
+                        <div className="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center mr-3">
+                          <span className="text-blue-600 dark:text-blue-400 text-sm">📅</span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
+                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                             {event.title}
                           </p>
                           {event.category && (
-                            <p className="text-xs text-gray-500 truncate">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                               {Array.isArray(event.category)
                                 ? event.category.join(", ")
                                 : event.category}
@@ -174,7 +174,7 @@ export default function SearchBar() {
                             </p>
                           )}
                         </div>
-                      </div>
+                      </button>
                     ))}
                 </div>
               )}
@@ -183,7 +183,7 @@ export default function SearchBar() {
               {results.hits.filter((item) => item.type === "group").length >
                 0 && (
                 <div className="p-3 border-t border-gray-100">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2 px-2">
+                  <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 px-2">
                     Groups (
                     {
                       results.hits.filter((item) => item.type === "group")
@@ -195,20 +195,20 @@ export default function SearchBar() {
                     .filter((item) => item.type === "group")
                     .slice(0, 5)
                     .map((group, index) => (
-                      <div
+                      <button
                         key={`group-${index}`}
                         onClick={() => handleResultClick(group, "group")}
-                        className="flex items-center p-2 theme-hover-light rounded-md cursor-pointer transition-colors"
+                        className="flex items-center p-2 theme-hover-light rounded-md cursor-pointer transition-colors w-full text-left"
                       >
-                        <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                          <span className="text-green-600 text-sm">👥</span>
+                        <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900/40 rounded-full flex items-center justify-center mr-3">
+                          <span className="text-green-600 dark:text-green-400 text-sm">👥</span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
+                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                             {group.title}
                           </p>
                           {group.category && (
-                            <p className="text-xs text-gray-500 truncate">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                               {Array.isArray(group.category)
                                 ? group.category.join(", ")
                                 : group.category}
@@ -225,7 +225,7 @@ export default function SearchBar() {
                             </p>
                           )}
                         </div>
-                      </div>
+                      </button>
                     ))}
                 </div>
               )}
@@ -254,7 +254,7 @@ export default function SearchBar() {
 
           {/* No Results */}
           {results && results.hits.length === 0 && (
-            <div className="p-4 text-center text-gray-500">
+            <div className="p-4 text-center text-gray-500 dark:text-gray-400">
               <p>No results found for "{query}"</p>
             </div>
           )}
@@ -263,10 +263,10 @@ export default function SearchBar() {
 
       {/* Loading State */}
       {isLoading && showResults && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 p-4 z-50">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4 z-50">
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-            <span className="ml-2 text-gray-600">Searching...</span>
+            <span className="ml-2 text-gray-600 dark:text-gray-400">Searching...</span>
           </div>
         </div>
       )}

@@ -1,5 +1,6 @@
 import { ContactForm } from "@/components/ContactForm";
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "About & Contact",
@@ -75,12 +76,12 @@ export default function ContactPage() {
               Browse our events, find something that interests you, and make
               plans to touch some grass today!
             </p>
-            <a
+            <Link
               href="/"
               className="inline-block bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
             >
               Explore Events
-            </a>
+            </Link>
           </div>
         </div>
       </div>

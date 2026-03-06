@@ -53,7 +53,6 @@ export default function MonthlyCalendar({
   className = "",
 }: MonthlyCalendarProps) {
   const router = useRouter();
-  const [currentDate, setCurrentDate] = useState(new Date());
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [calendarDays, setCalendarDays] = useState<CalendarDay[]>([]);
@@ -195,13 +194,6 @@ export default function MonthlyCalendar({
       return d;
     });
     setWindowDays(28);
-  };
-
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString("en-US", {
-      month: "long",
-      year: "numeric",
-    });
   };
 
   // Header range formatter in ET (e.g., Oct 29 – Nov 27, 2025)
@@ -422,25 +414,25 @@ export default function MonthlyCalendar({
       )}
 
       {/* ===== MOBILE: 3-day vertical view ===== */}
-      <div className="md:hidden rounded-lg shadow-lg overflow-hidden bg-white">
+      <div className="md:hidden rounded-lg shadow-lg overflow-hidden bg-white dark:bg-gray-800">
         {/* Mobile nav header */}
-        <div className="flex items-center justify-between p-3 border-b bg-gray-50">
+        <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80">
           <button
             onClick={() => setMobileOffset((o) => o - 3)}
-            className="p-2 hover:bg-gray-200 rounded-lg transition-colors text-gray-700"
+            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-700 dark:text-gray-300"
             aria-label="Previous 3 days"
           >
             <FontAwesomeIcon icon={faChevronLeft} className="w-4 h-4" />
           </button>
 
           <div className="text-center">
-            <h3 className="text-sm font-semibold text-gray-900">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               {formatFullDay(mobileDays[0].date)} – {formatFullDay(mobileDays[2].date)}
             </h3>
             {mobileOffset !== 0 && (
               <button
                 onClick={() => setMobileOffset(0)}
-                className="text-xs text-blue-600 hover:text-blue-800"
+                className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
               >
                 Back to today
               </button>
@@ -449,7 +441,7 @@ export default function MonthlyCalendar({
 
           <button
             onClick={() => setMobileOffset((o) => o + 3)}
-            className="p-2 hover:bg-gray-200 rounded-lg transition-colors text-gray-700"
+            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-700 dark:text-gray-300"
             aria-label="Next 3 days"
           >
             <FontAwesomeIcon icon={faChevronRight} className="w-4 h-4" />
@@ -457,19 +449,19 @@ export default function MonthlyCalendar({
         </div>
 
         {/* 3 day cards */}
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-gray-200 dark:divide-gray-700">
           {mobileDays.map((day) => (
             <div key={getEtYmd(day.date)} className="p-3">
               {/* Day header */}
               <Link
                 href={`/calendar/day/${formatDateForUrl(day.date)}`}
                 className={`block text-sm font-semibold mb-2 ${
-                  day.isToday ? "text-blue-600" : "text-gray-900"
+                  day.isToday ? "text-blue-600 dark:text-blue-400" : "text-gray-900 dark:text-gray-100"
                 }`}
               >
                 {formatFullDay(day.date)}
                 {day.isToday && (
-                  <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">
+                  <span className="ml-2 text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded-full">
                     Today
                   </span>
                 )}
@@ -481,32 +473,32 @@ export default function MonthlyCalendar({
               ) : (
                 <div className="space-y-1.5">
                   {day.events.slice(0, 4).map((event) => (
-                    <div
+                    <button
                       key={event.pk}
-                      className="rounded-lg bg-blue-50 border border-blue-200 p-2 cursor-pointer hover:bg-blue-100 transition-colors"
+                      className="rounded-lg bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 p-2 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors w-full text-left"
                       onClick={() => handleEventClick(event)}
                     >
-                      <div className="font-medium text-sm text-blue-900 truncate">
+                      <div className="font-medium text-sm text-blue-900 dark:text-blue-200 truncate">
                         {event.title}
                       </div>
                       <div className="flex items-center gap-2 mt-0.5">
                         {(event.start_time || event.time) && (
-                          <span className="text-xs text-blue-600">
+                          <span className="text-xs text-blue-600 dark:text-blue-400">
                             {formatTime((event.start_time || event.time)!)}
                           </span>
                         )}
                         {(event.location || event.venue) && (
-                          <span className="text-xs text-blue-500 truncate">
+                          <span className="text-xs text-blue-500 dark:text-blue-400 truncate">
                             {event.location || event.venue}
                           </span>
                         )}
                       </div>
-                    </div>
+                    </button>
                   ))}
                   {day.events.length > 4 && (
                     <Link
                       href={`/calendar/day/${formatDateForUrl(day.date)}`}
-                      className="block text-xs text-blue-600 text-center hover:text-blue-800"
+                      className="block text-xs text-blue-600 dark:text-blue-400 text-center hover:text-blue-800 dark:hover:text-blue-300"
                     >
                       +{day.events.length - 4} more events
                     </Link>
@@ -521,21 +513,21 @@ export default function MonthlyCalendar({
       {/* ===== DESKTOP: 7-column grid calendar ===== */}
       <div
         className={`hidden md:block rounded-lg shadow-lg overflow-hidden ${
-          isCompact ? "bg-white" : ""
+          isCompact ? "bg-white dark:bg-gray-800" : ""
         }`}
       >
         {/* Navigation Header for Compact */}
         {isCompact && (
-          <div className="flex items-center justify-between p-4 border-b bg-gray-50">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80">
             <button
               onClick={goToPreviousMonth}
-              className="p-2 hover:bg-gray-200 rounded-lg transition-colors text-gray-700 hover:text-gray-900"
+              className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-700 dark:text-gray-300"
               aria-label="Previous Month"
             >
               <FontAwesomeIcon icon={faChevronLeft} className="w-4 h-4" />
             </button>
 
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               {windowStartDate
                 ? formatEtRange(windowStartDate, windowDays)
                 : "Loading..."}
@@ -543,7 +535,7 @@ export default function MonthlyCalendar({
 
             <button
               onClick={goToNextMonth}
-              className="p-2 hover:bg-gray-200 rounded-lg transition-colors text-gray-700 hover:text-gray-900"
+              className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-700 dark:text-gray-300"
               aria-label="Next Month"
             >
               <FontAwesomeIcon icon={faChevronRight} className="w-4 h-4" />
@@ -554,7 +546,9 @@ export default function MonthlyCalendar({
         {/* Day Headers */}
         <div
           className={`grid grid-cols-7 border-b ${
-            isCompact ? "bg-gray-50 border-gray-300" : "border-gray-200"
+            isCompact
+              ? "bg-gray-50 dark:bg-gray-800/80 border-gray-300 dark:border-gray-700"
+              : "border-gray-200 dark:border-gray-700"
           }`}
         >
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
@@ -563,7 +557,7 @@ export default function MonthlyCalendar({
                 key={index}
                 className={`text-center font-medium ${
                   isCompact
-                    ? "p-2 text-xs text-gray-600 border-r border-gray-300"
+                    ? "p-2 text-xs text-gray-600 dark:text-gray-400 border-r border-gray-300 dark:border-gray-700"
                     : "p-3 text-sm"
                 }`}
               >
@@ -579,9 +573,11 @@ export default function MonthlyCalendar({
             <Link
               href={`/calendar/day/${formatDateForUrl(day.date)}`}
               className={`border-r border-b ${
-                isCompact ? "border-gray-300" : "border-gray-200"
+                isCompact ? "border-gray-300 dark:border-gray-700" : "border-gray-200 dark:border-gray-700"
               } ${isCompact ? "p-1" : "p-2"} ${
-                !day.isCurrentMonth ? "bg-gray-50 text-gray-400" : "bg-white"
+                !day.isCurrentMonth
+                  ? "bg-gray-50 dark:bg-gray-900/50 text-gray-400"
+                  : "bg-white dark:bg-gray-800"
               } ${isCompact ? "min-h-[80px]" : "min-h-[200px]"}`}
               key={index}
             >
@@ -589,9 +585,9 @@ export default function MonthlyCalendar({
               <div
                 className={`font-medium ${isCompact ? "mb-1" : "mb-2"} ${
                   day.isToday
-                    ? "font-bold text-blue-600"
+                    ? "font-bold text-blue-600 dark:text-blue-400"
                     : day.isCurrentMonth
-                      ? "text-gray-900"
+                      ? "text-gray-900 dark:text-gray-100"
                       : "text-gray-400"
                 } ${isCompact ? "text-xs" : "text-sm"}`}
               >
@@ -607,8 +603,8 @@ export default function MonthlyCalendar({
                       key={event.pk}
                       className={`rounded cursor-pointer transition-colors truncate ${
                         isCompact
-                          ? "text-xs bg-blue-100 text-blue-800 px-1 py-0.5 hover:bg-blue-200"
-                          : "text-xs bg-blue-50 border border-blue-200 p-1 hover:bg-blue-100"
+                          ? "text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 px-1 py-0.5 hover:bg-blue-200 dark:hover:bg-blue-900/60"
+                          : "text-xs bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 p-1 hover:bg-blue-100 dark:hover:bg-blue-900/50"
                       }`}
                       title={`${event.title} - ${
                         event.start_time
@@ -617,18 +613,21 @@ export default function MonthlyCalendar({
                             ? formatTime(event.time)
                             : ""
                       } - ${event.location || event.venue || "Location TBD"}`}
-                      onClick={() => handleEventClick(event)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleEventClick(event);
+                      }}
                     >
-                      <div className="font-medium text-blue-800">
+                      <div className="font-medium text-blue-800 dark:text-blue-200">
                         {event.title}
                       </div>
                       {!isCompact && (event.start_time || event.time) && (
-                        <div className="text-blue-600">
+                        <div className="text-blue-600 dark:text-blue-400">
                           {formatTime((event.start_time || event.time)!)}
                         </div>
                       )}
                       {!isCompact && (event.location || event.venue) && (
-                        <div className="text-blue-500 truncate">
+                        <div className="text-blue-500 dark:text-blue-400 truncate">
                           {event.location || event.venue}
                         </div>
                       )}
@@ -647,8 +646,8 @@ export default function MonthlyCalendar({
 
         {/* Footer for Compact */}
         {isCompact && (
-          <div className="p-3 bg-gray-50 text-center">
-            <p className="text-xs text-gray-600">
+          <div className="p-3 bg-gray-50 dark:bg-gray-800/80 text-center">
+            <p className="text-xs text-gray-600 dark:text-gray-400">
               Click the day to see more events
             </p>
           </div>

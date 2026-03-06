@@ -1,3 +1,4 @@
+import { sendEmail } from "@/lib/email";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -5,7 +6,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { eventTitle, eventId, currentUrl } = body;
 
-    // Validate required fields
     if (!eventTitle || !eventId || !currentUrl) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -13,47 +13,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Send email directly to the Lambda function
-    const emailData = {
-      subject: `Event Information Correction: ${eventTitle}`,
-      body: `🚨 EVENT INFORMATION CORRECTION REQUEST
-
-📋 EVENT DETAILS
-================
-Event Title: ${eventTitle}
-Event ID: ${eventId}
-Current URL: ${currentUrl}
-
-📝 REQUEST
-==========
-Hi,
-
-I found some incorrect information on this event. Please review and update the information.
-
-Thanks!
-
----
-This correction request was submitted through the TouchGrass DC website.`,
+    await sendEmail({
       to: "hi@touchgrassdc.com",
+      subject: `Event Information Correction: ${eventTitle}`,
+      body: `Event: ${eventTitle}\nEvent ID: ${eventId}\nURL: ${currentUrl}\n\nPlease review and update the information.`,
       from: "hi@touchgrassdc.com",
-    };
-
-    // Send email using the same route as other email functions
-    const response = await fetch("/api/sendEmail", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(emailData),
     });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Lambda function error:", errorText);
-      throw new Error(
-        `Lambda function returned ${response.status}: ${errorText}`
-      );
-    }
 
     return NextResponse.json(
       { success: true, message: "Correction request sent successfully" },
@@ -67,7 +32,7 @@ This correction request was submitted through the TouchGrass DC website.`,
         error:
           error instanceof Error
             ? error.message
-            : "Failed to send correction request. Please try again later.",
+            : "Failed to send correction request.",
         success: false,
       },
       { status: 500 }

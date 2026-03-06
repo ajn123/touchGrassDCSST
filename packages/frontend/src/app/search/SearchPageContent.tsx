@@ -261,8 +261,8 @@ function SearchPageInner() {
                       Events
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {events.map((event: any, index: number) => (
-                        <FeaturedEvent key={`event-${index}`} event={event} />
+                      {events.map((event: any) => (
+                        <FeaturedEvent key={event.pk || event.title} event={event} />
                       ))}
                     </div>
                   </div>
@@ -281,9 +281,9 @@ function SearchPageInner() {
                           href={`/groups/${encodeURIComponent(group.title)}`}
                           className="block"
                         >
-                          <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
+                          <div className="bg-white dark:bg-gray-800/60 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
                             <div className="p-6 flex-1 flex flex-col">
-                              <h3 className="text-xl font-semibold text-gray-900 mb-2 line-clamp-2">
+                              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 line-clamp-2">
                                 {group.title}
                               </h3>
                               {group.description && (

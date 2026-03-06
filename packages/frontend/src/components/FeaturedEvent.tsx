@@ -43,7 +43,7 @@ export default function FeaturedEvent({ event }: { event: Event }) {
 
   return (
     <EventCard
-      href={`/events/${eventTitle}`}
+      href={`/events/${encodeURIComponent(eventTitle)}`}
       title={eventTitle}
       imageUrl={event.image_url}
       category={event.category}

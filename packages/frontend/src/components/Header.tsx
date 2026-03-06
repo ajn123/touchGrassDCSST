@@ -45,7 +45,7 @@ export default function Header() {
         {/* Logo/Brand */}
         <div className="flex items-center space-x-2">
           <Link href="/" className="text-xl header-brand">
-            DC Events
+            TouchGrass DC
           </Link>
           {user && (
             <div className="flex items-center">
@@ -304,7 +304,7 @@ export default function Header() {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="lg:hidden">
+        <div className="xl:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 footer-border border-t">
             <Link
               href="/search?sortBy=date&sortOrder=asc"

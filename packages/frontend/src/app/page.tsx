@@ -1,5 +1,6 @@
 import ArticleCard from "@/components/ArticleCard";
 import Categories from "@/components/Categories";
+import NewsletterBanner from "@/components/NewsletterBanner";
 import PersonalizedEvents from "@/components/PersonalizedEvents";
 import SearchBar from "@/components/SearchBar";
 import WeekendEvents from "@/components/WeekendEvents";
@@ -121,6 +122,9 @@ export default async function Home() {
 
       {/* Happening This Weekend */}
       <WeekendEvents events={diversifiedWeekend} />
+
+      {/* Newsletter Signup */}
+      <NewsletterBanner />
 
       {/* Browse by Category */}
       <Categories categories={categories as Category[]} />

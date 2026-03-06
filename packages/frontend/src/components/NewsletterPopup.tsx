@@ -35,7 +35,7 @@ export default function NewsletterPopup() {
     const timer = setTimeout(() => {
       setVisible(true);
       document.body.style.overflow = 'hidden';
-    }, 30000);
+    }, 15000);
 
     return () => clearTimeout(timer);
   }, []);

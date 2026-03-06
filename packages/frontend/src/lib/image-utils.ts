@@ -66,15 +66,16 @@ function generateEventPlaceholderDataUri(
   const badgeHeight = 44;
   const titleBlockHeight = titleLines.length * lineHeight;
   const venueHeight = safeVenue ? 40 : 0;
-  const totalHeight = badgeHeight + 24 + titleBlockHeight + (venueHeight ? 16 + venueHeight : 0);
+  const badgeTitleGap = 36;
+  const totalHeight = badgeHeight + badgeTitleGap + titleBlockHeight + (venueHeight ? 16 + venueHeight : 0);
   const startY = Math.max(60, (500 - totalHeight) / 2);
 
   const badgeY = startY;
-  const titleStartY = badgeY + badgeHeight + 24 + lineHeight * 0.75;
+  const titleStartY = badgeY + badgeHeight + badgeTitleGap + lineHeight * 0.75;
   const venueY = titleStartY + (titleLines.length - 1) * lineHeight + 32;
 
-  const badgeW = safeCategory.length * 18 + 56;
-  const badgeSvg = `<rect x="50" y="${badgeY}" rx="26" width="${badgeW}" height="52" fill="%23000000" fill-opacity="0.5"/><rect x="50" y="${badgeY}" rx="26" width="${badgeW}" height="52" fill="${color}" fill-opacity="0.4"/><text x="78" y="${badgeY + 36}" fill="%23ffffff" font-family="system-ui,-apple-system,sans-serif" font-size="30" font-weight="700" letter-spacing="0.5">${safeCategory}</text>`;
+  const badgeW = safeCategory.length * 16 + 48;
+  const badgeSvg = `<rect x="50" y="${badgeY}" rx="20" width="${badgeW}" height="44" fill="${color}" fill-opacity="0.85"/><text x="${50 + badgeW / 2}" y="${badgeY + 30}" fill="%23ffffff" font-family="system-ui,-apple-system,sans-serif" font-size="24" font-weight="700" letter-spacing="1" text-anchor="middle" text-transform="uppercase">${safeCategory}</text>`;
 
   const titleSvg = titleLines
     .map(

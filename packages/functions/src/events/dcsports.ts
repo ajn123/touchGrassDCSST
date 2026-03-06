@@ -141,6 +141,9 @@ export function parseESPNSchedule(
       competition?.competitors
     );
 
+    // Only include home games (games in DC area)
+    if (!isHome) continue;
+
     // Get venue from the game data, or fall back to the team's default venue
     const gameVenue = competition?.venue?.fullName || team.venue;
     const gameAddress = competition?.venue?.address

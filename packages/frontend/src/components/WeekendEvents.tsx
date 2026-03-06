@@ -1,6 +1,5 @@
-import { resolveImageUrl, shouldBeUnoptimized } from "@/lib/image-utils";
-import Image from "next/image";
 import Link from "next/link";
+import EventCard from "./EventCard";
 
 interface WeekendEvent {
   pk?: string;
@@ -57,60 +56,39 @@ export default function WeekendEvents({ events }: { events: WeekendEvent[] }) {
           </svg>
         </Link>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         {events.map((event) => {
           const eventId = event.pk || "";
           const category = Array.isArray(event.category)
             ? event.category[0]
             : event.category;
+          const venue =
+            event.venue && !event.venue.toLowerCase().includes("unknown")
+              ? event.venue
+              : undefined;
+
+          let dateStr: string | undefined;
+          if (event.start_date) {
+            dateStr = new Date(
+              event.start_date + "T00:00:00"
+            ).toLocaleDateString("en-US", {
+              weekday: "short",
+              month: "short",
+              day: "numeric",
+            });
+            if (event.start_time) dateStr += ` at ${event.start_time}`;
+          }
 
           return (
-            <Link
+            <EventCard
               key={eventId}
               href={`/events/${encodeURIComponent(eventId)}`}
-              className="group bg-gray-800 rounded-lg overflow-hidden hover:ring-2 hover:ring-amber-500 transition-all"
-            >
-              <div className="relative h-40">
-                <Image
-                  src={resolveImageUrl(event.image_url, category, event.title, event.venue)}
-                  alt={event.title || "Event"}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  unoptimized={shouldBeUnoptimized(
-                    resolveImageUrl(event.image_url, category, event.title, event.venue)
-                  )}
-                />
-                {category && (
-                  <span className="absolute top-2 left-2 text-xs bg-black/60 text-white px-2 py-0.5 rounded">
-                    {category}
-                  </span>
-                )}
-              </div>
-              <div className="p-3">
-                <h3 className="text-sm font-semibold text-white line-clamp-2 group-hover:text-amber-400 transition-colors">
-                  {event.title}
-                </h3>
-                {event.start_date && (
-                  <p className="text-xs text-gray-400 mt-1">
-                    {new Date(event.start_date + "T00:00:00").toLocaleDateString(
-                      "en-US",
-                      {
-                        weekday: "short",
-                        month: "short",
-                        day: "numeric",
-                      }
-                    )}
-                    {event.start_time && ` at ${event.start_time}`}
-                  </p>
-                )}
-                {event.venue && !event.venue.toLowerCase().includes("unknown") && (
-                  <p className="text-xs text-gray-500 mt-0.5 truncate">
-                    {event.venue}
-                  </p>
-                )}
-              </div>
-            </Link>
+              title={event.title || "Event"}
+              imageUrl={event.image_url}
+              category={category}
+              venue={venue}
+              date={dateStr}
+            />
           );
         })}
       </div>

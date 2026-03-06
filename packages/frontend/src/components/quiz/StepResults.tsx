@@ -1,8 +1,7 @@
 "use client";
 
-import Categories from "@/components/Categories";
+import EventCard from "@/components/EventCard";
 import type { Group } from "@/components/GroupsClient";
-import { resolveImageUrl } from "@/lib/image-utils";
 import type { QuizPreferences } from "@/lib/groupQuizPreferences";
 import Link from "next/link";
 import { useState } from "react";
@@ -89,7 +88,17 @@ export default function StepResults({
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {topMatches.map((sg) => (
-              <GroupResultCard key={sg.group.pk} scoredGroup={sg} />
+              <EventCard
+                key={sg.group.pk}
+                href={`/groups/${encodeURIComponent(sg.group.title)}`}
+                title={sg.group.title}
+                imageUrl={sg.group.image_url}
+                category={sg.group.category}
+                description={sg.group.description}
+                venue={sg.group.scheduleLocation}
+                badge={`${sg.score}% match`}
+                tags={sg.reasons.slice(0, 2)}
+              />
             ))}
           </div>
         </div>
@@ -116,73 +125,21 @@ export default function StepResults({
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {moreToExplore.slice(0, 6).map((sg) => (
-              <GroupResultCard key={sg.group.pk} scoredGroup={sg} />
+              <EventCard
+                key={sg.group.pk}
+                href={`/groups/${encodeURIComponent(sg.group.title)}`}
+                title={sg.group.title}
+                imageUrl={sg.group.image_url}
+                category={sg.group.category}
+                description={sg.group.description}
+                venue={sg.group.scheduleLocation}
+                badge={`${sg.score}% match`}
+                tags={sg.reasons.slice(0, 2)}
+              />
             ))}
           </div>
         </div>
       )}
     </div>
-  );
-}
-
-function GroupResultCard({ scoredGroup }: { scoredGroup: ScoredGroup }) {
-  const { group, score, reasons } = scoredGroup;
-  const imageUrl = resolveImageUrl(
-    group.image_url || "",
-    group.category,
-    group.title,
-    group.scheduleLocation
-  );
-
-  return (
-    <Link href={`/groups/${encodeURIComponent(group.title)}`}>
-      <div className="rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] transform h-full flex flex-col border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60"
-      >
-        {/* Image */}
-        <div className="relative h-44">
-          <img
-            src={imageUrl || "/images/placeholder.jpg"}
-            alt={group.title}
-            className="w-full h-full object-cover"
-          />
-          {/* Match badge */}
-          <div className="absolute top-3 right-3 bg-emerald-600 text-white text-sm font-bold px-3 py-1 rounded-full shadow-lg">
-            {score}% match
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="p-5 flex-1 flex flex-col">
-          {/* Categories */}
-          {group.category && (
-            <div className="mb-2">
-              <Categories displayMode="display" eventCategories={group.category} disableLinks={true} />
-            </div>
-          )}
-
-          <h3 className="text-lg font-semibold mb-2 line-clamp-2">{group.title}</h3>
-
-          {group.description && (
-            <p className="text-sm mb-3 line-clamp-2 flex-1" style={{ color: "var(--text-secondary)" }}>
-              {group.description}
-            </p>
-          )}
-
-          {/* Reason tags */}
-          {reasons.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-auto">
-              {reasons.slice(0, 2).map((reason, i) => (
-                <span
-                  key={i}
-                  className="inline-flex items-center text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
-                >
-                  {reason}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </Link>
   );
 }

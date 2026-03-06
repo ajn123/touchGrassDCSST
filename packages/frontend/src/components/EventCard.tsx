@@ -102,7 +102,7 @@ export default function EventCard({
         }}
       >
         {/* Image */}
-        <div className="relative h-44 flex-shrink-0 overflow-hidden">
+        <div className="relative h-28 sm:h-44 flex-shrink-0 overflow-hidden">
           {!imageError ? (
             <Image
               src={resolvedUrl}
@@ -161,8 +161,8 @@ export default function EventCard({
         </div>
 
         {/* Content */}
-        <div className="p-4 flex-1 flex flex-col gap-1.5">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 leading-snug group-hover:text-opacity-80 transition-colors">
+        <div className="p-2.5 sm:p-4 flex-1 flex flex-col gap-1 sm:gap-1.5">
+          <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 leading-snug group-hover:text-opacity-80 transition-colors">
             {title}
           </h3>
 

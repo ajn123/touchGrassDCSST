@@ -56,7 +56,7 @@ export default function WeekendEvents({ events }: { events: WeekendEvent[] }) {
           </svg>
         </Link>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
         {events.map((event) => {
           const eventId = event.pk || "";
           const category = Array.isArray(event.category)

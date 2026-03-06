@@ -32,7 +32,7 @@ export default function ArticleCard({
         style={{ backgroundColor: "var(--bg-secondary)", borderColor: "var(--border-primary)", borderWidth: "1px" }}
       >
         {imageUrl && (
-          <div className="relative w-full h-48 overflow-hidden">
+          <div className="relative w-full h-32 sm:h-48 overflow-hidden">
             <Image
               src={imageUrl}
               alt={title}
@@ -42,7 +42,7 @@ export default function ArticleCard({
             />
           </div>
         )}
-        <div className="p-6 flex flex-col flex-1">
+        <div className="p-4 sm:p-6 flex flex-col flex-1">
           <div className="flex items-center gap-2 mb-3">
             <span
               className="text-xs font-semibold px-2.5 py-0.5 rounded-full"

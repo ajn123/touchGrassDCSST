@@ -161,7 +161,7 @@ export default function EventCard({
         </div>
 
         {/* Content */}
-        <div className="p-2.5 sm:p-4 flex-1 flex flex-col gap-1 sm:gap-1.5">
+        <div className="p-3 sm:p-4 flex-1 flex flex-col gap-1 sm:gap-1.5 text-center sm:text-left">
           <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 leading-snug group-hover:text-opacity-80 transition-colors">
             {title}
           </h3>

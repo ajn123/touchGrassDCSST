@@ -13,10 +13,10 @@ export default async function FeaturedEvents() {
       console.log("⚠️ FeaturedEvents: No events returned from getEvents()");
       return (
         <section className="max-w-7xl mx-auto px-4 py-16">
-          <h2 className="text-4xl font-bold mb-8 text-center text-white">
+          <h2 className="text-4xl font-bold mb-8 text-center theme-text-primary">
             Featured Events
           </h2>
-          <div className="text-center text-white">
+          <div className="text-center theme-text-secondary">
             <p>No events available at the moment.</p>
             <p className="text-sm mt-2">
               Check back later for upcoming events!
@@ -37,10 +37,10 @@ export default async function FeaturedEvents() {
       console.log("⚠️ FeaturedEvents: No events have image_url");
       return (
         <section className="max-w-7xl mx-auto px-4 py-16">
-          <h2 className="text-4xl font-bold mb-8 text-center text-white">
+          <h2 className="text-4xl font-bold mb-8 text-center theme-text-primary">
             Featured Events
           </h2>
-          <div className="text-center text-white">
+          <div className="text-center theme-text-secondary">
             <p>Events are available but images are still loading.</p>
             <p className="text-sm mt-2">Please check back soon!</p>
           </div>
@@ -58,7 +58,7 @@ export default async function FeaturedEvents() {
 
     return (
       <section className="max-w-7xl mx-auto px-4 py-16">
-        <h2 className="text-4xl font-bold mb-8 text-center text-white">
+        <h2 className="text-4xl font-bold mb-8 text-center theme-text-primary">
           Featured Events
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
@@ -72,10 +72,10 @@ export default async function FeaturedEvents() {
     console.error("❌ FeaturedEvents: Error fetching featured events:", error);
     return (
       <section className="max-w-7xl mx-auto px-4 py-16">
-        <h2 className="text-4xl font-bold mb-8 text-center text-white">
+        <h2 className="text-4xl font-bold mb-8 text-center theme-text-primary">
           Featured Events
         </h2>
-        <div className="text-center text-white">
+        <div className="text-center theme-text-secondary">
           <p>Unable to load events at the moment.</p>
           <p className="text-sm mt-2">Please try again later.</p>
         </div>

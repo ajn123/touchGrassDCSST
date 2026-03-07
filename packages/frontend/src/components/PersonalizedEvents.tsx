@@ -68,18 +68,19 @@ export default function PersonalizedEvents() {
     return (
       <section className="max-w-7xl mx-auto px-4 py-12">
         <div className="flex items-center gap-2 mb-6">
-          <h2 className="text-2xl font-bold text-white">Upcoming Events</h2>
+          <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Upcoming Events</h2>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
           {[...Array(4)].map((_, i) => (
             <div
               key={i}
-              className="rounded-xl overflow-hidden animate-pulse bg-gray-800/60"
+              className="rounded-xl overflow-hidden animate-pulse"
+              style={{ backgroundColor: 'var(--bg-secondary)' }}
             >
-              <div className="h-28 sm:h-44 bg-gray-700" />
+              <div className="h-28 sm:h-44" style={{ backgroundColor: 'var(--border-primary)' }} />
               <div className="p-4 space-y-2">
-                <div className="h-4 bg-gray-700 rounded w-3/4" />
-                <div className="h-3 bg-gray-700 rounded w-1/2" />
+                <div className="h-4 rounded w-3/4" style={{ backgroundColor: 'var(--border-primary)' }} />
+                <div className="h-3 rounded w-1/2" style={{ backgroundColor: 'var(--border-primary)' }} />
               </div>
             </div>
           ))}
@@ -91,7 +92,7 @@ export default function PersonalizedEvents() {
   return (
     <section className="max-w-7xl mx-auto px-4 py-12">
       <div className="flex items-center gap-2 mb-6">
-        <h2 className="text-2xl font-bold text-white">
+        <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
           {hasPersonalization ? "Recommended for You" : "Upcoming Events"}
         </h2>
         {hasPersonalization && (

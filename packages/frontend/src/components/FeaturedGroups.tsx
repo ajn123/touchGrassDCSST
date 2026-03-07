@@ -22,7 +22,8 @@ export default async function FeaturedGroups() {
           <h2 className="text-4xl font-bold ">Featured Groups</h2>
           <Link
             href="/groups"
-            className="bg-white text-gray-900 px-6 py-3 rounded-lg font-semibold theme-hover-light transition-colors border border-black"
+            className="px-6 py-3 rounded-lg font-semibold theme-hover-light transition-colors border"
+            style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', borderColor: 'var(--border-primary)' }}
           >
             Show All Groups
           </Link>
@@ -33,7 +34,7 @@ export default async function FeaturedGroups() {
               <FeaturedGroup key={group.pk} group={group} />
             ))}
           {featuredGroups.length === 0 && (
-            <div className="text-center text-white">
+            <div className="text-center theme-text-secondary">
               No featured groups found
             </div>
           )}

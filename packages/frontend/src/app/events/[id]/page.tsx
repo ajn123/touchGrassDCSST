@@ -101,14 +101,14 @@ export default async function ItemPage({
       "
       >
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+          <h1 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
             Event Not Available
           </h1>
-          <p className="text-gray-600 mb-4">
+          <p className="mb-4" style={{ color: 'var(--text-secondary)' }}>
             This event is currently private and not available for public
             viewing.
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
             Please check back later or contact an administrator if you believe
             this is an error.
           </p>
@@ -193,23 +193,28 @@ export default async function ItemPage({
       {/* Public View - Enhanced display */}
       <EntityDetail
         title={item.title}
-        rightActionNode={
-          <div className="flex gap-2 flex-wrap">
-            <ShareButton
-              title={item.title}
-              text={`Check out ${item.title} on TouchGrass DC`}
-              url={`https://touchgrassdc.com/events/${encodeURIComponent(awaitedParams.id)}`}
-            />
-            <ReportWrongInfoButton eventTitle={item.title} eventId={item.pk} />
-          </div>
-        }
-        imageUrl={resolveImageUrl(item.image_url)}
+        category={eventCategory}
+        categories={item.category}
+        venue={item.venue}
+        imageUrl={resolveImageUrl(item.image_url, eventCategory, item.title, item.venue)}
         cost={item.cost}
         socials={item.socials ? item.socials : { website: item.url }}
         date={item.start_date as any}
+        startTime={item.start_time}
+        endTime={item.end_time}
+        eventUrl={item.url}
         location={item.location}
-        categories={item.category}
         description={item.description}
+        shareNode={
+          <ShareButton
+            title={item.title}
+            text={`Check out ${item.title} on TouchGrass DC`}
+            url={`https://touchgrassdc.com/events/${encodeURIComponent(awaitedParams.id)}`}
+          />
+        }
+        reportNode={
+          <ReportWrongInfoButton eventTitle={item.title} eventId={item.pk} variant="subtle" />
+        }
       />
 
       {/* Map Section */}

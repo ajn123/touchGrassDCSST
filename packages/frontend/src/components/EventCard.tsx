@@ -1,6 +1,7 @@
 "use client";
 
 import { resolveImageUrl, shouldBeUnoptimized } from "@/lib/image-utils";
+import { useTheme } from "@/contexts/ThemeContext";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -50,6 +51,25 @@ function getCategoryAccent(category?: string | string[]): string {
   return CATEGORY_ACCENT[primary] || "#10B981";
 }
 
+/**
+ * Darker version of accent colors for use as text on light backgrounds.
+ * Only overrides colors that have poor contrast on white.
+ */
+const ACCENT_TEXT_OVERRIDE: Record<string, string> = {
+  "#F59E0B": "#92400E", // amber-800 (Comedy, Trivia)
+  "#D97706": "#92400E", // amber-800 (Festival)
+  "#22C55E": "#166534", // green-800 (Outdoors)
+  "#10B981": "#065F46", // emerald-800 (default/Volunteer)
+  "#14B8A6": "#115E59", // teal-800 (Yoga)
+  "#06B6D4": "#155E75", // cyan-800 (Cycling)
+  "#F472B6": "#9D174D", // pink-800 (Dance)
+};
+
+function getAccentTextColor(accent: string, isDark: boolean): string {
+  if (isDark) return accent;
+  return ACCENT_TEXT_OVERRIDE[accent] || accent;
+}
+
 export interface EventCardProps {
   href: string;
   title: string;
@@ -82,8 +102,10 @@ export default function EventCard({
 }: EventCardProps) {
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
+  const { isDark } = useTheme();
 
   const accent = getCategoryAccent(category);
+  const accentText = getAccentTextColor(accent, isDark);
   const primaryCategory = Array.isArray(category) ? category[0] : category;
   const resolvedUrl = resolveImageUrl(
     imageUrl || "",
@@ -95,8 +117,9 @@ export default function EventCard({
   return (
     <Link href={href} className="group block h-full">
       <div
-        className="rounded-xl overflow-hidden h-full flex flex-col bg-white dark:bg-gray-800/80 shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] transform"
+        className="rounded-xl overflow-hidden h-full flex flex-col shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] transform"
         style={{
+          backgroundColor: 'var(--bg-primary)',
           borderTop: `3px solid ${accent}`,
           boxShadow: `0 1px 3px 0 rgba(0,0,0,0.1)`,
         }}
@@ -118,7 +141,7 @@ export default function EventCard({
               unoptimized={shouldBeUnoptimized(resolvedUrl)}
             />
           ) : (
-            <div className="w-full h-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+            <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: 'var(--bg-secondary)' }}>
               <svg
                 className="w-8 h-8 text-gray-400"
                 fill="none"
@@ -137,7 +160,7 @@ export default function EventCard({
 
           {/* Loading shimmer */}
           {imageLoading && imageUrl && (
-            <div className="absolute inset-0 z-10 bg-gray-200 dark:bg-gray-700 animate-pulse" />
+            <div className="absolute inset-0 z-10 animate-pulse" style={{ backgroundColor: 'var(--bg-secondary)' }} />
           )}
 
           {/* Gradient overlay at bottom of image */}
@@ -162,24 +185,24 @@ export default function EventCard({
 
         {/* Content */}
         <div className="p-3 sm:p-4 flex-1 flex flex-col gap-1 sm:gap-1.5 text-center">
-          <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 leading-snug group-hover:text-opacity-80 transition-colors">
+          <h3 className="text-sm sm:text-base font-semibold line-clamp-2 leading-snug group-hover:opacity-80 transition-colors" style={{ color: 'var(--text-primary)' }}>
             {title}
           </h3>
 
           {date && (
-            <p className="text-xs font-medium" style={{ color: accent }}>
+            <p className="text-sm font-medium" style={{ color: accentText }}>
               {date}
             </p>
           )}
 
           {description && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+            <p className="text-sm line-clamp-2" style={{ color: 'var(--text-secondary)' }}>
               {description}
             </p>
           )}
 
           {venue && (
-            <p className="text-xs text-gray-500 dark:text-gray-500 truncate mt-auto">
+            <p className="text-sm truncate mt-auto" style={{ color: 'var(--text-secondary)' }}>
               {venue}
             </p>
           )}
@@ -193,7 +216,7 @@ export default function EventCard({
                   className="text-xs px-2 py-0.5 rounded-full font-medium"
                   style={{
                     backgroundColor: `${accent}15`,
-                    color: accent,
+                    color: accentText,
                   }}
                 >
                   {tag}
@@ -210,4 +233,4 @@ export default function EventCard({
   );
 }
 
-export { getCategoryAccent, CATEGORY_ACCENT };
+export { getCategoryAccent, getAccentTextColor, CATEGORY_ACCENT, ACCENT_TEXT_OVERRIDE };

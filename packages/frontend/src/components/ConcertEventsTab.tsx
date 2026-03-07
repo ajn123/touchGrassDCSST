@@ -2,7 +2,15 @@
 
 import FeaturedEvent from "@/components/FeaturedEvent";
 import { filterEvents, FilterOptions } from "@/lib/filter-events";
-import { useEffect, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
+
+const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
+
+function getEventDayOfWeek(event: any): number | null {
+  if (!event.start_date) return null;
+  const d = new Date(event.start_date + "T00:00:00");
+  return isNaN(d.getTime()) ? null : d.getDay();
+}
 
 function groupByVenue(events: any[]): Map<string, any[]> {
   const groups = new Map<string, any[]>();
@@ -31,6 +39,7 @@ export default function ConcertEventsTab({ allEvents }: ConcertEventsTabProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"date" | "venue">("date");
   const [selectedVenue, setSelectedVenue] = useState<string | null>(null);
+  const [selectedDays, setSelectedDays] = useState<Set<number>>(new Set([0,1,2,3,4,5,6]));
 
   useEffect(() => {
     const today = new Date();
@@ -56,6 +65,25 @@ export default function ConcertEventsTab({ allEvents }: ConcertEventsTabProps) {
     setLoading(false);
   }, [allEvents, searchQuery]);
 
+  const availableDays = useMemo(() => {
+    const days = new Set<number>();
+    for (const e of concertEvents) {
+      const d = getEventDayOfWeek(e);
+      if (d !== null) days.add(d);
+    }
+    return days;
+  }, [concertEvents]);
+
+  const allDaysSelected = selectedDays.size === 7;
+
+  const filteredByDay = useMemo(() => {
+    if (allDaysSelected) return concertEvents;
+    return concertEvents.filter((e) => {
+      const d = getEventDayOfWeek(e);
+      return d !== null && selectedDays.has(d);
+    });
+  }, [concertEvents, selectedDays, allDaysSelected]);
+
   if (loading) {
     return (
       <div className="text-center py-12">
@@ -63,6 +91,24 @@ export default function ConcertEventsTab({ allEvents }: ConcertEventsTabProps) {
         <p>Loading concerts...</p>
       </div>
     );
+  }
+
+  function toggleDay(day: number) {
+    setSelectedDays((prev) => {
+      const next = new Set(prev);
+      if (next.has(day)) {
+        if (next.size === 1) return prev;
+        next.delete(day);
+      } else {
+        next.add(day);
+      }
+      return next;
+    });
+  }
+
+  function toggleAllDays() {
+    if (allDaysSelected) return;
+    setSelectedDays(new Set([0,1,2,3,4,5,6]));
   }
 
   const venueGroups = viewMode === "venue" ? groupByVenue(concertEvents) : null;
@@ -123,6 +169,38 @@ export default function ConcertEventsTab({ allEvents }: ConcertEventsTabProps) {
         </div>
       </div>
 
+      {/* Day-of-week filter pills (date view) */}
+      {viewMode === "date" && concertEvents.length > 0 && (
+        <div className="mb-6 flex flex-wrap gap-2">
+          <button
+            onClick={toggleAllDays}
+            className={`text-sm px-3 py-1 rounded-full font-medium transition-colors ${
+              allDaysSelected
+                ? "bg-purple-600 text-white"
+                : "theme-bg-secondary theme-text-secondary border border-[var(--text-tertiary)] hover:opacity-80"
+            }`}
+          >
+            All
+          </button>
+          {DAY_LABELS.map((label, i) => (
+            <button
+              key={label}
+              onClick={() => toggleDay(i)}
+              disabled={!availableDays.has(i)}
+              className={`text-sm px-3 py-1 rounded-full font-medium transition-colors ${
+                !availableDays.has(i)
+                  ? "opacity-30 cursor-not-allowed theme-bg-secondary theme-text-secondary border border-[var(--text-tertiary)]"
+                  : selectedDays.has(i) && !allDaysSelected
+                    ? "bg-purple-600 text-white"
+                    : "theme-bg-secondary theme-text-secondary border border-[var(--text-tertiary)] hover:opacity-80"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Venue selector pills */}
       {viewMode === "venue" && venueNames.length > 0 && (
         <div className="mb-6 flex flex-wrap gap-2">
@@ -156,9 +234,13 @@ export default function ConcertEventsTab({ allEvents }: ConcertEventsTabProps) {
             <FeaturedEvent key={`concert-${activeVenue}-${index}`} event={event} />
           ))}
         </div>
+      ) : filteredByDay.length === 0 ? (
+        <div className="text-center py-12">
+          <p>No concerts on the selected days.</p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {concertEvents.map((event: any, index: number) => (
+          {filteredByDay.map((event: any, index: number) => (
             <FeaturedEvent key={`concert-event-${index}`} event={event} />
           ))}
         </div>

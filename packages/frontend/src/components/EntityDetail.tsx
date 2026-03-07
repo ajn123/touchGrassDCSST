@@ -9,7 +9,7 @@ import { Schedule } from "@/components/Schedule";
 import { Socials } from "@/components/Socials";
 import { CATEGORY_COLORS } from "@/lib/image-utils";
 import { getCategoryAccent, getAccentTextColor } from "@/components/EventCard";
-import { useTheme } from "@/contexts/ThemeContext";
+import { useThemeSafe } from "@/contexts/ThemeContext";
 import { ReactNode } from "react";
 
 interface EntityDetailProps {
@@ -200,7 +200,7 @@ export function EntityDetail({
     />;
   }
 
-  const { isDark } = useTheme();
+  const { isDark } = useThemeSafe();
   const accent = getCategoryAccent(category);
   const accentText = getAccentTextColor(accent, isDark);
   const categoryColors = CATEGORY_COLORS[category] ?? CATEGORY_COLORS["General"];

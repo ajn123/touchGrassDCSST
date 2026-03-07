@@ -1,7 +1,7 @@
 "use client";
 
 import { resolveImageUrl, shouldBeUnoptimized } from "@/lib/image-utils";
-import { useTheme } from "@/contexts/ThemeContext";
+import { useThemeSafe } from "@/contexts/ThemeContext";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -102,7 +102,7 @@ export default function EventCard({
 }: EventCardProps) {
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
-  const { isDark } = useTheme();
+  const { isDark } = useThemeSafe();
 
   const accent = getCategoryAccent(category);
   const accentText = getAccentTextColor(accent, isDark);

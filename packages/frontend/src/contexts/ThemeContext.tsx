@@ -65,3 +65,10 @@ export function useTheme() {
   }
   return context;
 }
+
+const THEME_DEFAULTS: ThemeContextType = { isDark: false, toggleTheme: () => {}, mounted: false, hoverClass: "" };
+
+export function useThemeSafe(): ThemeContextType {
+  const context = useContext(ThemeContext);
+  return context ?? THEME_DEFAULTS;
+}

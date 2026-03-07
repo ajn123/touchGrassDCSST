@@ -47,31 +47,13 @@ export default function Header() {
           <Link href="/" className="text-xl header-brand">
             TouchGrass DC
           </Link>
-          {user && (
-            <div className="flex items-center">
-              <span className="admin-badge inline-flex items-center px-2 py-1 rounded-full text-xs font-medium">
-                <svg
-                  className="w-3 h-3 mr-1"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                Admin
-              </span>
-            </div>
-          )}
         </div>
 
         {/* Desktop Navigation */}
-        <div className="hidden xl:flex flex-row">
+        <div className="hidden xl:flex flex-row items-center gap-1">
           <Link
             href="/search?sortBy=date&sortOrder=asc"
-            className="header-link px-10 py-2 flex items-center"
+            className="header-link px-4 py-2 flex items-center"
           >
             <svg
               className="w-4 h-4 mr-1"
@@ -90,7 +72,7 @@ export default function Header() {
           </Link>
           <Link
             href="/groups"
-            className="header-link px-10 py-2 flex items-center"
+            className="header-link px-4 py-2 flex items-center"
           >
             <svg
               className="w-4 h-4 mr-1"
@@ -109,7 +91,7 @@ export default function Header() {
           </Link>
           <Link
             href="/find-my-group"
-            className="header-link px-10 py-2 flex items-center"
+            className="header-link px-4 py-2 flex items-center"
             style={{ color: "var(--accent-primary)" }}
           >
             <svg
@@ -129,7 +111,7 @@ export default function Header() {
           </Link>
           <Link
             href="/calendar"
-            className="header-link px-10 py-2 flex items-center"
+            className="header-link px-4 py-2 flex items-center"
           >
             <svg
               className="w-4 h-4 mr-1"
@@ -148,7 +130,7 @@ export default function Header() {
           </Link>
           <Link
             href="/comedy"
-            className="header-link px-10 py-2 flex items-center"
+            className="header-link px-4 py-2 flex items-center"
           >
             <svg
               className="w-4 h-4 mr-1"
@@ -167,7 +149,7 @@ export default function Header() {
           </Link>
           <Link
             href="/articles"
-            className="header-link px-10 py-2 flex items-center"
+            className="header-link px-4 py-2 flex items-center"
           >
             <svg
               className="w-4 h-4 mr-1"
@@ -187,7 +169,7 @@ export default function Header() {
           {process.env.NEXT_PUBLIC_SHOP_ENABLED === "true" && (
             <Link
               href="/shop"
-              className="header-link px-10 py-2 flex items-center"
+              className="header-link px-4 py-2 flex items-center"
             >
               <svg
                 className="w-4 h-4 mr-1"
@@ -205,28 +187,32 @@ export default function Header() {
               Shop
             </Link>
           )}
-          <Link href="/add-event" className="header-link px-10 py-2">
-            Add Event
-          </Link>
-          {/* <Link href="/signup-emails" className="header-link px-10 py-2">
-            Sign Up For Emails
-          </Link> */}
-          <Link href="/about" className="header-link px-10 py-2">
-            Contact
-          </Link>
           {user && (
             <Link
               href="/admin"
-              className="header-link px-10 py-2 font-semibold"
+              className="header-link px-4 py-2 font-semibold inline-flex items-center"
               style={{ color: "var(--accent-primary)" }}
             >
-              Admin
+              <span className="admin-badge inline-flex items-center px-2 py-1 rounded-full text-xs font-medium">
+                <svg
+                  className="w-3 h-3 mr-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                Admin
+              </span>
             </Link>
           )}
           {/* Theme Toggle Button */}
           <button
             onClick={toggleTheme}
-            className="header-button px-10 py-2 flex items-center"
+            className="header-button px-4 py-2 flex items-center"
             title={
               mounted
                 ? isDark
@@ -463,27 +449,6 @@ export default function Header() {
                 </div>
               </Link>
             )}
-            <Link
-              href="/add-event"
-              className="block px-3 py-2 text-base font-medium header-link rounded-md"
-              onClick={closeMenu}
-            >
-              Add Event
-            </Link>
-            {/* <Link
-              href="/signup-emails"
-              className="block px-3 py-2 text-base font-medium header-link rounded-md"
-              onClick={closeMenu}
-            >
-              Sign Up For Emails
-            </Link> */}
-            <Link
-              href="/about"
-              className="block px-3 py-2 text-base font-medium header-link rounded-md"
-              onClick={closeMenu}
-            >
-              Contact
-            </Link>
             {user && (
               <Link
                 href="/admin"

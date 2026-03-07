@@ -214,15 +214,12 @@ export default async function ItemPage({
 
       {/* Map Section */}
       {(item.coordinates || (item.location && !item.location.toLowerCase().includes("unknown"))) && (
-        <div>
-          <h2 className="text-xl font-semibold mb-3">Location</h2>
-          <EventMap
-            coordinates={item.coordinates}
-            address={item.location}
-            eventTitle={item.title}
-            className="mb-4"
-          />
-        </div>
+        <EventMap
+          coordinates={item.coordinates}
+          address={item.location}
+          eventTitle={item.title}
+          className="mb-4"
+        />
       )}
 
       {/* Additional Fields */}

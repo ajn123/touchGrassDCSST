@@ -6,6 +6,7 @@ import { Resource } from "sst";
 const DC_TEAMS = [
   {
     name: "Washington Wizards",
+    espnAbbrev: "WSH",
     sport: "Basketball",
     venue: "Capital One Arena",
     venueAddress: "601 F St NW, Washington, DC 20004",
@@ -14,6 +15,7 @@ const DC_TEAMS = [
   },
   {
     name: "Washington Capitals",
+    espnAbbrev: "WSH",
     sport: "Hockey",
     venue: "Capital One Arena",
     venueAddress: "601 F St NW, Washington, DC 20004",
@@ -22,6 +24,7 @@ const DC_TEAMS = [
   },
   {
     name: "Washington Nationals",
+    espnAbbrev: "WSH",
     sport: "Baseball",
     venue: "Nationals Park",
     venueAddress: "1500 South Capitol St SE, Washington, DC 20003",
@@ -30,6 +33,7 @@ const DC_TEAMS = [
   },
   {
     name: "Washington Commanders",
+    espnAbbrev: "WSH",
     sport: "Football",
     venue: "Northwest Stadium",
     venueAddress: "1600 FedEx Way, Landover, MD 20785",
@@ -38,6 +42,7 @@ const DC_TEAMS = [
   },
   {
     name: "D.C. United",
+    espnAbbrev: "DC",
     sport: "Soccer",
     venue: "Audi Field",
     venueAddress: "100 Potomac Ave SW, Washington, DC 20024",
@@ -82,19 +87,18 @@ export function parseESPNDate(utcDateStr: string): {
  * Build a human-readable game title like "Wizards vs. Lakers" or "Nationals at Dodgers".
  */
 export function buildGameTitle(
-  teamName: string,
+  teamAbbrev: string,
   competitors: any[]
 ): { title: string; isHome: boolean } {
   if (!competitors || competitors.length < 2) {
-    return { title: teamName, isHome: true };
+    return { title: teamAbbrev, isHome: true };
   }
 
-  // Find our team and the opponent
   const homeTeam = competitors.find((c: any) => c.homeAway === "home");
   const awayTeam = competitors.find((c: any) => c.homeAway === "away");
 
   if (!homeTeam || !awayTeam) {
-    return { title: teamName, isHome: true };
+    return { title: teamAbbrev, isHome: true };
   }
 
   const homeName =
@@ -102,10 +106,9 @@ export function buildGameTitle(
   const awayName =
     awayTeam.team?.shortDisplayName || awayTeam.team?.displayName || "Away";
 
-  // Determine if we're the home team by matching the team name
-  const isHome = (homeTeam.team?.displayName || "").includes(
-    teamName.split(" ").pop() || ""
-  );
+  // Use ESPN's abbreviation to reliably determine if we're the home team
+  const homeAbbrev = (homeTeam.team?.abbreviation || "").toUpperCase();
+  const isHome = homeAbbrev === teamAbbrev.toUpperCase();
 
   if (isHome) {
     return { title: `${homeName} vs. ${awayName}`, isHome: true };
@@ -137,7 +140,7 @@ export function parseESPNSchedule(
     if (!date) continue;
 
     const { title, isHome } = buildGameTitle(
-      team.name,
+      team.espnAbbrev,
       competition?.competitors
     );
 

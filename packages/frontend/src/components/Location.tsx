@@ -19,7 +19,14 @@ export function Location({ location, className = "" }: LocationProps) {
       iconClassName="text-red-600"
       className={`my-4 ${className}`}
     >
-      <p className="">{location}</p>
+      <a
+        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="hover:underline"
+      >
+        {location}
+      </a>
     </IconSection>
   );
 }

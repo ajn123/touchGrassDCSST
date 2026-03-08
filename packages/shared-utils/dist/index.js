@@ -633,19 +633,19 @@ function sanitizeEvent(event) {
 // SVG IMAGE GENERATION
 // ============================================================================
 const CATEGORY_COLORS = {
-    "Arts & Culture": "#E11D48",
-    "Comedy": "#F59E0B",
-    "Community": "#2563EB",
-    "Education": "#4338CA",
-    "Festival": "#CA8A04",
-    "Food & Drink": "#EA580C",
-    "General": "#475569",
-    "Music": "#7C3AED",
-    "Networking": "#0D9488",
-    "Nightlife": "#6D28D9",
-    "Outdoors & Recreation": "#16A34A",
-    "Sports": "#059669",
-    "Theater": "#DC2626",
+    "Arts & Culture": { accent: "#E11D48", bgFrom: "#4a0d1a", bgTo: "#1a0a10" },
+    Comedy: { accent: "#F59E0B", bgFrom: "#4a3208", bgTo: "#1a1505" },
+    Community: { accent: "#2563EB", bgFrom: "#0d1f4a", bgTo: "#080e1a" },
+    Education: { accent: "#4338CA", bgFrom: "#1a154a", bgTo: "#0c0a1a" },
+    Festival: { accent: "#CA8A04", bgFrom: "#4a3508", bgTo: "#1a1505" },
+    "Food & Drink": { accent: "#EA580C", bgFrom: "#4a1e08", bgTo: "#1a0e05" },
+    General: { accent: "#475569", bgFrom: "#1e293b", bgTo: "#0f172a" },
+    Music: { accent: "#7C3AED", bgFrom: "#2a154a", bgTo: "#120a1a" },
+    Networking: { accent: "#0D9488", bgFrom: "#083a36", bgTo: "#051a18" },
+    Nightlife: { accent: "#6D28D9", bgFrom: "#25104a", bgTo: "#10081a" },
+    "Outdoors & Recreation": { accent: "#16A34A", bgFrom: "#0a3a1a", bgTo: "#051a0d" },
+    Sports: { accent: "#059669", bgFrom: "#083a28", bgTo: "#051a14" },
+    Theater: { accent: "#DC2626", bgFrom: "#4a0d0d", bgTo: "#1a0808" },
 };
 /**
  * Word-wrap a string into lines of at most `maxChars` characters.
@@ -685,7 +685,7 @@ function escapeXml(str) {
  * Returns a Buffer containing UTF-8 encoded SVG XML.
  */
 function generateStyledEventSvgBuffer({ title, category, venue, }) {
-    const color = CATEGORY_COLORS[category ?? ""] ?? CATEGORY_COLORS["General"];
+    const { accent: color, bgFrom, bgTo } = CATEGORY_COLORS[category ?? ""] ?? CATEGORY_COLORS["General"];
     const safeTitle = escapeXml(title || "Untitled Event");
     const safeVenue = escapeXml(venue || "");
     const safeCategory = escapeXml(category || "General");
@@ -702,8 +702,8 @@ function generateStyledEventSvgBuffer({ title, category, venue, }) {
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#0f172a"/>
-      <stop offset="100%" stop-color="#1e293b"/>
+      <stop offset="0%" stop-color="${bgFrom}"/>
+      <stop offset="100%" stop-color="${bgTo}"/>
     </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
@@ -722,37 +722,42 @@ function generateStyledEventSvgBuffer({ title, category, venue, }) {
  * Returns a Buffer containing UTF-8 encoded SVG XML (1200x630, OG standard).
  */
 function generateStyledArticleSvgBuffer({ title, category, subtitle, }) {
-    const color = CATEGORY_COLORS[category ?? ""] ?? CATEGORY_COLORS["General"];
+    const { accent: color, bgFrom, bgTo } = CATEGORY_COLORS[category ?? ""] ?? CATEGORY_COLORS["General"];
     const safeTitle = escapeXml(title || "Untitled Article");
     const safeCategory = escapeXml(category || "General");
     const safeSubtitle = escapeXml(subtitle || "");
-    const titleLines = wrapText(safeTitle, 36, 3);
-    const lineHeight = 64;
+    const titleLines = wrapText(safeTitle, 24, 3);
+    const lineHeight = 80;
     const titleStartY = 210;
     const titleSvg = titleLines
-        .map((line, i) => `<text x="64" y="${titleStartY + i * lineHeight}" fill="#f8fafc" font-family="system-ui,-apple-system,sans-serif" font-size="48" font-weight="700" letter-spacing="-0.5">${line}</text>`)
+        .map((line, i) => `<text x="600" y="${titleStartY + i * lineHeight}" fill="#f8fafc" font-family="system-ui,-apple-system,sans-serif" font-size="64" font-weight="700" letter-spacing="-0.5" text-anchor="middle">${line}</text>`)
         .join("\n  ");
-    const subtitleY = titleStartY + titleLines.length * lineHeight + 24;
+    const subtitleY = titleStartY + titleLines.length * lineHeight + 32;
     const subtitleSvg = safeSubtitle
-        ? `<text x="64" y="${subtitleY}" fill="#94a3b8" font-family="system-ui,-apple-system,sans-serif" font-size="24">${escapeXml(wrapText(safeSubtitle, 50, 1)[0])}</text>`
+        ? `<text x="600" y="${subtitleY}" fill="#94a3b8" font-family="system-ui,-apple-system,sans-serif" font-size="30" text-anchor="middle">${escapeXml(wrapText(safeSubtitle, 40, 1)[0])}</text>`
         : "";
+    const badgeWidth = safeCategory.length * 14 + 56;
+    const badgeX = 600 - badgeWidth / 2;
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#0f172a"/>
-      <stop offset="50%" stop-color="#1e293b"/>
-      <stop offset="100%" stop-color="#0f172a"/>
+      <stop offset="0%" stop-color="${bgFrom}"/>
+      <stop offset="50%" stop-color="${bgTo}"/>
+      <stop offset="100%" stop-color="${bgFrom}"/>
     </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
-  <rect x="0" y="0" width="1200" height="6" fill="${color}"/>
-  <rect x="0" y="624" width="1200" height="6" fill="${color}"/>
-  <rect x="64" y="80" rx="16" width="${safeCategory.length * 12 + 48}" height="36" fill="${color}" fill-opacity="0.2"/>
-  <text x="88" y="104" fill="${color}" font-family="system-ui,-apple-system,sans-serif" font-size="16" font-weight="600" letter-spacing="0.5">${safeCategory}</text>
-  <text x="64" y="156" fill="#64748b" font-family="system-ui,-apple-system,sans-serif" font-size="14" font-weight="500" letter-spacing="2">TOUCHGRASS DC ARTICLE</text>
+  <circle cx="1050" cy="120" r="180" fill="${color}" fill-opacity="0.06"/>
+  <circle cx="150" cy="500" r="140" fill="${color}" fill-opacity="0.04"/>
+  <circle cx="1150" cy="450" r="90" fill="${color}" fill-opacity="0.08"/>
+  <rect x="0" y="0" width="1200" height="8" fill="${color}"/>
+  <rect x="0" y="622" width="1200" height="8" fill="${color}"/>
+  <rect x="${badgeX}" y="85" rx="18" width="${badgeWidth}" height="42" fill="${color}" fill-opacity="0.7"/>
+  <text x="600" y="113" fill="#ffffff" font-family="system-ui,-apple-system,sans-serif" font-size="20" font-weight="600" letter-spacing="0.5" text-anchor="middle">${safeCategory}</text>
   ${titleSvg}
   ${subtitleSvg}
-  <text x="64" y="596" fill="#334155" font-family="system-ui,-apple-system,sans-serif" font-size="18">touchgrassdc.com</text>
+  <line x1="400" y1="560" x2="800" y2="560" stroke="${color}" stroke-opacity="0.2" stroke-width="1"/>
+  <text x="600" y="596" fill="#475569" font-family="system-ui,-apple-system,sans-serif" font-size="22" text-anchor="middle">touchgrassdc.com</text>
 </svg>`;
     return Buffer.from(svg, "utf-8");
 }

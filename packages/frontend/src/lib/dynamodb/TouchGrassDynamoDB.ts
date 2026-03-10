@@ -342,30 +342,80 @@ export class TouchGrassDynamoDB {
 
   /**
    * Get all current and future events from DynamoDB
-   * Filters out past events based on end_date or start_date
+   * Queries publicEventsIndex GSI with date filtering pushed to DynamoDB
+   * to avoid transferring past events over the wire
    */
   async getCurrentAndFutureEvents(): Promise<Event[]> {
     try {
       const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
 
-      // Get all events
-      const allEvents = await this.getEvents();
+      const allEvents: Event[] = [];
+      let lastEvaluatedKey: any = undefined;
 
-      // Filter to only current and future events
-      const currentAndFutureEvents = allEvents.filter((event) => {
-        // Use end_date if available, otherwise use start_date
-        const eventDate = event.end_date || event.start_date;
+      do {
+        const command = new QueryCommand({
+          TableName: this.tableName,
+          IndexName: "publicEventsIndex",
+          KeyConditionExpression: "#isPublic = :isPublic",
+          FilterExpression:
+            "(begins_with(#pk, :eventPrefixNew) OR begins_with(#pk, :eventPrefixOld) OR begins_with(#pk, :washingtonianPrefixNew) OR begins_with(#pk, :washingtonianPrefixOld)) AND (attribute_not_exists(#start_date) OR (attribute_exists(#end_date) AND #end_date >= :today) OR (attribute_not_exists(#end_date) AND #start_date >= :today))",
+          ExpressionAttributeNames: {
+            "#isPublic": "isPublic",
+            "#pk": "pk",
+            "#start_date": "start_date",
+            "#end_date": "end_date",
+          },
+          ExpressionAttributeValues: {
+            ":isPublic": { S: "true" },
+            ":eventPrefixNew": { S: "EVENT-" },
+            ":eventPrefixOld": { S: "EVENT#" },
+            ":washingtonianPrefixNew": { S: "EVENT-WASHINGTONIAN-" },
+            ":washingtonianPrefixOld": { S: "EVENT#WASHINGTONIAN#" },
+            ":today": { S: today },
+          },
+          ExclusiveStartKey: lastEvaluatedKey,
+        });
 
-        if (!eventDate) {
-          // If no date, include it (could be ongoing or date TBD)
-          return true;
+        const result = await this.client.send(command);
+
+        const batchEvents: Event[] =
+          result.Items?.map((item) => unmarshall(item) as Event) || [];
+
+        allEvents.push(...batchEvents);
+        lastEvaluatedKey = result.LastEvaluatedKey;
+      } while (lastEvaluatedKey);
+
+      // For Washingtonian events, derive start_date/start_time from url or pk
+      return allEvents.map((ev: any) => {
+        const pk: string | undefined = ev?.pk;
+        const url: string | undefined = ev?.url;
+        const isWash =
+          typeof pk === "string" &&
+          (pk.startsWith("EVENT#WASHINGTONIAN#") ||
+            pk.startsWith("EVENT-WASHINGTONIAN-"));
+
+        if (isWash) {
+          const source = (url || pk) as string;
+          if (!ev.start_date) {
+            const dateMatch = source.match(/\d{4}-\d{2}-\d{2}/i);
+            if (dateMatch) ev.start_date = dateMatch[0];
+          }
+          if (!ev.start_time) {
+            const timeMatch = source.match(/\d{4}-\d{2}-\d{2}[tT](\d{2})/);
+            if (timeMatch) {
+              const hh = timeMatch[1];
+              const minutes = ev?.time?.match(/:(\d{2})/)?.[1] || "00";
+              const hourNum = parseInt(hh, 10);
+              const ampm = hourNum >= 12 ? "PM" : "AM";
+              const displayHour = hourNum % 12 || 12;
+              ev.start_time = `${displayHour}:${minutes} ${ampm}`;
+            } else if (ev?.time) {
+              ev.start_time = ev.time;
+            }
+          }
         }
-
-        // Compare dates (YYYY-MM-DD format allows string comparison)
-        return eventDate >= today;
+        return ev;
       });
-
-      return currentAndFutureEvents;
     } catch (error) {
       console.error("Error fetching current and future events:", error);
       return [];

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import type { Itinerary, ItinerarySlot, PerfectDayPreferences } from "@/lib/perfect-day";
+import type { Itinerary, ItinerarySlot, PerfectDayPreferences, Vibe } from "@/lib/perfect-day";
 
 const EVENT_CATEGORIES = [
   "Music", "Comedy", "Arts", "Sports", "Community",
@@ -25,6 +25,15 @@ const SLOT_LABELS: Record<string, string> = {
   evening: "Evening",
   night: "Late Night",
 };
+
+const VIBES: { value: Vibe; label: string; emoji: string; desc: string }[] = [
+  { value: "chill", label: "Chill", emoji: "😌", desc: "Low-key, no rush" },
+  { value: "adventure", label: "Adventure", emoji: "🚀", desc: "Pack it full" },
+  { value: "date-night", label: "Date Night", emoji: "💕", desc: "Romantic & intimate" },
+  { value: "solo", label: "Solo Explorer", emoji: "🧭", desc: "Just me, myself & DC" },
+  { value: "group-hangout", label: "Group Hangout", emoji: "🎉", desc: "Squad outing" },
+  { value: "culture-vulture", label: "Culture Vulture", emoji: "🎭", desc: "Museums, art & theater" },
+];
 
 const DC_FACTS = [
   "DC has more free museums than any other US city",
@@ -193,6 +202,73 @@ export default function PerfectDayClient() {
                 {preferences.categories.length === 0
                   ? "Leave empty for a mix of everything"
                   : `Selected: ${preferences.categories.join(", ")}`}
+              </p>
+            </div>
+
+            {/* Vibe Selector */}
+            <div className="mb-8">
+              <h2 className="text-lg font-semibold mb-4">What's the vibe?</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {VIBES.map(({ value, label, emoji, desc }) => {
+                  const isSelected = preferences.vibe === value;
+                  return (
+                    <button
+                      key={value}
+                      onClick={() =>
+                        setPreferences((prev) => ({
+                          ...prev,
+                          vibe: prev.vibe === value ? undefined : value,
+                        }))
+                      }
+                      className={`p-3 rounded-lg text-left transition-all border ${
+                        isSelected
+                          ? "bg-emerald-600 text-white border-emerald-600 shadow-md"
+                          : "hover:border-emerald-400 hover:shadow-sm"
+                      }`}
+                      style={
+                        !isSelected
+                          ? {
+                              backgroundColor: "var(--bg-secondary)",
+                              borderColor: "var(--border-color, #d1d5db)",
+                              color: "var(--text-primary)",
+                            }
+                          : undefined
+                      }
+                    >
+                      <span className="text-lg">{emoji}</span>
+                      <span className="ml-2 text-sm font-medium">{label}</span>
+                      <p
+                        className="text-xs mt-1"
+                        style={{ color: isSelected ? "rgba(255,255,255,0.8)" : "var(--text-secondary)" }}
+                      >
+                        {desc}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Free-text Interests */}
+            <div className="mb-8">
+              <h2 className="text-lg font-semibold mb-4">Anything else we should know?</h2>
+              <textarea
+                value={preferences.interests || ""}
+                onChange={(e) =>
+                  setPreferences((prev) => ({ ...prev, interests: e.target.value }))
+                }
+                placeholder="e.g. &quot;I love jazz and hole-in-the-wall restaurants&quot; or &quot;First time in DC, want iconic spots&quot;"
+                rows={3}
+                maxLength={300}
+                className="w-full px-4 py-3 rounded-lg border text-sm resize-none"
+                style={{
+                  backgroundColor: "var(--bg-secondary)",
+                  borderColor: "var(--border-color, #d1d5db)",
+                  color: "var(--text-primary)",
+                }}
+              />
+              <p className="mt-1 text-xs text-right" style={{ color: "var(--text-secondary)" }}>
+                {(preferences.interests || "").length}/300
               </p>
             </div>
 

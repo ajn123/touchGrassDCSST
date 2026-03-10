@@ -22,10 +22,14 @@ export interface Itinerary {
   tips: string;
 }
 
+export type Vibe = "chill" | "adventure" | "date-night" | "solo" | "group-hangout" | "culture-vulture";
+
 export interface PerfectDayPreferences {
   date: string;
   categories: string[];
   budget: "free" | "moderate" | "any";
+  vibe?: Vibe;
+  interests?: string;
 }
 
 export interface EventForBucketing {
@@ -136,9 +140,12 @@ ${restaurantsText}
 USER PREFERENCES:
 - Interests: ${preferences.categories.length > 0 ? preferences.categories.join(", ") : "open to anything"}
 - Budget: ${preferences.budget}
+- Vibe: ${preferences.vibe || "no preference"}${preferences.interests ? `\n- Personal note: "${preferences.interests}"` : ""}
 
 INSTRUCTIONS:
 - Pick 4-6 slots that create a fun, varied day from morning to night
+- Match the user's vibe — if they said "chill" keep it relaxed, if "adventure" make it packed and exciting, if "date-night" keep it romantic, etc.
+- If they wrote a personal note, treat it as the most important signal for what kind of day to build
 - Include 1-2 dining breaks (use food events if available, otherwise restaurants)
 - Each activity should flow naturally to the next (consider neighborhoods/proximity)
 - Add personality — explain WHY each pick is great

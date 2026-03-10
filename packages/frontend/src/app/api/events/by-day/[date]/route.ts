@@ -29,7 +29,10 @@ export async function GET(
     }
 
     const db = new TouchGrassDynamoDB(Resource.Db.name);
-    const allEvents = await db.getEvents();
+    const today = new Date().toISOString().split("T")[0];
+    const allEvents = date >= today
+      ? await db.getCurrentAndFutureEvents()
+      : await db.getEvents();
 
     // Include events that start on the date or span over the date
     const events = allEvents.filter((ev: any) => {

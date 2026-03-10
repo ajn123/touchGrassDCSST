@@ -5,7 +5,7 @@ import { Resource } from "sst";
 export async function GET() {
   try {
     const db = new TouchGrassDynamoDB(Resource.Db.name);
-    const events = await db.getEvents();
+    const events = await db.getCurrentAndFutureEvents();
 
     return NextResponse.json({
       events,

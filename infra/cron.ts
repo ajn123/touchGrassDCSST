@@ -27,17 +27,17 @@ const cron = new sst.aws.Cron("cron", {
 
 const washingtonianCron = new sst.aws.Cron("washingtonianCron", {
   task: WashingtonianTask,
-  schedule: "rate(1 day)",
+  schedule: "rate(3 days)",
 });
 
 const clockoutdcCron = new sst.aws.Cron("clockoutdcCron", {
   task: ClockOutDCTask,
-  schedule: "rate(1 day)",
+  schedule: "rate(3 days)",
 });
 
 const eventbriteCron = new sst.aws.Cron("eventbriteCron", {
   task: EventbriteTask,
-  schedule: "rate(1 day)",
+  schedule: "rate(3 days)",
 });
 
 const dcimprovCron = new sst.aws.Cron("dcimprovCron", {
@@ -132,7 +132,7 @@ const indieVenuesCron = new sst.aws.Cron("indieVenuesCron", {
 
 const meetupdcCron = new sst.aws.Cron("meetupdcCron", {
   task: MeetupDCTask,
-  schedule: "rate(1 day)",
+  schedule: "rate(3 days)",
 });
 
 const smithsonianCron = new sst.aws.Cron("smithsonianCron", {

@@ -53,7 +53,24 @@
       "Bash(git checkout:*)",
       "Bash(git restore:*)",
       "Bash(PATH=\"/opt/homebrew/opt/node@22/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin\" npm ci:*)",
-      "Bash(PATH=\"/opt/homebrew/opt/node@22/bin:$PATH\" npx next:*)"
+      "Bash(PATH=\"/opt/homebrew/opt/node@22/bin:$PATH\" npx next:*)",
+      "Bash(PATH=\"/opt/homebrew/opt/node@22/bin:/usr/local/bin:$PATH\" npx sst:*)",
+      "Bash(PATH=\"/opt/homebrew/opt/node@22/bin:$PATH\" npx sst:*)",
+      "Bash(python3:*)",
+      "Bash(PATH=\"/opt/homebrew/opt/node@22/bin:/usr/local/bin:$PATH\" which node:*)",
+      "Read(//opt/homebrew/Cellar/node@22/22.22.1/bin/**)",
+      "Bash(/opt/homebrew/opt/node@22/bin/node --version)",
+      "Bash(PATH=\"/opt/homebrew/opt/node@22/bin:/usr/local/bin:$PATH\" /opt/homebrew/opt/node@22/bin/npx sst:*)",
+      "Bash(PATH=\"/opt/homebrew/opt/node@22/bin:/usr/local/bin:/bin:/usr/bin:$PATH\" npx sst:*)",
+      "Bash(PATH=\"/opt/homebrew/opt/node@22/bin:/bin:/usr/bin:/usr/local/bin:$PATH\" node:*)",
+      "Bash(PATH=\"/opt/homebrew/opt/node@22/bin:/usr/local/bin:/bin:/usr/bin:$PATH\" npx tsc:*)",
+      "Bash(do:*)",
+      "WebFetch(domain:touchgrassdcsst-production-mediabucketbucket-knbwsuzh.s3.amazonaws.com)",
+      "Bash(PATH=\"/opt/homebrew/opt/node@22/bin:/usr/local/bin:/bin:/usr/bin:$PATH\" aws dynamodb:*)",
+      "Bash(PATH=\"/opt/homebrew/opt/node@22/bin:/usr/local/bin:/bin:/usr/bin:$PATH\" node:*)",
+      "Bash(PATH=\"/opt/homebrew/opt/node@22/bin:/usr/local/bin:/bin:/usr/bin:$PATH\" aws dynamodb query --table-name touchgrassdcsst-production-DbTable-bcabbfkm --key-condition-expression \"pk = :pk AND sk BETWEEN :start AND :end\" --expression-attribute-values '{:*)",
+      "Read(//tmp/**)",
+      "Bash(AWS_REGION=us-east-1 aws dynamodb:*)"
     ]
   }
 }

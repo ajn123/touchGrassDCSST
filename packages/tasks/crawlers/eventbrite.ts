@@ -234,8 +234,8 @@ class EventbriteCrawler {
     // Check for free
     if (lower.includes("free")) return "free";
 
-    // Extract price from text like "$25.00", "$25", "From $20", "25.00"
-    const priceMatch = priceText.match(/\$?\s*([0-9]+(?:\.[0-9]{2})?)/);
+    // Extract price — require $ sign to avoid matching years like "2026"
+    const priceMatch = priceText.match(/\$\s*([0-9]+(?:\.[0-9]{2})?)/);
     if (priceMatch) {
       return priceMatch[1];
     }

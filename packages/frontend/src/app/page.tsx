@@ -1,4 +1,5 @@
 import ArticleCard from "@/components/ArticleCard";
+import BigEvents from "@/components/BigEvents";
 import Categories from "@/components/Categories";
 import NewsletterBanner from "@/components/NewsletterBanner";
 import PersonalizedEvents from "@/components/PersonalizedEvents";
@@ -6,6 +7,7 @@ import SearchBar from "@/components/SearchBar";
 import WeekendEvents from "@/components/WeekendEvents";
 import { getArticles } from "@/lib/dynamodb/dynamodb-articles";
 import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
+import { getBigEvents } from "@/lib/event-scoring";
 import { getCategoriesFromEvents } from "@/lib/filter-events";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -55,8 +57,17 @@ export default async function Home() {
       return (a.start_time || "").localeCompare(b.start_time || "");
     });
 
+  // Find "big" events worth highlighting
+  const bigEvents = getBigEvents(weekendEvents);
+  const bigEventIds = new Set(bigEvents.map((e: any) => e.pk || e.title));
+
+  // Remove big events from the regular weekend list to avoid duplicates
+  const regularWeekend = weekendEvents.filter(
+    (e: any) => !bigEventIds.has(e.pk || e.title)
+  );
+
   // Diversify by category: round-robin so cards aren't all the same type
-  const diversifiedWeekend = diversifyByCategory(weekendEvents, 8);
+  const diversifiedWeekend = diversifyByCategory(regularWeekend, 8);
 
   // Fetch latest articles
   const allArticles = await getArticles();
@@ -119,6 +130,9 @@ export default async function Home() {
 
       {/* Personalized Events - client component that hydrates after SSR */}
       <PersonalizedEvents />
+
+      {/* Don't Miss This Weekend — big events scored by importance */}
+      <BigEvents events={bigEvents} />
 
       {/* Happening This Weekend */}
       <WeekendEvents events={diversifiedWeekend} />

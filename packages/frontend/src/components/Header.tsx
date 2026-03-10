@@ -148,6 +148,25 @@ export default function Header() {
             Comedy
           </Link>
           <Link
+            href="/concerts"
+            className="header-link px-4 py-2 flex items-center"
+          >
+            <svg
+              className="w-4 h-4 mr-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"
+              />
+            </svg>
+            Concerts
+          </Link>
+          <Link
             href="/articles"
             className="header-link px-4 py-2 flex items-center"
           >
@@ -165,6 +184,25 @@ export default function Header() {
               />
             </svg>
             Articles
+          </Link>
+          <Link
+            href="/guides"
+            className="header-link px-4 py-2 flex items-center"
+          >
+            <svg
+              className="w-4 h-4 mr-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+              />
+            </svg>
+            Guides
           </Link>
           {process.env.NEXT_PUBLIC_SHOP_ENABLED === "true" && (
             <Link
@@ -404,6 +442,28 @@ export default function Header() {
               </div>
             </Link>
             <Link
+              href="/concerts"
+              className="block px-3 py-2 text-base font-medium header-link rounded-md"
+              onClick={closeMenu}
+            >
+              <div className="flex items-center">
+                <svg
+                  className="w-4 h-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"
+                  />
+                </svg>
+                Concerts
+              </div>
+            </Link>
+            <Link
               href="/articles"
               className="block px-3 py-2 text-base font-medium header-link rounded-md"
               onClick={closeMenu}
@@ -423,6 +483,28 @@ export default function Header() {
                   />
                 </svg>
                 Articles
+              </div>
+            </Link>
+            <Link
+              href="/guides"
+              className="block px-3 py-2 text-base font-medium header-link rounded-md"
+              onClick={closeMenu}
+            >
+              <div className="flex items-center">
+                <svg
+                  className="w-4 h-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+                  />
+                </svg>
+                Guides
               </div>
             </Link>
             {process.env.NEXT_PUBLIC_SHOP_ENABLED === "true" && (

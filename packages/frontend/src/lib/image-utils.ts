@@ -1,4 +1,4 @@
-const CATEGORY_COLORS: Record<string, { accent: string; bgFrom: string; bgTo: string }> = {
+export const CATEGORY_COLORS: Record<string, { accent: string; bgFrom: string; bgTo: string }> = {
   "Arts & Culture": { accent: "#E11D48", bgFrom: "#4a0d1a", bgTo: "#1a0a10" },
   Comedy: { accent: "#F59E0B", bgFrom: "#4a3208", bgTo: "#1a1505" },
   Community: { accent: "#2563EB", bgFrom: "#0d1f4a", bgTo: "#080e1a" },

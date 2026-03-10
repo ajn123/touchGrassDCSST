@@ -98,5 +98,20 @@ const KennedyCenterTask = new sst.aws.Task("kennedyCenterTask", {
   dev: false,
 });
 
-export { ClockOutDCTask, DCComedyLoftTask, DCImprovTask, EventbriteTask, KennedyCenterTask, WashingtonianTask };
+const IndieVenuesTask = new sst.aws.Task("indieVenuesTask", {
+  cluster,
+  link: [db, api, normalizeEventStepFunction],
+  image: {
+    context: ".",
+    dockerfile: "./packages/tasks/crawlers/Dockerfile.indievenues",
+  },
+  memory,
+  cpu,
+  environment: {
+    NODE_OPTIONS: "--max-old-space-size=1536",
+  },
+  dev: false,
+});
+
+export { ClockOutDCTask, DCComedyLoftTask, DCImprovTask, EventbriteTask, IndieVenuesTask, KennedyCenterTask, WashingtonianTask };
 

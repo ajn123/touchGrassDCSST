@@ -279,6 +279,48 @@ export function transformMeetupDCEvent(event: any): NormalizedEvent {
 }
 
 /**
+ * Transform Ticketmaster concert event to normalized format
+ */
+export function transformTicketmasterEvent(event: any): NormalizedEvent {
+  return {
+    title: event.title,
+    description: event.description,
+    start_date: normalizeDate(event.date),
+    start_time: normalizeTime(event.time),
+    location: event.location,
+    venue: event.venue,
+    category: normalizeCategory(event.category || "Music"),
+    url: event.url,
+    cost: normalizeCost(event.price),
+    image_url: event.image_url,
+    socials: event.url ? { website: event.url } : undefined,
+    isPublic: true,
+    source: "ticketmaster",
+  };
+}
+
+/**
+ * Transform indie venue event to normalized format
+ */
+export function transformIndieVenueEvent(event: any): NormalizedEvent {
+  return {
+    title: event.title,
+    description: event.description,
+    start_date: normalizeDate(event.date),
+    start_time: normalizeTime(event.time),
+    location: event.location,
+    venue: event.venue,
+    category: normalizeCategory(event.category || "Music"),
+    url: event.url,
+    cost: normalizeCost(event.price),
+    image_url: event.image_url,
+    socials: event.url ? { website: event.url } : undefined,
+    isPublic: true,
+    source: "indievenue",
+  };
+}
+
+/**
  * Transform DC Sports event to normalized format
  */
 export function transformDCSportsEvent(event: any): NormalizedEvent {
@@ -832,6 +874,12 @@ export const handler: Handler = async (event, context, callback) => {
             break;
           case "meetupdc":
             normalizedEvent = transformMeetupDCEvent(rawEvent);
+            break;
+          case "ticketmaster":
+            normalizedEvent = transformTicketmasterEvent(rawEvent);
+            break;
+          case "indievenue":
+            normalizedEvent = transformIndieVenueEvent(rawEvent);
             break;
           case "dcsports":
             normalizedEvent = transformDCSportsEvent(rawEvent);

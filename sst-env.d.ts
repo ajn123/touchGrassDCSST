@@ -38,6 +38,10 @@ declare module "sst" {
       "type": "sst.aws.Function"
       "url": string
     }
+    "TICKETMASTER_API_KEY": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
     "Vpc": {
       "type": "sst.aws.Vpc"
     }
@@ -89,6 +93,15 @@ declare module "sst" {
       "configSet": string
       "sender": string
       "type": "sst.aws.Email"
+    }
+    "indieVenuesTask": {
+      "assignPublicIp": boolean
+      "cluster": string
+      "containers": any
+      "securityGroups": any
+      "subnets": any
+      "taskDefinition": string
+      "type": "sst.aws.Task"
     }
     "kennedyCenterTask": {
       "assignPublicIp": boolean

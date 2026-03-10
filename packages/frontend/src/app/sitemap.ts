@@ -1,5 +1,6 @@
 "use server";
 import { getArticles } from "@/lib/dynamodb/dynamodb-articles";
+import { getGuides } from "@/lib/dynamodb/dynamodb-guides";
 import { getPublicGroups } from "@/lib/dynamodb/dynamodb-groups";
 import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
 import type { MetadataRoute } from "next";
@@ -35,10 +36,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
     {
+      url: `${SITE_URL}/concerts`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.7,
+    },
+    {
       url: `${SITE_URL}/calendar`,
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.7,
+    },
+    {
+      url: `${SITE_URL}/guides`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.9,
     },
     {
       url: `${SITE_URL}/find-my-group`,
@@ -77,6 +90,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("Sitemap: failed to fetch articles", e);
   }
 
+  // Dynamic guide pages
+  let guidePages: MetadataRoute.Sitemap = [];
+  try {
+    const guides = await getGuides();
+    guidePages = guides.map((guide) => ({
+      url: `${SITE_URL}/guides/${encodeURIComponent(guide.slug)}`,
+      lastModified: new Date(guide.updatedAt || guide.publishedAt),
+      changeFrequency: "monthly" as const,
+      priority: 0.85,
+    }));
+  } catch (e) {
+    console.error("Sitemap: failed to fetch guides", e);
+  }
+
   // Dynamic group pages
   let groupPages: MetadataRoute.Sitemap = [];
   try {
@@ -105,5 +132,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("Sitemap: failed to fetch events", e);
   }
 
-  return [...staticPages, ...articlePages, ...groupPages, ...eventPages];
+  return [...staticPages, ...guidePages, ...articlePages, ...groupPages, ...eventPages];
 }

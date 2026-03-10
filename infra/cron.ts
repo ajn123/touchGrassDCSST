@@ -1,7 +1,7 @@
 import { api } from "./api";
 import { db } from "./db";
 import { EmailConfig } from "./email";
-import { GOOGLE_MAPS_API_KEY, OPENROUTER_API_KEY, OPENWEBNINJA_API_KEY } from "./secrets";
+import { GOOGLE_MAPS_API_KEY, OPENROUTER_API_KEY, OPENWEBNINJA_API_KEY, TICKETMASTER_API_KEY } from "./secrets";
 import { normalizeEventStepFunction } from "./step_functions";
 import { bucket } from "./storage";
 import {
@@ -9,6 +9,7 @@ import {
   DCComedyLoftTask,
   DCImprovTask,
   EventbriteTask,
+  IndieVenuesTask,
   KennedyCenterTask,
   WashingtonianTask,
 } from "./tasks";
@@ -112,6 +113,20 @@ const articleGenerationCron = new sst.aws.Cron("articleGenerationCron", {
   schedule: "cron(0 10 ? * MON *)", // Every Monday at 6 AM EST (10:00 UTC)
 });
 
+const ticketmasterConcertsCron = new sst.aws.Cron("ticketmasterConcertsCron", {
+  function: {
+    handler: "packages/functions/src/events/ticketmaster-concerts.handler",
+    link: [db, normalizeEventStepFunction, TICKETMASTER_API_KEY],
+    timeout: "2 minutes",
+  },
+  schedule: "rate(1 day)",
+});
+
+const indieVenuesCron = new sst.aws.Cron("indieVenuesCron", {
+  task: IndieVenuesTask,
+  schedule: "rate(7 days)",
+});
+
 export {
   articleGenerationCron,
   clockoutdcCron,
@@ -123,7 +138,9 @@ export {
   dcSportsCron,
   eventbriteCron,
   generateMissingImagesCron,
+  indieVenuesCron,
   kennedyCenterCron,
   newsletterCron,
+  ticketmasterConcertsCron,
   washingtonianCron,
 };

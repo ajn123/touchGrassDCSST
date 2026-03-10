@@ -8,6 +8,7 @@ import Modal from "./Modal";
 interface ReportWrongInfoButtonProps {
   eventTitle: string;
   eventId: string;
+  variant?: "default" | "subtle";
 }
 
 const WRONG_INFO_OPTIONS = [
@@ -26,6 +27,7 @@ const WRONG_INFO_OPTIONS = [
 export function ReportWrongInfoButton({
   eventTitle,
   eventId,
+  variant = "default",
 }: ReportWrongInfoButtonProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
@@ -85,9 +87,13 @@ export function ReportWrongInfoButton({
     <>
       <button
         onClick={() => setIsModalOpen(true)}
-        className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 border border-red-300 rounded-lg text-sm font-medium transition-colors duration-200"
+        className={
+          variant === "subtle"
+            ? "text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] underline-offset-2 hover:underline transition-colors duration-200"
+            : "px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 border border-red-300 rounded-lg text-sm font-medium transition-colors duration-200"
+        }
       >
-        ⚠️ Some of this information is wrong
+        {variant === "subtle" ? "Report an issue" : "Some of this information is wrong"}
       </button>
 
       {/* Modal */}

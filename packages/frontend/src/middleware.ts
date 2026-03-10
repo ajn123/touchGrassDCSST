@@ -24,6 +24,14 @@ function sanitizeString(value: string | null | undefined): string | undefined {
   }
 }
 
+const BOT_PATTERN =
+  /bot|crawl|spider|slurp|wget|curl|python|scrapy|headless|phantom|lighthouse|pagespeed|gtmetrix|pingdom|uptime|monitor|fetch|archive|semrush|ahrefs|mj12|dotbot|yandex|baidu|petalbot|bytespider|amazonbot|claudebot|gptbot|chatgpt|anthropic|perplexity|cohere|ai2bot|ccbot|commoncrawl|applebot|duckduck|facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegram|discord|slack|preview|embed|og-|opengraph/i;
+
+function isBot(userAgent: string | null): boolean {
+  if (!userAgent) return false;
+  return BOT_PATTERN.test(userAgent);
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const fullUrl = request.url || request.nextUrl.toString();
@@ -32,6 +40,13 @@ export function middleware(request: NextRequest) {
   const existingVisitorId = request.cookies.get("tg_vid")?.value;
   const visitorId = existingVisitorId || generateVisitorId();
   const isNewVisitor = !existingVisitorId;
+
+  // ── Block exploit probes (PHP, WordPress, etc.) ──
+  if (/\.(php|asp|aspx|jsp|cgi|env)$/i.test(pathname) ||
+      /^\/wp-(admin|content|includes|login)/i.test(pathname) ||
+      /^\/(swagger|actuator|debug|console|\.git|\.env)/i.test(pathname)) {
+    return new NextResponse("Not Found", { status: 404 });
+  }
 
   // ── API routes — enforce secret, no cookie needed ──
   if (pathname.startsWith("/api")) {
@@ -45,15 +60,16 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // ── Analytics tracking (page views only) ──
+  // ── Analytics tracking (page views only, skip bots) ──
   try {
     const method = request.method;
     const accept = request.headers.get("accept") || "";
     const isHtmlRequest = accept.includes("text/html");
     const isInternalAnalytics =
       request.headers.get("x-analytics-internal") === "1";
+    const userAgent = request.headers.get("user-agent");
 
-    if (method === "GET" && isHtmlRequest && !isInternalAnalytics) {
+    if (method === "GET" && isHtmlRequest && !isInternalAnalytics && !isBot(userAgent)) {
       const secret = process.env.NEXT_INTERNAL_API_SECRET;
       const analyticsUrl = new URL("/api/analytics/track", request.nextUrl.origin);
 

@@ -279,7 +279,7 @@ class DCImprovCrawler {
     const money = text.match(/\$\s*([0-9]+(?:\.[0-9]{2})?)/);
     if (money) return money[1];
     const bare = text.match(/\b([0-9]+(?:\.[0-9]{2})?)\b/);
-    if (bare) return bare[1];
+    if (bare && !/^(19|20)\d{2}$/.test(bare[1])) return bare[1];
     return undefined;
   }
 

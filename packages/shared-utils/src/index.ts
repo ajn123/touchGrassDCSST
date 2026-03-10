@@ -361,8 +361,8 @@ export function normalizeCost(cost?: any): NormalizedEvent["cost"] {
       return { type: "free", currency: "USD", amount: 0 };
     }
 
-    // Try to extract amount from string
-    const amountMatch = costStr.match(/\$?(\d+(?:\.\d{2})?)/);
+    // Try to extract amount from string — require $ sign to avoid matching years
+    const amountMatch = costStr.match(/\$(\d+(?:\.\d{2})?)/);
     if (amountMatch) {
       return {
         type: "fixed",

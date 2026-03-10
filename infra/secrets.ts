@@ -3,3 +3,4 @@
 export const OPENWEBNINJA_API_KEY = new sst.Secret("OPENWEBNINJA_API_KEY");
 export const GOOGLE_MAPS_API_KEY = new sst.Secret("GOOGLE_MAPS_API_KEY");
 export const OPENROUTER_API_KEY = new sst.Secret("OPENROUTER_API_KEY");
+export const TICKETMASTER_API_KEY = new sst.Secret("TICKETMASTER_API_KEY");

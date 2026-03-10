@@ -397,7 +397,7 @@
     "category": [
       "Dating"
     ],
-    "image_url": "https://cdn.cityswoon.com/serverImages/dating/speed-dating-event.webp",
+    "image_url": "",
     "description": "Cityswoon DC: it's speed dating's cooler, more adventurous cousin.  Check the website for more details",
     "cost": {
       "type": "variable",
@@ -432,7 +432,7 @@
       "Dating"
     ],
     "description": "Pitch A Friend is a social event that allows you to meet new people in a fun and interactive way.  Pitching your friend power-point style.  The event is free to attend and $5 to sign up to pitch your friend.  Check the website for more details",
-    "image_url": "paf.png",
+    "image_url": "",
     "cost": {
       "type": "variable",
       "currency": "USD",

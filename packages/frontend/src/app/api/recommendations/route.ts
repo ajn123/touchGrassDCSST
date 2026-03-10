@@ -79,11 +79,8 @@ export async function POST(request: NextRequest) {
 
     if (!hasPersonalization) {
       // No user signals yet — return a diverse mix of upcoming events
-      const upcomingAll = await db.getCurrentAndFutureEvents();
-      const today = new Date().toISOString().split("T")[0];
-      const upcoming = upcomingAll
-        .filter((e) => e.start_date && e.start_date >= today)
-        .sort((a, b) => (a.start_date || "").localeCompare(b.start_date || ""));
+      const upcoming = await db.getCurrentAndFutureEvents();
+      upcoming.sort((a, b) => (a.start_date || "").localeCompare(b.start_date || ""));
       const diverse = diversifyByCategory(upcoming, limit);
       return NextResponse.json({ events: diverse, hasPersonalization: false });
     }
@@ -107,8 +104,8 @@ export async function POST(request: NextRequest) {
         }
       }
     } else {
-      // Only click history signals — fetch general events
-      candidateEvents = await db.getEvents();
+      // Only click history signals — fetch upcoming events
+      candidateEvents = await db.getCurrentAndFutureEvents();
     }
 
     // Filter to future/today events only

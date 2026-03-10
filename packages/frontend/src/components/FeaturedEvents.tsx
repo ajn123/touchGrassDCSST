@@ -6,11 +6,11 @@ export default async function FeaturedEvents() {
   try {
     console.log("🔄 FeaturedEvents: Starting to fetch events...");
     const db = new TouchGrassDynamoDB(Resource.Db.name);
-    const allEvents = await db.getEvents();
+    const allEvents = await db.getCurrentAndFutureEvents();
     console.log("📊 FeaturedEvents: Fetched events:", allEvents.length);
 
     if (allEvents.length === 0) {
-      console.log("⚠️ FeaturedEvents: No events returned from getEvents()");
+      console.log("⚠️ FeaturedEvents: No events returned");
       return (
         <section className="max-w-7xl mx-auto px-4 py-16">
           <h2 className="text-4xl font-bold mb-8 text-center theme-text-primary">

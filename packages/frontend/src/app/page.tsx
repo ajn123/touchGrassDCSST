@@ -4,6 +4,7 @@ import Categories from "@/components/Categories";
 import NewsletterBanner from "@/components/NewsletterBanner";
 import PersonalizedEvents from "@/components/PersonalizedEvents";
 import SearchBar from "@/components/SearchBar";
+import TonightInDC from "@/components/TonightInDC";
 import WeekendEvents from "@/components/WeekendEvents";
 import { getArticles } from "@/lib/dynamodb/dynamodb-articles";
 import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
@@ -69,6 +70,9 @@ export default async function Home() {
   // Diversify by category: round-robin so cards aren't all the same type
   const diversifiedWeekend = diversifyByCategory(regularWeekend, 8);
 
+  // Filter events happening tonight (next 6 hours)
+  const tonightEvents = getTonightEvents(events);
+
   // Fetch latest articles
   const allArticles = await getArticles();
   const latestArticles = allArticles
@@ -130,6 +134,9 @@ export default async function Home() {
 
       {/* Personalized Events - client component that hydrates after SSR */}
       <PersonalizedEvents />
+
+      {/* Tonight in DC — events happening in the next few hours */}
+      <TonightInDC events={tonightEvents} />
 
       {/* Don't Miss This Weekend — big events scored by importance */}
       <BigEvents events={bigEvents} />
@@ -232,6 +239,49 @@ function getWeekendDates(): string[] {
   sun.setDate(sun.getDate() + 2);
 
   return [fmt.format(fri), fmt.format(sat), fmt.format(sun)];
+}
+
+/** Parse "7:00 PM" style time strings to 24-hour format. Returns null if unparseable. */
+function parseTimeHour(t: string): number | null {
+  const m = t.trim().toLowerCase().match(/(\d{1,2})(?::(\d{2}))?\s*([ap]m)/);
+  if (!m) return null;
+  let h = parseInt(m[1]);
+  if (m[3] === "pm" && h !== 12) h += 12;
+  if (m[3] === "am" && h === 12) h = 0;
+  return h;
+}
+
+/** Returns events happening today within the next 6 hours, sorted by start time. */
+function getTonightEvents(events: any[]): any[] {
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const hourFmt = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    hour: "numeric",
+    hour12: false,
+  });
+
+  const now = new Date();
+  const todayStr = fmt.format(now);
+  const currentHour = parseInt(hourFmt.format(now));
+
+  return events
+    .filter((e: any) => {
+      if (e.start_date !== todayStr) return false;
+      if (!e.start_time) return false;
+      const hour = parseTimeHour(e.start_time);
+      if (hour === null) return false;
+      return hour >= currentHour && hour <= currentHour + 6;
+    })
+    .sort((a: any, b: any) => {
+      const ha = parseTimeHour(a.start_time || "") ?? 24;
+      const hb = parseTimeHour(b.start_time || "") ?? 24;
+      return ha - hb;
+    });
 }
 
 /** Round-robin across categories so results show variety. */

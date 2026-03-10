@@ -86,7 +86,7 @@ const generateMissingImagesCron = new sst.aws.Cron("generateMissingImagesCron", 
     link: [db, bucket],
     timeout: "10 minutes",
   },
-  schedule: "rate(1 day)",
+  schedule: "rate(7 days)",
 });
 
 const newsletterCron = new sst.aws.Cron("newsletterCron", {

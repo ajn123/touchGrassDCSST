@@ -32,6 +32,9 @@ export default $config({
       newsletterCron,
       ticketmasterConcertsCron,
       indieVenuesCron,
+      meetupdcCron,
+      smithsonianCron,
+      dcbareventsCron,
     } = await import("./infra/cron");
     const {
       WashingtonianTask,
@@ -39,6 +42,9 @@ export default $config({
       EventbriteTask,
       KennedyCenterTask,
       IndieVenuesTask,
+      MeetupDCTask,
+      SmithsonianTask,
+      DCBarEventsTask,
     } = await import("./infra/tasks");
     const { normalizeEventStepFunction } = await import(
       "./infra/step_functions"
@@ -61,6 +67,12 @@ export default $config({
       EventbriteTask: EventbriteTask,
       KennedyCenterTask: KennedyCenterTask,
       IndieVenuesTask: IndieVenuesTask,
+      MeetupDCTask: MeetupDCTask,
+      SmithsonianTask: SmithsonianTask,
+      DCBarEventsTask: DCBarEventsTask,
+      meetupdcCron: meetupdcCron,
+      smithsonianCron: smithsonianCron,
+      dcbareventsCron: dcbareventsCron,
       kennedyCenterCron: kennedyCenterCron,
       dcSportsCron: dcSportsCron,
       ticketmasterConcertsCron: ticketmasterConcertsCron,

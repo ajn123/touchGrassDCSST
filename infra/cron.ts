@@ -6,11 +6,14 @@ import { normalizeEventStepFunction } from "./step_functions";
 import { bucket } from "./storage";
 import {
   ClockOutDCTask,
+  DCBarEventsTask,
   DCComedyLoftTask,
   DCImprovTask,
   EventbriteTask,
   IndieVenuesTask,
   KennedyCenterTask,
+  MeetupDCTask,
+  SmithsonianTask,
   WashingtonianTask,
 } from "./tasks";
 
@@ -127,12 +130,28 @@ const indieVenuesCron = new sst.aws.Cron("indieVenuesCron", {
   schedule: "rate(7 days)",
 });
 
+const meetupdcCron = new sst.aws.Cron("meetupdcCron", {
+  task: MeetupDCTask,
+  schedule: "rate(1 day)",
+});
+
+const smithsonianCron = new sst.aws.Cron("smithsonianCron", {
+  task: SmithsonianTask,
+  schedule: "rate(7 days)",
+});
+
+const dcbareventsCron = new sst.aws.Cron("dcbareventsCron", {
+  task: DCBarEventsTask,
+  schedule: "rate(7 days)",
+});
+
 export {
   articleGenerationCron,
   clockoutdcCron,
   copyProdToDevCron,
   cron,
   dailyAnalyticsCron,
+  dcbareventsCron,
   dccomedyloftCron,
   dcimprovCron,
   dcSportsCron,
@@ -140,7 +159,9 @@ export {
   generateMissingImagesCron,
   indieVenuesCron,
   kennedyCenterCron,
+  meetupdcCron,
   newsletterCron,
+  smithsonianCron,
   ticketmasterConcertsCron,
   washingtonianCron,
 };

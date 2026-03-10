@@ -321,6 +321,27 @@ export function transformIndieVenueEvent(event: any): NormalizedEvent {
 }
 
 /**
+ * Transform DC Bar Event to normalized format
+ */
+export function transformDCBarEvent(event: any): NormalizedEvent {
+  return {
+    title: event.title,
+    description: event.description,
+    start_date: normalizeDate(event.date),
+    start_time: normalizeTime(event.time),
+    location: event.location,
+    venue: event.venue,
+    category: normalizeCategory(event.category || "Food & Drink"),
+    url: event.url,
+    cost: normalizeCost(event.price),
+    image_url: event.image_url,
+    socials: event.url ? { website: event.url } : undefined,
+    isPublic: true,
+    source: "dcbarevents",
+  };
+}
+
+/**
  * Transform DC Sports event to normalized format
  */
 export function transformDCSportsEvent(event: any): NormalizedEvent {
@@ -889,6 +910,9 @@ export const handler: Handler = async (event, context, callback) => {
             break;
           case "dccomedyloft":
             normalizedEvent = transformDCComedyLoftEvent(rawEvent);
+            break;
+          case "dcbarevents":
+            normalizedEvent = transformDCBarEvent(rawEvent);
             break;
           default: {
             // Assume it's already in normalized format

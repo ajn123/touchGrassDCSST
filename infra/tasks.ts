@@ -113,5 +113,50 @@ const IndieVenuesTask = new sst.aws.Task("indieVenuesTask", {
   dev: false,
 });
 
-export { ClockOutDCTask, DCComedyLoftTask, DCImprovTask, EventbriteTask, IndieVenuesTask, KennedyCenterTask, WashingtonianTask };
+const MeetupDCTask = new sst.aws.Task("meetupdcTask", {
+  cluster,
+  link: [db, api, normalizeEventStepFunction],
+  image: {
+    context: ".",
+    dockerfile: "./packages/tasks/crawlers/Dockerfile.meetup",
+  },
+  memory,
+  cpu,
+  environment: {
+    NODE_OPTIONS: "--max-old-space-size=1536",
+  },
+  dev: false,
+});
+
+const SmithsonianTask = new sst.aws.Task("smithsonianTask", {
+  cluster,
+  link: [db, api, normalizeEventStepFunction],
+  image: {
+    context: ".",
+    dockerfile: "./packages/tasks/crawlers/Dockerfile.smithsonian",
+  },
+  memory,
+  cpu,
+  environment: {
+    NODE_OPTIONS: "--max-old-space-size=1536",
+  },
+  dev: false,
+});
+
+const DCBarEventsTask = new sst.aws.Task("dcbareventsTask", {
+  cluster,
+  link: [db, api, normalizeEventStepFunction],
+  image: {
+    context: ".",
+    dockerfile: "./packages/tasks/crawlers/Dockerfile.dcbarevents",
+  },
+  memory,
+  cpu,
+  environment: {
+    NODE_OPTIONS: "--max-old-space-size=1536",
+  },
+  dev: false,
+});
+
+export { ClockOutDCTask, DCBarEventsTask, DCComedyLoftTask, DCImprovTask, EventbriteTask, IndieVenuesTask, KennedyCenterTask, MeetupDCTask, SmithsonianTask, WashingtonianTask };
 

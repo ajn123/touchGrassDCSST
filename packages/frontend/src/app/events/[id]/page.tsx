@@ -10,6 +10,7 @@ import { EventPageTracker } from "@/components/EventPageTracker";
 import EventMap from "@/components/EventMap";
 import { ReportWrongInfoButton } from "@/components/ReportWrongInfoButton";
 import { ShareButton } from "@/components/ShareButton";
+import SimilarEvents from "@/components/SimilarEvents";
 import { isAdminEmail } from "@/lib/admin-utils";
 import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
 import { resolveImageUrl } from "@/lib/image-utils";
@@ -127,6 +128,34 @@ export default async function ItemPage({
     ? item.category[0]
     : item.category;
 
+  // Fetch similar events by category
+  let similarEvents: any[] = [];
+  if (eventCategory) {
+    const db = new TouchGrassDynamoDB(Resource.Db.name);
+    const today = new Date().toISOString().split("T")[0];
+    const categoryEvents = await db.getEventsByCategory(eventCategory);
+    similarEvents = categoryEvents
+      .filter(
+        (e) =>
+          e.pk !== item.pk &&
+          e.start_date &&
+          e.start_date >= today &&
+          e.isPublic !== false &&
+          String(e.isPublic) !== "false"
+      )
+      .sort((a, b) => {
+        const refDate = item.start_date || today;
+        const distA = Math.abs(
+          new Date(a.start_date!).getTime() - new Date(refDate).getTime()
+        );
+        const distB = Math.abs(
+          new Date(b.start_date!).getTime() - new Date(refDate).getTime()
+        );
+        return distA - distB;
+      })
+      .slice(0, 6);
+  }
+
   const eventJsonLd: Record<string, any> = {
     "@context": "https://schema.org",
     "@type": "Event",
@@ -226,6 +255,9 @@ export default async function ItemPage({
           className="mb-4"
         />
       )}
+
+      {/* Similar Events */}
+      <SimilarEvents events={similarEvents} />
 
       {/* Additional Fields */}
       {Object.entries(item)

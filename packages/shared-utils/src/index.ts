@@ -601,56 +601,6 @@ function getMonthIndex(month: string): number {
 // ============================================================================
 
 /**
- * Standardized event interface used across the application
- */
-export interface NormalizedEvent {
-  // Core fields
-  title: string;
-  description?: string;
-  start_date?: string;
-  end_date?: string;
-  start_time?: string;
-  end_time?: string;
-
-  // Location fields
-  location?: string;
-  venue?: string;
-  coordinates?: string; // "lat,lng" format
-
-  // Categorization
-  category?: string | string[];
-
-  // Media & Links
-  image_url?: string;
-  url?: string;
-  socials?: {
-    website?: string;
-    facebook?: string;
-    instagram?: string;
-    twitter?: string;
-  };
-
-  // Cost information
-  cost?: {
-    type: "free" | "fixed" | "variable";
-    currency: string;
-    amount: string | number;
-  };
-
-  // Metadata
-  source?: string;
-  external_id?: string;
-  isPublic?: boolean;
-  is_virtual?: boolean;
-
-  // Optional fields for specific sources
-  publisher?: string;
-  ticket_links?: string[];
-  confidence?: number;
-  extractionMethod?: string;
-}
-
-/**
  * Parse cost amount from various formats
  */
 export function parseCostAmount(amount: any): number {

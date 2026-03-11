@@ -174,6 +174,37 @@ export default function Header() {
             Map
           </Link>
           <Link
+            href="/near-me"
+            className="header-link px-4 py-2 flex items-center"
+          >
+            <svg
+              className="w-4 h-4 mr-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18a8 8 0 110-16 8 8 0 010 16z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 5v3m0 8v3m7-7h-3m-8 0H5"
+              />
+            </svg>
+            Near Me
+          </Link>
+          <Link
             href="/comedy"
             className="header-link px-4 py-2 flex items-center"
           >
@@ -513,6 +544,40 @@ export default function Header() {
                   />
                 </svg>
                 Map
+              </div>
+            </Link>
+            <Link
+              href="/near-me"
+              className="block px-3 py-2 text-base font-medium header-link rounded-md"
+              onClick={closeMenu}
+            >
+              <div className="flex items-center">
+                <svg
+                  className="w-4 h-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18a8 8 0 110-16 8 8 0 010 16z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 5v3m0 8v3m7-7h-3m-8 0H5"
+                  />
+                </svg>
+                Near Me
               </div>
             </Link>
             <Link

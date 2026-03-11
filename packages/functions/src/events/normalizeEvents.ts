@@ -421,6 +421,39 @@ export function transformLoveInActionDCEvent(event: any): NormalizedEvent {
   };
 }
 
+export function transformPotomacConservancyEvent(event: any): NormalizedEvent {
+  return {
+    title: event.title,
+    description: event.description,
+    start_date: normalizeDate(event.date),
+    start_time: normalizeTime(event.time),
+    end_time: normalizeTime(event.end_time),
+    location: event.location,
+    venue: event.venue || "Potomac Conservancy",
+    category: "Volunteer",
+    url: event.url,
+    image_url: event.image_url,
+    isPublic: true,
+    source: "potomacconservancy",
+  };
+}
+
+export function transformAnacostiaWSEvent(event: any): NormalizedEvent {
+  return {
+    title: event.title,
+    description: event.description,
+    start_date: normalizeDate(event.date),
+    start_time: normalizeTime(event.time),
+    end_time: normalizeTime(event.end_time),
+    location: event.location,
+    venue: event.venue || "Anacostia Watershed Society",
+    category: "Volunteer",
+    url: event.url,
+    isPublic: true,
+    source: "anacostiaws",
+  };
+}
+
 // Dummy saveEvents function to mimic member function, you will need to implement it or import if defined elsewhere.
 export async function saveEvents(
   normalizedEvents: NormalizedEvent[],
@@ -933,6 +966,12 @@ export const handler: Handler = async (event, context, callback) => {
             break;
           case "loveinactiondc":
             normalizedEvent = transformLoveInActionDCEvent(rawEvent);
+            break;
+          case "potomacconservancy":
+            normalizedEvent = transformPotomacConservancyEvent(rawEvent);
+            break;
+          case "anacostiaws":
+            normalizedEvent = transformAnacostiaWSEvent(rawEvent);
             break;
           default: {
             // Assume it's already in normalized format

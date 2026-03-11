@@ -154,7 +154,26 @@ const loveinactiondcCron = new sst.aws.Cron("loveinactiondcCron", {
   schedule: "rate(7 days)",
 });
 
+const potomacConservancyCron = new sst.aws.Cron("potomacConservancyCron", {
+  function: {
+    handler: "packages/functions/src/events/potomac-conservancy.handler",
+    link: [db, normalizeEventStepFunction],
+    timeout: "2 minutes",
+  },
+  schedule: "rate(7 days)",
+});
+
+const anacostiaWSCron = new sst.aws.Cron("anacostiaWSCron", {
+  function: {
+    handler: "packages/functions/src/events/anacostia-ws.handler",
+    link: [db, normalizeEventStepFunction],
+    timeout: "2 minutes",
+  },
+  schedule: "rate(7 days)",
+});
+
 export {
+  anacostiaWSCron,
   articleGenerationCron,
   clockoutdcCron,
   copyProdToDevCron,
@@ -171,6 +190,7 @@ export {
   loveinactiondcCron,
   meetupdcCron,
   newsletterCron,
+  potomacConservancyCron,
   smithsonianCron,
   ticketmasterConcertsCron,
   washingtonianCron,

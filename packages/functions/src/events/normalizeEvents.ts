@@ -11,6 +11,106 @@ import { Handler } from "aws-lambda";
 import { Resource } from "sst";
 
 /**
+ * Static venue-to-coordinates map for known DC-area venues.
+ * Keys are lowercase for case-insensitive matching.
+ */
+const VENUE_COORDINATES: Record<string, string> = {
+  // Music Venues
+  "9:30 club": "38.9198,-77.0236",
+  "the anthem": "38.8782,-77.0232",
+  "the fillmore silver spring": "38.9951,-77.0293",
+  "echostage": "38.9186,-76.9726",
+  "the howard theatre": "38.9162,-77.0193",
+  "dc9 nightclub": "38.9157,-77.0236",
+  "pearl street warehouse": "38.8785,-77.0237",
+  "union stage": "38.8781,-77.0234",
+  "pie shop": "38.9229,-77.0024",
+  "songbyrd": "38.9224,-77.0418",
+  "black cat": "38.9145,-77.0354",
+  "jammin java": "38.8946,-77.1349",
+  "the hamilton live": "38.8976,-77.0323",
+  "blues alley": "38.9047,-77.0604",
+  "wolf trap": "38.9364,-77.2654",
+  "jiffy lube live": "38.9129,-77.5455",
+  "merriweather post pavilion": "39.2101,-76.8619",
+  "capital one hall": "38.9533,-77.3490",
+
+  // Comedy
+  "dc improv": "38.9068,-77.0416",
+  "the comedy loft of dc": "38.9006,-77.0356",
+  "drafthouse comedy theater": "38.8892,-77.0917",
+
+  // Sports
+  "capital one arena": "38.8981,-77.0209",
+  "nationals park": "38.8730,-77.0074",
+  "audi field": "38.8686,-77.0128",
+  "northwestern stadium": "38.8253,-76.8708",
+  "cacti park of the palm beaches": "26.6827,-80.0955",
+
+  // Theaters & Performing Arts
+  "arena stage": "38.8690,-77.0245",
+  "kennedy center": "38.8957,-77.0556",
+  "the john f. kennedy center for the performing arts": "38.8957,-77.0556",
+  "national theatre": "38.8953,-77.0289",
+  "warner theatre": "38.8966,-77.0263",
+  "ford's theatre": "38.8967,-77.0256",
+  "woolly mammoth theatre": "38.8971,-77.0224",
+  "shakespeare theatre company": "38.8943,-77.0239",
+  "atlas performing arts center": "38.8942,-76.9942",
+  "studio theatre": "38.9124,-77.0285",
+  "folger theatre": "38.8887,-77.0028",
+  "signature theatre": "38.8617,-77.0622",
+
+  // Museums & Galleries
+  "national museum of american history": "38.8912,-77.0300",
+  "national air and space museum": "38.8882,-77.0199",
+  "national gallery of art": "38.8913,-77.0199",
+  "smithsonian national zoo": "38.9296,-77.0497",
+  "hirshhorn museum": "38.8883,-77.0228",
+  "national museum of natural history": "38.8913,-77.0259",
+  "national museum of african american history and culture": "38.8910,-77.0326",
+  "artechouse": "38.8867,-77.0231",
+  "the phillips collection": "38.9115,-77.0468",
+  "renwick gallery": "38.8997,-77.0393",
+
+  // Event Spaces & Hotels
+  "the wharf": "38.8782,-77.0235",
+  "the yards": "38.8768,-77.0033",
+  "city winery dc": "38.9024,-77.0032",
+  "the line hotel dc": "38.9225,-77.0418",
+  "eaton dc": "38.9050,-77.0232",
+  "dupont circle": "38.9096,-77.0434",
+  "the park at fourteenth": "38.9056,-77.0322",
+  "long view gallery": "38.9035,-77.0127",
+  "dock5 at union market": "38.9085,-76.9949",
+  "union market": "38.9085,-76.9949",
+
+  // Parks & Outdoor
+  "the national mall": "38.8893,-77.0281",
+  "rock creek park": "38.9582,-77.0498",
+  "anacostia park": "38.8734,-76.9671",
+  "theodore roosevelt island": "38.8958,-77.0631",
+  "east potomac park": "38.8649,-77.0282",
+  "meridian hill park": "38.9213,-77.0358",
+
+  // Community & Other
+  "busboys and poets": "38.9053,-77.0422",
+  "politics and prose": "38.9567,-77.0697",
+  "kramerbooks": "38.9109,-77.0440",
+  "the dc eagle": "38.9060,-77.0142",
+  "pitchers dc": "38.9325,-77.0314",
+  "nellie's sports bar": "38.9165,-77.0324",
+  "workbox washington dc - dupont circle": "38.9087,-77.0428",
+  "capitol view neighborhood library": "38.8318,-76.9965",
+  "bender jcc of greater washington": "39.0840,-77.1530",
+
+  // Volunteer Organizations (as venues)
+  "love in action dc": "38.9072,-77.0369",
+  "anacostia watershed society": "38.8629,-76.9858",
+  "potomac conservancy": "38.9072,-77.0369",
+};
+
+/**
  * Transform OpenWebNinja event to normalized format
  */
 export function transformOpenWebNinjaEvent(event: any): NormalizedEvent {
@@ -992,6 +1092,23 @@ export const handler: Handler = async (event, context, callback) => {
               normalizedEvent.isPublic =
                 rawEventAny.is_public === true ||
                 rawEventAny.is_public === "true";
+            }
+          }
+        }
+
+        // Backfill coordinates from known venue map if missing
+        if (!normalizedEvent.coordinates && normalizedEvent.venue) {
+          const venueKey = normalizedEvent.venue.toLowerCase().trim();
+          // Try exact match first
+          if (VENUE_COORDINATES[venueKey]) {
+            normalizedEvent.coordinates = VENUE_COORDINATES[venueKey];
+          } else {
+            // Try partial match (venue name contains a known key)
+            for (const [known, coords] of Object.entries(VENUE_COORDINATES)) {
+              if (venueKey.includes(known) || known.includes(venueKey)) {
+                normalizedEvent.coordinates = coords;
+                break;
+              }
             }
           }
         }

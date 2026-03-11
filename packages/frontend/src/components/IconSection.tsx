@@ -1,11 +1,9 @@
 "use client";
 
-import { IconDefinition } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ReactNode } from "react";
 
 interface IconSectionProps {
-  icon: IconDefinition;
+  icon: ReactNode;
   iconClassName?: string;
   children: ReactNode;
   className?: string;
@@ -35,10 +33,11 @@ export function IconSection({
   return (
     <div className={`space-y-2 ${className}`}>
       <div className="flex flex-wrap items-center gap-2">
-        <FontAwesomeIcon
-          icon={icon}
-          className={`inline-flex ${getIconSizeClasses()} items-center justify-center text-gray-500 filter dark:invert ${iconClassName}`}
-        />
+        <span
+          className={`inline-flex ${getIconSizeClasses()} items-center justify-center text-gray-500 dark:text-gray-400 ${iconClassName}`}
+        >
+          {icon}
+        </span>
         {children}
       </div>
     </div>

@@ -1,10 +1,5 @@
 "use client";
 
-import {
-  faChevronLeft,
-  faChevronRight,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -392,7 +387,7 @@ export default function MonthlyCalendar({
                 className="hidden md:block p-2 theme-hover-light rounded-lg"
                 aria-label="Previous Month"
               >
-                <FontAwesomeIcon icon={faChevronLeft} className="text-lg" />
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
               </button>
 
               <h2 className="hidden md:block text-2xl font-bold text-center">
@@ -406,7 +401,7 @@ export default function MonthlyCalendar({
                 className="hidden md:block p-2 theme-hover-light rounded-lg transition-colors"
                 aria-label="Next Month"
               >
-                <FontAwesomeIcon icon={faChevronRight} className="text-lg" />
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </button>
             </>
           )}
@@ -422,7 +417,7 @@ export default function MonthlyCalendar({
             className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-700 dark:text-gray-300"
             aria-label="Previous 3 days"
           >
-            <FontAwesomeIcon icon={faChevronLeft} className="w-4 h-4" />
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           </button>
 
           <div className="text-center">
@@ -444,7 +439,7 @@ export default function MonthlyCalendar({
             className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-700 dark:text-gray-300"
             aria-label="Next 3 days"
           >
-            <FontAwesomeIcon icon={faChevronRight} className="w-4 h-4" />
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
           </button>
         </div>
 
@@ -524,7 +519,7 @@ export default function MonthlyCalendar({
               className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-700 dark:text-gray-300"
               aria-label="Previous Month"
             >
-              <FontAwesomeIcon icon={faChevronLeft} className="w-4 h-4" />
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
 
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
@@ -538,7 +533,7 @@ export default function MonthlyCalendar({
               className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-700 dark:text-gray-300"
               aria-label="Next Month"
             >
-              <FontAwesomeIcon icon={faChevronRight} className="w-4 h-4" />
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </button>
           </div>
         )}

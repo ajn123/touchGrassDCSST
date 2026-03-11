@@ -70,7 +70,10 @@
       "Bash(PATH=\"/opt/homebrew/opt/node@22/bin:/usr/local/bin:/bin:/usr/bin:$PATH\" node:*)",
       "Bash(PATH=\"/opt/homebrew/opt/node@22/bin:/usr/local/bin:/bin:/usr/bin:$PATH\" aws dynamodb query --table-name touchgrassdcsst-production-DbTable-bcabbfkm --key-condition-expression \"pk = :pk AND sk BETWEEN :start AND :end\" --expression-attribute-values '{:*)",
       "Read(//tmp/**)",
-      "Bash(AWS_REGION=us-east-1 aws dynamodb:*)"
+      "Bash(AWS_REGION=us-east-1 aws dynamodb:*)",
+      "Bash(do if:*)",
+      "Bash(PATH=\"/opt/homebrew/opt/node@22/bin:/usr/local/bin:/bin:/usr/bin:$PATH\" npm install:*)",
+      "Bash(/opt/homebrew/opt/node@22/bin/node:*)"
     ]
   }
 }

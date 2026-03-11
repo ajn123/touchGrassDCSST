@@ -62,6 +62,15 @@ declare module "sst" {
       "taskDefinition": string
       "type": "sst.aws.Task"
     }
+    "dcbareventsTask": {
+      "assignPublicIp": boolean
+      "cluster": string
+      "containers": any
+      "securityGroups": any
+      "subnets": any
+      "taskDefinition": string
+      "type": "sst.aws.Task"
+    }
     "dccomedyloftTask": {
       "assignPublicIp": boolean
       "cluster": string
@@ -112,6 +121,15 @@ declare module "sst" {
       "taskDefinition": string
       "type": "sst.aws.Task"
     }
+    "meetupdcTask": {
+      "assignPublicIp": boolean
+      "cluster": string
+      "containers": any
+      "securityGroups": any
+      "subnets": any
+      "taskDefinition": string
+      "type": "sst.aws.Task"
+    }
     "normaizeEventStepFunction": {
       "arn": string
       "type": "sst.aws.StepFunctions"
@@ -119,6 +137,15 @@ declare module "sst" {
     "normalizeEventFunction": {
       "name": string
       "type": "sst.aws.Function"
+    }
+    "smithsonianTask": {
+      "assignPublicIp": boolean
+      "cluster": string
+      "containers": any
+      "securityGroups": any
+      "subnets": any
+      "taskDefinition": string
+      "type": "sst.aws.Task"
     }
     "user_analytics": {
       "type": "sst.aws.Queue"

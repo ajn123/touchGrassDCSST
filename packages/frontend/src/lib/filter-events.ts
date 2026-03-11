@@ -23,6 +23,7 @@ const VALID_CATEGORIES = [
   "Outdoors & Recreation",
   "Sports",
   "Theater",
+  "Volunteer",
 ] as const;
 
 export interface FilterOptions {

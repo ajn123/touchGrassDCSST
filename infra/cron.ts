@@ -145,6 +145,15 @@ const dcbareventsCron = new sst.aws.Cron("dcbareventsCron", {
   schedule: "rate(7 days)",
 });
 
+const loveinactiondcCron = new sst.aws.Cron("loveinactiondcCron", {
+  function: {
+    handler: "packages/functions/src/events/loveinactiondc.handler",
+    link: [db, normalizeEventStepFunction],
+    timeout: "2 minutes",
+  },
+  schedule: "rate(7 days)",
+});
+
 export {
   articleGenerationCron,
   clockoutdcCron,
@@ -159,6 +168,7 @@ export {
   generateMissingImagesCron,
   indieVenuesCron,
   kennedyCenterCron,
+  loveinactiondcCron,
   meetupdcCron,
   newsletterCron,
   smithsonianCron,

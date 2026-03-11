@@ -154,6 +154,7 @@ export const VALID_CATEGORIES = [
   "Outdoors & Recreation",
   "Sports",
   "Theater",
+  "Volunteer",
 ] as const;
 
 export type ValidCategory = (typeof VALID_CATEGORIES)[number];
@@ -188,7 +189,6 @@ const CATEGORY_KEYWORDS: [string, ValidCategory][] = [
 
   // Community
   ["community", "Community"],
-  ["volunteer", "Community"],
   ["charity", "Community"],
   ["fundraiser", "Community"],
   ["family", "Community"],
@@ -310,6 +310,16 @@ const CATEGORY_KEYWORDS: [string, ValidCategory][] = [
   ["stage", "Theater"],
   ["ballet", "Theater"],
   ["dance", "Theater"],
+
+  // Volunteer
+  ["volunteer", "Volunteer"],
+  ["cleanup", "Volunteer"],
+  ["clean-up", "Volunteer"],
+  ["trash pickup", "Volunteer"],
+  ["shelter", "Volunteer"],
+  ["outreach", "Volunteer"],
+  ["service day", "Volunteer"],
+  ["service morning", "Volunteer"],
 ];
 
 /**

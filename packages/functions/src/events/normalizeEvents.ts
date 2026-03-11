@@ -404,6 +404,23 @@ export function transformDCComedyLoftEvent(event: any): NormalizedEvent {
   };
 }
 
+export function transformLoveInActionDCEvent(event: any): NormalizedEvent {
+  return {
+    title: event.title,
+    description: event.description,
+    start_date: normalizeDate(event.date),
+    start_time: normalizeTime(event.time),
+    end_time: normalizeTime(event.end_time),
+    location: event.location,
+    venue: event.venue || "Love In Action DC",
+    category: "Volunteer",
+    url: event.url,
+    image_url: event.image_url,
+    isPublic: true,
+    source: "loveinactiondc",
+  };
+}
+
 // Dummy saveEvents function to mimic member function, you will need to implement it or import if defined elsewhere.
 export async function saveEvents(
   normalizedEvents: NormalizedEvent[],
@@ -913,6 +930,9 @@ export const handler: Handler = async (event, context, callback) => {
             break;
           case "dcbarevents":
             normalizedEvent = transformDCBarEvent(rawEvent);
+            break;
+          case "loveinactiondc":
+            normalizedEvent = transformLoveInActionDCEvent(rawEvent);
             break;
           default: {
             // Assume it's already in normalized format

@@ -60,7 +60,6 @@ const VENUE_COORDINATES: Record<string, string> = {
   "signature theatre": "38.8617,-77.0622",
   "studio theatre": "38.9124,-77.0285",
   "the phillips collection": "38.9115,-77.0468",
-  "cacti park of the palm beaches": "26.6827,-80.0955",
 };
 
 function backfillCoordinates(event: any): any {
@@ -92,7 +91,9 @@ export default async function MapPage() {
       const parts = event.coordinates.split(",").map((c: string) => c.trim());
       const lat = parseFloat(parts[0]);
       const lng = parseFloat(parts[1]);
-      return !isNaN(lat) && !isNaN(lng);
+      if (isNaN(lat) || isNaN(lng)) return false;
+      // Only show events in the DMV area (DC / Maryland / Virginia)
+      return lat >= 38.3 && lat <= 39.5 && lng >= -78.0 && lng <= -76.5;
     });
 
   // Extract unique categories for the filter panel

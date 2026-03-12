@@ -45,7 +45,6 @@ const VENUE_COORDINATES: Record<string, string> = {
   "nationals park": "38.8730,-77.0074",
   "audi field": "38.8686,-77.0128",
   "northwestern stadium": "38.8253,-76.8708",
-  "cacti park of the palm beaches": "26.6827,-80.0955",
 
   // Theaters & Performing Arts
   "arena stage": "38.8690,-77.0245",

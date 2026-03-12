@@ -8,44 +8,14 @@ import { Resource } from "sst";
 
 const DC_BAR_VENUES = [
   {
-    name: "Board Room",
-    url: "https://boardroomdc.com/events/",
-    address: "1737 Connecticut Ave NW, Washington, DC 20009",
-  },
-  {
-    name: "Dacha Beer Garden",
-    url: "https://www.dachadc.com/navy-yard-events",
-    address: "79 Potomac Ave SE, Washington, DC 20003",
-  },
-  {
     name: "Red Bear Brewing",
     url: "https://www.redbear.beer/events",
     address: "209 M St NE, Washington, DC 20002",
   },
   {
-    name: "Lyman's Tavern",
-    url: "https://www.lymanstavern.com/events",
-    address: "3720 14th St NW, Washington, DC 20010",
-  },
-  {
-    name: "Decades DC",
-    url: "https://www.decadesdc.com/events",
-    address: "1219 Connecticut Ave NW, Washington, DC 20036",
-  },
-  {
     name: "Penn Social",
     url: "https://pennsocialdc.com/events/",
     address: "801 E St NW, Washington, DC 20004",
-  },
-  {
-    name: "The Salt Line",
-    url: "https://www.thesaltline.com/events",
-    address: "79 Potomac Ave SE, Washington, DC 20003",
-  },
-  {
-    name: "City Tap House",
-    url: "https://www.citytap.com/location/penn-quarter/events/",
-    address: "901 9th St NW, Washington, DC 20001",
   },
 ];
 

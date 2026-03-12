@@ -8,24 +8,9 @@ import { Resource } from "sst";
 
 const INDIE_VENUES = [
   {
-    name: "Echostage",
-    url: "https://www.echostage.com/events",
-    address: "2135 Queens Chapel Rd NE, Washington, DC 20018",
-  },
-  {
-    name: "Union Stage",
-    url: "https://www.unionstage.com/events",
-    address: "740 Water St SW, Washington, DC 20024",
-  },
-  {
     name: "Lincoln Theatre",
     url: "https://www.thelincolndc.com/events",
     address: "1215 U St NW, Washington, DC 20009",
-  },
-  {
-    name: "Howard Theatre",
-    url: "https://www.thehowardtheatre.com/events",
-    address: "620 T St NW, Washington, DC 20001",
   },
   {
     name: "Black Cat",

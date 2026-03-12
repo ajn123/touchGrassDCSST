@@ -1,5 +1,5 @@
-import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
-import { marshall } from "@aws-sdk/util-dynamodb";
+import { DynamoDBClient, PutItemCommand, QueryCommand } from "@aws-sdk/client-dynamodb";
+import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import {
   NormalizedEvent,
   generateEventId,
@@ -26,6 +26,51 @@ function getTableName(): string {
 }
 
 /**
+ * Check if a duplicate event already exists from a different source.
+ * Queries eventTitleIndex for exact title match, then filters by same start_date.
+ */
+async function findDuplicate(
+  event: NormalizedEvent,
+  source?: string
+): Promise<{ pk: string; source: string } | null> {
+  if (!event.title || !event.start_date) return null;
+
+  try {
+    const tableName = getTableName();
+    const command = new QueryCommand({
+      TableName: tableName,
+      IndexName: "eventTitleIndex",
+      KeyConditionExpression: "#title = :title",
+      ExpressionAttributeNames: { "#title": "title" },
+      ExpressionAttributeValues: { ":title": { S: event.title } },
+      Limit: 10,
+    });
+
+    const result = await client.send(command);
+    if (!result.Items || result.Items.length === 0) return null;
+
+    const eventSource = source || event.source || "unknown";
+    for (const item of result.Items) {
+      const existing = unmarshall(item);
+      if (
+        existing.start_date === event.start_date &&
+        existing.source !== eventSource &&
+        typeof existing.pk === "string" &&
+        existing.pk.startsWith("EVENT")
+      ) {
+        return { pk: existing.pk, source: existing.source || "unknown" };
+      }
+    }
+
+    return null;
+  } catch (error) {
+    // Don't block insertion if dedup check fails
+    console.warn("⚠️ Dedup check failed, proceeding with insert:", error);
+    return null;
+  }
+}
+
+/**
  * Save normalized event to DynamoDB
  */
 export async function saveEvent(
@@ -43,6 +88,16 @@ export async function saveEvent(
   }
 
   const eventId = generateEventId(event, source);
+
+  // Cross-source dedup: skip if same title + date exists from another source
+  const duplicate = await findDuplicate(event, source);
+  if (duplicate) {
+    console.log(
+      `🔄 Duplicate skipped: "${event.title}" (${event.start_date}) — already exists as ${duplicate.pk} from ${duplicate.source}`
+    );
+    return { eventId, savedEvent: { pk: duplicate.pk, title: event.title, skipped: true } };
+  }
+
   const timestamp = Date.now();
 
   // Log isPublic values for debugging

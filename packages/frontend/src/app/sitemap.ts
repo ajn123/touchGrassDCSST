@@ -72,6 +72,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
     {
+      url: `${SITE_URL}/venues`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.8,
+    },
+    {
       url: `${SITE_URL}/add-event`,
       changeFrequency: "monthly",
       priority: 0.5,
@@ -129,8 +135,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("Sitemap: failed to fetch groups", e);
   }
 
-  // Dynamic event pages
+  // Dynamic event + venue pages
   let eventPages: MetadataRoute.Sitemap = [];
+  let venuePages: MetadataRoute.Sitemap = [];
   try {
     const db = new TouchGrassDynamoDB(Resource.Db.name);
     const events = await db.getCurrentAndFutureEvents();
@@ -140,9 +147,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
       priority: 0.7,
     }));
+
+    // Extract unique venues from the same events
+    const venueSet = new Set<string>();
+    for (const event of events) {
+      if (event.venue && !event.venue.toLowerCase().includes("unknown")) {
+        venueSet.add(event.venue);
+      }
+    }
+    venuePages = Array.from(venueSet).map((venue) => ({
+      url: `${SITE_URL}/venues/${encodeURIComponent(venue)}`,
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    }));
   } catch (e) {
     console.error("Sitemap: failed to fetch events", e);
   }
 
-  return [...staticPages, ...guidePages, ...articlePages, ...groupPages, ...eventPages];
+  return [...staticPages, ...guidePages, ...articlePages, ...groupPages, ...eventPages, ...venuePages];
 }

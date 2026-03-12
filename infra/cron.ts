@@ -5,7 +5,6 @@ import { GOOGLE_MAPS_API_KEY, OPENROUTER_API_KEY, OPENWEBNINJA_API_KEY, TICKETMA
 import { normalizeEventStepFunction } from "./step_functions";
 import { bucket } from "./storage";
 import {
-  ClockOutDCTask,
   DCBarEventsTask,
   DCComedyLoftTask,
   DCImprovTask,
@@ -22,22 +21,26 @@ const cron = new sst.aws.Cron("cron", {
     handler: "packages/functions/src/events/openWeb.handler",
     link: [db, OPENWEBNINJA_API_KEY, api, normalizeEventStepFunction],
   },
-  schedule: "rate(3 days)",
+  schedule: "rate(7 days)",
 });
 
 const washingtonianCron = new sst.aws.Cron("washingtonianCron", {
   task: WashingtonianTask,
-  schedule: "rate(3 days)",
+  schedule: "rate(7 days)",
 });
 
 const clockoutdcCron = new sst.aws.Cron("clockoutdcCron", {
-  task: ClockOutDCTask,
-  schedule: "rate(3 days)",
+  function: {
+    handler: "packages/functions/src/events/clockoutdc.handler",
+    link: [db, normalizeEventStepFunction],
+    timeout: "2 minutes",
+  },
+  schedule: "rate(7 days)",
 });
 
 const eventbriteCron = new sst.aws.Cron("eventbriteCron", {
   task: EventbriteTask,
-  schedule: "rate(3 days)",
+  schedule: "rate(7 days)",
 });
 
 const dcimprovCron = new sst.aws.Cron("dcimprovCron", {
@@ -132,7 +135,7 @@ const indieVenuesCron = new sst.aws.Cron("indieVenuesCron", {
 
 const meetupdcCron = new sst.aws.Cron("meetupdcCron", {
   task: MeetupDCTask,
-  schedule: "rate(3 days)",
+  schedule: "rate(7 days)",
 });
 
 const smithsonianCron = new sst.aws.Cron("smithsonianCron", {

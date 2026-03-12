@@ -23,20 +23,6 @@ const WashingtonianTask = new sst.aws.Task("washingtonianTask", {
   dev: false,
 });
 
-const ClockOutDCTask = new sst.aws.Task("clockoutdcTask", {
-  cluster,
-  link: [db, api, normalizeEventStepFunction],
-  image: {
-    context: ".", // Use project root as context
-    dockerfile: "./packages/tasks/crawlers/Dockerfile.clockoutdc",
-  },
-  memory: memory, // 2 GB
-  cpu: cpu, // 1 vCPU
-  environment: {
-    NODE_OPTIONS: "--max-old-space-size=1536", // Allow Node.js to use up to 1.5 GB (leaving ~500 MB for system/Playwright)
-  },
-  dev: false,
-});
 
 const EventbriteTask = new sst.aws.Task("eventbriteTask", {
   cluster,
@@ -158,5 +144,5 @@ const DCBarEventsTask = new sst.aws.Task("dcbareventsTask", {
   dev: false,
 });
 
-export { ClockOutDCTask, DCBarEventsTask, DCComedyLoftTask, DCImprovTask, EventbriteTask, IndieVenuesTask, KennedyCenterTask, MeetupDCTask, SmithsonianTask, WashingtonianTask };
+export { DCBarEventsTask, DCComedyLoftTask, DCImprovTask, EventbriteTask, IndieVenuesTask, KennedyCenterTask, MeetupDCTask, SmithsonianTask, WashingtonianTask };
 

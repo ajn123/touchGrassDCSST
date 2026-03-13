@@ -39,36 +39,6 @@ const EventbriteTask = new sst.aws.Task("eventbriteTask", {
   dev: false,
 });
 
-const DCImprovTask = new sst.aws.Task("dcimprovTask", {
-  cluster,
-  link: [db, api, normalizeEventStepFunction],
-  image: {
-    context: ".", // Use project root as context
-    dockerfile: "./packages/tasks/crawlers/Dockerfile.dcimprov",
-  },
-  memory: memory, // 2 GB
-  cpu: cpu, // 1 vCPU
-  environment: {
-    NODE_OPTIONS: "--max-old-space-size=1536", // Allow Node.js to use up to 1.5 GB (leaving ~500 MB for system/Playwright)
-  },
-  dev: false,
-});
-
-const DCComedyLoftTask = new sst.aws.Task("dccomedyloftTask", {
-  cluster,
-  link: [db, api, normalizeEventStepFunction],
-  image: {
-    context: ".", // Use project root as context
-    dockerfile: "./packages/tasks/crawlers/Dockerfile.dccomedyloft",
-  },
-  memory: memory, // 2 GB
-  cpu: cpu, // 1 vCPU
-  environment: {
-    NODE_OPTIONS: "--max-old-space-size=1536", // Allow Node.js to use up to 1.5 GB (leaving ~500 MB for system/Playwright)
-  },
-  dev: false,
-});
-
 const KennedyCenterTask = new sst.aws.Task("kennedyCenterTask", {
   cluster,
   link: [db, api, normalizeEventStepFunction],
@@ -144,5 +114,5 @@ const DCBarEventsTask = new sst.aws.Task("dcbareventsTask", {
   dev: false,
 });
 
-export { DCBarEventsTask, DCComedyLoftTask, DCImprovTask, EventbriteTask, IndieVenuesTask, KennedyCenterTask, MeetupDCTask, SmithsonianTask, WashingtonianTask };
+export { DCBarEventsTask, EventbriteTask, IndieVenuesTask, KennedyCenterTask, MeetupDCTask, SmithsonianTask, WashingtonianTask };
 

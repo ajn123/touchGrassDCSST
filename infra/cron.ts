@@ -6,8 +6,6 @@ import { normalizeEventStepFunction } from "./step_functions";
 import { bucket } from "./storage";
 import {
   DCBarEventsTask,
-  DCComedyLoftTask,
-  DCImprovTask,
   EventbriteTask,
   IndieVenuesTask,
   KennedyCenterTask,
@@ -44,12 +42,20 @@ const eventbriteCron = new sst.aws.Cron("eventbriteCron", {
 });
 
 const dcimprovCron = new sst.aws.Cron("dcimprovCron", {
-  task: DCImprovTask,
+  function: {
+    handler: "packages/functions/src/events/dcimprov.handler",
+    link: [db, normalizeEventStepFunction],
+    timeout: "2 minutes",
+  },
   schedule: "rate(7 days)",
 });
 
 const dccomedyloftCron = new sst.aws.Cron("dccomedyloftCron", {
-  task: DCComedyLoftTask,
+  function: {
+    handler: "packages/functions/src/events/dccomedyloft.handler",
+    link: [db, normalizeEventStepFunction],
+    timeout: "2 minutes",
+  },
   schedule: "rate(7 days)",
 });
 

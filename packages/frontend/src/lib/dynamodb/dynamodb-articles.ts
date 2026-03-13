@@ -11,8 +11,9 @@ const client = new DynamoDBClient({
   region: process.env.AWS_REGION || "us-east-1",
 });
 
-// In-memory cache to avoid full table scans on every request
+// In-memory cache to avoid repeated queries within the same Lambda instance
 let articlesCache: { data: Article[]; expiresAt: number } | null = null;
+const articleBySlugCache = new Map<string, { data: Article | null; expiresAt: number }>();
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 
 export interface Article {
@@ -76,6 +77,9 @@ export async function getArticles(): Promise<Article[]> {
  * Get a single article by its slug
  */
 export async function getArticle(slug: string): Promise<Article | null> {
+  const cached = articleBySlugCache.get(slug);
+  if (cached && Date.now() < cached.expiresAt) return cached.data;
+
   const result = await client.send(
     new GetItemCommand({
       TableName: Resource.Db.name,
@@ -86,8 +90,9 @@ export async function getArticle(slug: string): Promise<Article | null> {
     })
   );
 
-  if (!result.Item) return null;
-  return unmarshall(result.Item) as Article;
+  const article = result.Item ? (unmarshall(result.Item) as Article) : null;
+  articleBySlugCache.set(slug, { data: article, expiresAt: Date.now() + CACHE_TTL_MS });
+  return article;
 }
 
 /**

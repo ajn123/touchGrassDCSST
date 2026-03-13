@@ -11,8 +11,9 @@ const client = new DynamoDBClient({
   region: process.env.AWS_REGION || "us-east-1",
 });
 
-// In-memory cache to avoid full table scans on every request
+// In-memory cache to avoid repeated queries within the same Lambda instance
 let guidesCache: { data: Guide[]; expiresAt: number } | null = null;
+const guideBySlugCache = new Map<string, { data: Guide | null; expiresAt: number }>();
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 
 export interface Guide {
@@ -74,6 +75,9 @@ export async function getGuides(): Promise<Guide[]> {
  * Get a single guide by its slug
  */
 export async function getGuide(slug: string): Promise<Guide | null> {
+  const cached = guideBySlugCache.get(slug);
+  if (cached && Date.now() < cached.expiresAt) return cached.data;
+
   const result = await client.send(
     new GetItemCommand({
       TableName: Resource.Db.name,
@@ -84,6 +88,7 @@ export async function getGuide(slug: string): Promise<Guide | null> {
     })
   );
 
-  if (!result.Item) return null;
-  return unmarshall(result.Item) as Guide;
+  const guide = result.Item ? (unmarshall(result.Item) as Guide) : null;
+  guideBySlugCache.set(slug, { data: guide, expiresAt: Date.now() + CACHE_TTL_MS });
+  return guide;
 }

@@ -11,6 +11,10 @@ const client = new DynamoDBClient({
   region: process.env.AWS_REGION || "us-east-1",
 });
 
+// In-memory cache to avoid full table scans on every request
+let guidesCache: { data: Guide[]; expiresAt: number } | null = null;
+const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
+
 export interface Guide {
   pk: string;
   sk: string;
@@ -32,6 +36,11 @@ export interface Guide {
  * Get all published guides, sorted by publishedAt descending
  */
 export async function getGuides(): Promise<Guide[]> {
+  // Return cached data if available and not expired
+  if (guidesCache && Date.now() < guidesCache.expiresAt) {
+    return guidesCache.data;
+  }
+
   const items: any[] = [];
   let lastKey: any = undefined;
 
@@ -56,7 +65,9 @@ export async function getGuides(): Promise<Guide[]> {
 
   items.sort((a, b) => (b.publishedAt || 0) - (a.publishedAt || 0));
 
-  return items as Guide[];
+  const guides = items as Guide[];
+  guidesCache = { data: guides, expiresAt: Date.now() + CACHE_TTL_MS };
+  return guides;
 }
 
 /**

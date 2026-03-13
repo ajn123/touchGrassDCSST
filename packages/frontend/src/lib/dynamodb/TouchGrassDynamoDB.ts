@@ -81,6 +81,33 @@ export interface SearchResult {
 }
 
 // ============================================================================
+// IN-MEMORY CACHE (survives across requests within the same Lambda instance)
+// ============================================================================
+
+interface CacheEntry<T> {
+  data: T;
+  expiresAt: number;
+}
+
+const cache = new Map<string, CacheEntry<any>>();
+
+const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
+
+function getCached<T>(key: string): T | undefined {
+  const entry = cache.get(key);
+  if (!entry) return undefined;
+  if (Date.now() > entry.expiresAt) {
+    cache.delete(key);
+    return undefined;
+  }
+  return entry.data as T;
+}
+
+function setCache<T>(key: string, data: T, ttlMs: number = CACHE_TTL_MS): void {
+  cache.set(key, { data, expiresAt: Date.now() + ttlMs });
+}
+
+// ============================================================================
 // DYNAMODB CLIENT CLASS
 // ============================================================================
 
@@ -226,14 +253,11 @@ export class TouchGrassDynamoDB {
    * Handles pagination to get all events (not just the first 1MB)
    */
   async getEvents(): Promise<Event[]> {
-    try {
-      // console.log("🔍 getEvents: Starting to fetch events from DynamoDB...");
-      // console.log("🔍 getEvents: Table name:", this.tableName);
-      // console.log(
-      //   "🔍 getEvents: AWS Region:",
-      //   process.env.AWS_REGION || "us-east-1"
-      // );
+    const cacheKey = `allEvents:${this.tableName}`;
+    const cached = getCached<Event[]>(cacheKey);
+    if (cached) return cached;
 
+    try {
       const allEvents: Event[] = [];
       let lastEvaluatedKey: any = undefined;
       let queryCount = 0;
@@ -327,15 +351,9 @@ export class TouchGrassDynamoDB {
         return ev;
       });
 
-      // console.log("🔍 getEvents: Final events array length:", events.length);
+      setCache(cacheKey, events);
       return events;
     } catch (error) {
-      // console.error("❌ getEvents: Error fetching events:", error);
-      // console.error("❌ getEvents: Error details:", {
-      //   message: error instanceof Error ? error.message : "Unknown error",
-      //   stack: error instanceof Error ? error.stack : undefined,
-      //   name: error instanceof Error ? error.name : "Unknown error type",
-      // });
       return [];
     }
   }
@@ -346,6 +364,10 @@ export class TouchGrassDynamoDB {
    * to avoid transferring past events over the wire
    */
   async getCurrentAndFutureEvents(): Promise<Event[]> {
+    const cacheKey = `currentAndFutureEvents:${this.tableName}`;
+    const cached = getCached<Event[]>(cacheKey);
+    if (cached) return cached;
+
     try {
       const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
 
@@ -386,7 +408,7 @@ export class TouchGrassDynamoDB {
       } while (lastEvaluatedKey);
 
       // For Washingtonian events, derive start_date/start_time from url or pk
-      return allEvents.map((ev: any) => {
+      const processed = allEvents.map((ev: any) => {
         const pk: string | undefined = ev?.pk;
         const url: string | undefined = ev?.url;
         const isWash =
@@ -416,6 +438,9 @@ export class TouchGrassDynamoDB {
         }
         return ev;
       });
+
+      setCache(cacheKey, processed);
+      return processed;
     } catch (error) {
       console.error("Error fetching current and future events:", error);
       return [];

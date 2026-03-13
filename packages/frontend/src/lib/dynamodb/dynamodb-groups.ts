@@ -17,6 +17,10 @@ const client = new DynamoDBClient({
   region: process.env.AWS_REGION || "us-east-1",
 });
 
+// In-memory cache to avoid repeated queries on every request
+let publicGroupsCache: { data: Group[]; expiresAt: number } | null = null;
+const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
+
 // Interface for Group items
 export interface Group {
   pk: string;
@@ -204,6 +208,11 @@ export async function getGroupsByCategory(category: string) {
 
 // Get public groups only (using GSI for efficiency instead of scanning entire table)
 export async function getPublicGroups() {
+  // Return cached data if available and not expired
+  if (publicGroupsCache && Date.now() < publicGroupsCache.expiresAt) {
+    return publicGroupsCache.data;
+  }
+
   try {
     const allGroups: Group[] = [];
     let lastEvaluatedKey: any = undefined;
@@ -249,6 +258,7 @@ export async function getPublicGroups() {
     console.log(
       `✅ Fetched ${allGroups.length} public groups (using GSI Query)`
     );
+    publicGroupsCache = { data: allGroups, expiresAt: Date.now() + CACHE_TTL_MS };
     return allGroups;
   } catch (error) {
     console.error("Error fetching public groups:", error);

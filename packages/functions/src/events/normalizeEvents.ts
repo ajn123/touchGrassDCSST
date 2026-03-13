@@ -553,6 +553,22 @@ export function transformAnacostiaWSEvent(event: any): NormalizedEvent {
   };
 }
 
+export function transformNovaCleanupEvent(event: any): NormalizedEvent {
+  return {
+    title: event.title,
+    description: event.description,
+    start_date: normalizeDate(event.date),
+    start_time: normalizeTime(event.time),
+    location: event.location,
+    venue: event.venue || "NOVA Cleanups",
+    category: "Volunteer",
+    url: event.url,
+    image_url: event.image_url,
+    isPublic: true,
+    source: "novacleanups",
+  };
+}
+
 // Dummy saveEvents function to mimic member function, you will need to implement it or import if defined elsewhere.
 export async function saveEvents(
   normalizedEvents: NormalizedEvent[],
@@ -1071,6 +1087,9 @@ export const handler: Handler = async (event, context, callback) => {
             break;
           case "anacostiaws":
             normalizedEvent = transformAnacostiaWSEvent(rawEvent);
+            break;
+          case "novacleanups":
+            normalizedEvent = transformNovaCleanupEvent(rawEvent);
             break;
           default: {
             // Assume it's already in normalized format

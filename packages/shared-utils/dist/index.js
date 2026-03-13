@@ -112,6 +112,7 @@ exports.VALID_CATEGORIES = [
     "Outdoors & Recreation",
     "Sports",
     "Theater",
+    "Volunteer",
 ];
 /**
  * Substring → canonical-category mapping.
@@ -141,7 +142,6 @@ const CATEGORY_KEYWORDS = [
     ["open mic", "Comedy"],
     // Community
     ["community", "Community"],
-    ["volunteer", "Community"],
     ["charity", "Community"],
     ["fundraiser", "Community"],
     ["family", "Community"],
@@ -254,6 +254,15 @@ const CATEGORY_KEYWORDS = [
     ["stage", "Theater"],
     ["ballet", "Theater"],
     ["dance", "Theater"],
+    // Volunteer
+    ["volunteer", "Volunteer"],
+    ["cleanup", "Volunteer"],
+    ["clean-up", "Volunteer"],
+    ["trash pickup", "Volunteer"],
+    ["shelter", "Volunteer"],
+    ["outreach", "Volunteer"],
+    ["service day", "Volunteer"],
+    ["service morning", "Volunteer"],
 ];
 /**
  * Normalize category to a canonical value using substring matching.
@@ -299,8 +308,8 @@ function normalizeCost(cost) {
         if (costStr.includes("free")) {
             return { type: "free", currency: "USD", amount: 0 };
         }
-        // Try to extract amount from string
-        const amountMatch = costStr.match(/\$?(\d+(?:\.\d{2})?)/);
+        // Try to extract amount from string — require $ sign to avoid matching years
+        const amountMatch = costStr.match(/\$(\d+(?:\.\d{2})?)/);
         if (amountMatch) {
             return {
                 type: "fixed",
@@ -499,6 +508,9 @@ function getMonthIndex(month) {
     };
     return months[month.toLowerCase()] ?? 0;
 }
+// ============================================================================
+// EVENT NORMALIZATION UTILITIES
+// ============================================================================
 /**
  * Parse cost amount from various formats
  */

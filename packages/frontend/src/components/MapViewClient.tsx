@@ -174,10 +174,16 @@ export default function MapViewClient({ events, categories }: MapViewClientProps
       hasMarkers = true;
     }
 
-    // Set up clusterer
+    // Set up clusterer with zoom cap to prevent over-zooming
     clustererRef.current = new MarkerClusterer({
       map,
       markers: newMarkers,
+      onClusterClick: (event: any, cluster: any, map: any) => {
+        const currentZoom = map.getZoom() || 12;
+        const newZoom = Math.min(currentZoom + 2, 15);
+        map.setCenter(cluster.position);
+        map.setZoom(newZoom);
+      },
     });
 
     markersRef.current = newMarkers;

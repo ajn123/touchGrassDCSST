@@ -51,7 +51,7 @@ export declare function normalizeTime(timeStr?: string): string | undefined;
 /**
  * Canonical event categories — the only values that should appear in the DB and UI.
  */
-export declare const VALID_CATEGORIES: readonly ["Arts & Culture", "Comedy", "Community", "Education", "Festival", "Food & Drink", "General", "Music", "Networking", "Nightlife", "Outdoors & Recreation", "Sports", "Theater"];
+export declare const VALID_CATEGORIES: readonly ["Arts & Culture", "Comedy", "Community", "Education", "Festival", "Food & Drink", "General", "Music", "Networking", "Nightlife", "Outdoors & Recreation", "Sports", "Theater", "Volunteer"];
 export type ValidCategory = (typeof VALID_CATEGORIES)[number];
 /**
  * Normalize category to a canonical value using substring matching.
@@ -82,42 +82,6 @@ export declare function parseDateTime(dateValue: any): string | undefined;
  * Handles complex date strings from web scraping
  */
 export declare function parseComplexDate(dateText: string): string | null;
-/**
- * Standardized event interface used across the application
- */
-export interface NormalizedEvent {
-    title: string;
-    description?: string;
-    start_date?: string;
-    end_date?: string;
-    start_time?: string;
-    end_time?: string;
-    location?: string;
-    venue?: string;
-    coordinates?: string;
-    category?: string | string[];
-    image_url?: string;
-    url?: string;
-    socials?: {
-        website?: string;
-        facebook?: string;
-        instagram?: string;
-        twitter?: string;
-    };
-    cost?: {
-        type: "free" | "fixed" | "variable";
-        currency: string;
-        amount: string | number;
-    };
-    source?: string;
-    external_id?: string;
-    isPublic?: boolean;
-    is_virtual?: boolean;
-    publisher?: string;
-    ticket_links?: string[];
-    confidence?: number;
-    extractionMethod?: string;
-}
 /**
  * Parse cost amount from various formats
  */
@@ -174,7 +138,7 @@ declare const _default: {
     transformOpenWebNinjaEvent: typeof transformOpenWebNinjaEvent;
     validateEvent: typeof validateEvent;
     sanitizeEvent: typeof sanitizeEvent;
-    VALID_CATEGORIES: readonly ["Arts & Culture", "Comedy", "Community", "Education", "Festival", "Food & Drink", "General", "Music", "Networking", "Nightlife", "Outdoors & Recreation", "Sports", "Theater"];
+    VALID_CATEGORIES: readonly ["Arts & Culture", "Comedy", "Community", "Education", "Festival", "Food & Drink", "General", "Music", "Networking", "Nightlife", "Outdoors & Recreation", "Sports", "Theater", "Volunteer"];
     normalizeCategory: typeof normalizeCategory;
 };
 export default _default;

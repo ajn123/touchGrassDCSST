@@ -175,9 +175,19 @@ const anacostiaWSCron = new sst.aws.Cron("anacostiaWSCron", {
   schedule: "rate(7 days)",
 });
 
+const novacleanupsCron = new sst.aws.Cron("novacleanupsCron", {
+  function: {
+    handler: "packages/functions/src/events/novacleanups.handler",
+    link: [db, normalizeEventStepFunction],
+    timeout: "2 minutes",
+  },
+  schedule: "rate(7 days)",
+});
+
 export {
   anacostiaWSCron,
   articleGenerationCron,
+  novacleanupsCron,
   clockoutdcCron,
   copyProdToDevCron,
   cron,

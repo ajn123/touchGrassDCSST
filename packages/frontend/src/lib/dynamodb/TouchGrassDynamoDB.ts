@@ -451,9 +451,11 @@ export class TouchGrassDynamoDB {
    * Get a single event by ID
    */
   async getEvent(id: string): Promise<Event | null> {
-    try {
-      console.log("Getting event with id:", id);
+    const cacheKey = `event:${id}`;
+    const cached = getCached<Event | null>(cacheKey);
+    if (cached !== undefined) return cached;
 
+    try {
       // Try the exact ID first
       let command = new GetItemCommand({
         TableName: this.tableName,
@@ -490,14 +492,11 @@ export class TouchGrassDynamoDB {
         }
       }
 
-      // Use AWS SDK's built-in unmarshall utility
       const unmarshalledItem = result.Item
         ? (unmarshall(result.Item) as Event)
         : null;
-      console.log(
-        `Unmarshalled item: ${JSON.stringify(unmarshalledItem, null, 2)}`
-      );
 
+      setCache(cacheKey, unmarshalledItem);
       return unmarshalledItem;
     } catch (error) {
       console.error("Error fetching item:", error);
@@ -509,10 +508,11 @@ export class TouchGrassDynamoDB {
    * Get event by title
    */
   async getEventByTitle(title: string): Promise<Event | null> {
-    try {
-      console.log("Searching for event with title:", title);
-      console.log("Using table:", this.tableName);
+    const cacheKey = `eventByTitle:${title}`;
+    const cached = getCached<Event | null>(cacheKey);
+    if (cached !== undefined) return cached;
 
+    try {
       const command = new QueryCommand({
         TableName: Resource.Db.name,
         IndexName: "eventTitleIndex",
@@ -525,12 +525,10 @@ export class TouchGrassDynamoDB {
         },
       });
 
-      console.log("Scan command created, executing...");
       const result = await this.client.send(command);
-      console.log("Scan result received:", result);
 
       if (!result.Items) {
-        console.log("No items found in scan result");
+        setCache(cacheKey, null);
         return null;
       }
 
@@ -543,10 +541,9 @@ export class TouchGrassDynamoDB {
         }
       }).filter(Boolean) as Event[];
 
-      console.log("Found events:", events.length);
-
-      // Return the first matching event (titles should be unique)
-      return events.length > 0 ? events[0] : null;
+      const event = events.length > 0 ? events[0] : null;
+      setCache(cacheKey, event);
+      return event;
     } catch (error) {
       console.error("Error fetching event by title:", error);
       console.error("Error details:", {
@@ -563,6 +560,10 @@ export class TouchGrassDynamoDB {
    * Get events by category
    */
   async getEventsByCategory(category: string): Promise<Event[]> {
+    const cacheKey = `eventsByCategory:${category.toLowerCase().trim()}`;
+    const cached = getCached<Event[]>(cacheKey);
+    if (cached) return cached;
+
     try {
       const command = new QueryCommand({
         TableName: Resource.Db.name,
@@ -585,7 +586,7 @@ export class TouchGrassDynamoDB {
       // Filter events that have the specified category in their category array or comma-separated string
       // Case-insensitive comparison
       const normalizedSearchCategory = category.toLowerCase().trim();
-      return events.filter((event) => {
+      const filtered = events.filter((event) => {
         if (!event.category) return false;
 
         if (Array.isArray(event.category)) {
@@ -602,6 +603,9 @@ export class TouchGrassDynamoDB {
           return categories.includes(normalizedSearchCategory);
         }
       });
+
+      setCache(cacheKey, filtered);
+      return filtered;
     } catch (error) {
       console.error("Error fetching events by category:", error);
       return [];
@@ -1675,6 +1679,10 @@ export class TouchGrassDynamoDB {
   // ============================================================================
 
   async getProducts(): Promise<any[]> {
+    const cacheKey = `products:${this.tableName}`;
+    const cached = getCached<any[]>(cacheKey);
+    if (cached) return cached;
+
     try {
       const command = new QueryCommand({
         TableName: this.tableName,
@@ -1692,7 +1700,9 @@ export class TouchGrassDynamoDB {
       });
 
       const result = await this.client.send(command);
-      return result.Items?.map((item) => unmarshall(item)) || [];
+      const products = result.Items?.map((item) => unmarshall(item)) || [];
+      setCache(cacheKey, products);
+      return products;
     } catch (error) {
       console.error("Error fetching products:", error);
       return [];
@@ -1700,6 +1710,10 @@ export class TouchGrassDynamoDB {
   }
 
   async getProductBySlug(slug: string): Promise<any | null> {
+    const cacheKey = `product:${slug}`;
+    const cached = getCached<any | null>(cacheKey);
+    if (cached !== undefined) return cached;
+
     try {
       const command = new GetItemCommand({
         TableName: this.tableName,
@@ -1710,7 +1724,9 @@ export class TouchGrassDynamoDB {
       });
 
       const result = await this.client.send(command);
-      return result.Item ? unmarshall(result.Item) : null;
+      const product = result.Item ? unmarshall(result.Item) : null;
+      setCache(cacheKey, product);
+      return product;
     } catch (error) {
       console.error("Error fetching product by slug:", error);
       return null;

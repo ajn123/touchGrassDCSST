@@ -2,8 +2,7 @@ import FindMyGroupClient from "@/components/FindMyGroupClient";
 import { getPublicGroups } from "@/lib/dynamodb/dynamodb-groups";
 import type { Metadata } from "next";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Find My Group",

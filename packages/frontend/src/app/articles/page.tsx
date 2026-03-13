@@ -2,8 +2,7 @@ import ArticleCard from "@/components/ArticleCard";
 import { getArticles } from "@/lib/dynamodb/dynamodb-articles";
 import type { Metadata } from "next";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Articles - Weekly DC Guides",

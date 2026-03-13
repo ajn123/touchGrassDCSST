@@ -2,9 +2,7 @@ import GroupsClient from "@/components/GroupsClient";
 import { getPublicGroups } from "@/lib/dynamodb/dynamodb-groups";
 import type { Metadata } from "next";
 
-// Force dynamic rendering to prevent caching
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Community Groups & Clubs in DC",

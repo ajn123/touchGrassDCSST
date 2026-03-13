@@ -2,8 +2,7 @@ import GuideCard from "@/components/GuideCard";
 import { getGuides } from "@/lib/dynamodb/dynamodb-guides";
 import type { Metadata } from "next";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 7200;
 
 export const metadata: Metadata = {
   title: "DC Guides - First-Timer Tips & Local Knowledge | TouchGrass DC",

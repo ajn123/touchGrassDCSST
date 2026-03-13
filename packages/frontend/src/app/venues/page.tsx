@@ -3,8 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Resource } from "sst";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 1800;
 
 export const metadata: Metadata = {
   title: "Event Venues in DC",

@@ -14,8 +14,7 @@ const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
   allowedAttributes: { a: ["href", "target", "rel", "id"], "*": ["class", "id"] },
 };
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 7200;
 
 export async function generateMetadata({
   params,

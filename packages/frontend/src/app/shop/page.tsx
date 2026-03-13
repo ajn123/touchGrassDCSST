@@ -5,8 +5,7 @@ import type { Product } from "@/lib/shop-types";
 import { redirect } from "next/navigation";
 import { Resource } from "sst";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 900;
 
 export default async function ShopPage() {
   if (process.env.NEXT_PUBLIC_SHOP_ENABLED !== "true") {

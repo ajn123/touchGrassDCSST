@@ -110,7 +110,7 @@ export function resolveImageUrl(image_url?: string | null, ...args: any[]): stri
     return image_url; // Web image
   }
   // Static image in public/images/
-  return `/images/${image_url.replace(/^\/+/, '')}`;
+  return `/images/${image_url.replace(/^\/+/, '').replace(/^images\//, '')}`;
 }
 
 /**

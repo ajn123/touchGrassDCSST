@@ -59,21 +59,6 @@ const dccomedyloftCron = new sst.aws.Cron("dccomedyloftCron", {
   schedule: "rate(7 days)",
 });
 
-// Daily copy of production DB to dev (only runs in non-production stages)
-// Note: This cron will only be created in non-production stages
-// The function itself checks the stage and prevents running in production
-const copyProdToDevCron = new sst.aws.Cron("copyProdToDevCron", {
-  function: {
-    handler: "packages/functions/src/events/copyProdToDev.handler",
-    link: [db],
-    environment: {
-      // Production table name - update this with the actual production table name
-      // You can get it by running: npm run print:table:prod
-      PRODUCTION_TABLE_NAME: `touchgrassdcsst-production-DbTable-bcabbfkm`,
-    },
-  },
-  schedule: "cron(0 2 * * ? *)", // Daily at 2 AM UTC (10 PM EST previous day)
-});
 
 const dcSportsCron = new sst.aws.Cron("dcSportsCron", {
   function: {
@@ -195,7 +180,6 @@ export {
   articleGenerationCron,
   novacleanupsCron,
   clockoutdcCron,
-  copyProdToDevCron,
   cron,
   dailyAnalyticsCron,
   dcbareventsCron,

@@ -11,20 +11,12 @@ export const db = new sst.aws.Dynamo("Db", {
     title: "string", // Event title
     category: "string", // Event category (comma-separated string for GSI compatibility)
     isPublic: "string", // Whether the event is publicly visible
-
-    scheduleDay: "string", // Day of the week for group schedules
-    scheduleTime: "string", // Time for group schedules
   },
   primaryIndex: {
     hashKey: "pk",
     rangeKey: "sk",
   },
   globalIndexes: {
-    // GSI for sorting by creation time across all entities
-    createdAtIndex: {
-      hashKey: "createdAt",
-      rangeKey: "pk",
-    },
     // GSI for events by category (category -> createdAt)
     eventCategoryIndex: {
       hashKey: "category",
@@ -40,10 +32,6 @@ export const db = new sst.aws.Dynamo("Db", {
       hashKey: "title",
       rangeKey: "createdAt",
     },
-    // GSI for groups by schedule details
-    groupScheduleIndex: {
-      hashKey: "scheduleDay",
-      rangeKey: "scheduleTime",
-    },
   },
+  ttl: "ttl",
 });

@@ -48,6 +48,10 @@ export const handler = async (sqsEvent: any) => {
       ...event,
       pk: event.pk,
       sk: event.sk,
+      // Auto-expire analytics records after 90 days
+      ...(event.pk?.startsWith("ANALYTICS#") && {
+        ttl: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60,
+      }),
     };
 
     // Convert the entire event to DynamoDB format (top level)

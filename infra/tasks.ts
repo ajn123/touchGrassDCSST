@@ -114,5 +114,20 @@ const DCBarEventsTask = new sst.aws.Task("dcbareventsTask", {
   dev: false,
 });
 
-export { DCBarEventsTask, EventbriteTask, IndieVenuesTask, KennedyCenterTask, MeetupDCTask, SmithsonianTask, WashingtonianTask };
+const DistrictCleanupsTask = new sst.aws.Task("districtcleanupsTask", {
+  cluster,
+  link: [db, api, normalizeEventStepFunction],
+  image: {
+    context: ".",
+    dockerfile: "./packages/tasks/crawlers/Dockerfile.districtcleanups",
+  },
+  memory,
+  cpu,
+  environment: {
+    NODE_OPTIONS: "--max-old-space-size=1536",
+  },
+  dev: false,
+});
+
+export { DCBarEventsTask, DistrictCleanupsTask, EventbriteTask, IndieVenuesTask, KennedyCenterTask, MeetupDCTask, SmithsonianTask, WashingtonianTask };
 

@@ -6,6 +6,7 @@ import { normalizeEventStepFunction } from "./step_functions";
 import { bucket } from "./storage";
 import {
   DCBarEventsTask,
+  DistrictCleanupsTask,
   EventbriteTask,
   IndieVenuesTask,
   KennedyCenterTask,
@@ -166,6 +167,11 @@ const anacostiaWSCron = new sst.aws.Cron("anacostiaWSCron", {
   schedule: "rate(7 days)",
 });
 
+const districtcleanupsCron = new sst.aws.Cron("districtcleanupsCron", {
+  task: DistrictCleanupsTask,
+  schedule: "rate(7 days)",
+});
+
 const novacleanupsCron = new sst.aws.Cron("novacleanupsCron", {
   function: {
     handler: "packages/functions/src/events/novacleanups.handler",
@@ -178,6 +184,7 @@ const novacleanupsCron = new sst.aws.Cron("novacleanupsCron", {
 export {
   anacostiaWSCron,
   articleGenerationCron,
+  districtcleanupsCron,
   novacleanupsCron,
   clockoutdcCron,
   cron,

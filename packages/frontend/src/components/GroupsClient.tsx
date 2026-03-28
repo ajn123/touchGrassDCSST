@@ -7,6 +7,34 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
+function GroupCardImage({ group }: { group: { image_url?: string; title: string } }) {
+  const resolved = resolveImageUrl(group.image_url);
+  const fallback = resolveImageUrl(undefined);
+  const [src, setSrc] = useState(resolved);
+
+  if (!group.image_url) {
+    return (
+      <div className="w-full h-48 bg-gray-200 flex items-center justify-center theme-hover-medium transition-colors">
+        <span>No image</span>
+      </div>
+    );
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={group.title}
+      fill
+      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      className="object-cover hover:opacity-90 transition-opacity"
+      unoptimized={shouldBeUnoptimized(src)}
+      onError={() => {
+        if (src !== fallback) setSrc(fallback);
+      }}
+    />
+  );
+}
+
 export interface Group {
   pk: string;
   sk: string;
@@ -194,23 +222,7 @@ export default function GroupsClient({ groups }: { groups: Group[] }) {
                   className="block"
                 >
                   <div className="relative h-48 cursor-pointer">
-                    {group.image_url ? (
-                      <Image
-                        src={
-                          resolveImageUrl(group.image_url) ||
-                          "/images/placeholder.jpg"
-                        }
-                        alt={group.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        className="object-cover hover:opacity-90 transition-opacity"
-                        unoptimized={shouldBeUnoptimized(resolveImageUrl(group.image_url) || "")}
-                      />
-                    ) : (
-                      <div className="w-full h-48 bg-gray-200 flex items-center justify-center theme-hover-medium transition-colors">
-                        <span>No image</span>
-                      </div>
-                    )}
+                    <GroupCardImage group={group} />
                   </div>
 
                   <div className="p-6">

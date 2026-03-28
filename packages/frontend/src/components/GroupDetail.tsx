@@ -1,6 +1,6 @@
 "use client";
 
-import { resolveImageUrl } from "@/lib/image-utils";
+import { resolveImageUrl, shouldBeUnoptimized } from "@/lib/image-utils";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -49,13 +49,21 @@ interface GroupDetailProps {
 }
 
 function GroupImage({ imageUrl, title }: { imageUrl: string; title?: string }) {
+  const resolvedUrl = resolveImageUrl(imageUrl || undefined);
+  const [imageSrc, setImageSrc] = useState(resolvedUrl);
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
 
   const handleImageLoad = () => setImageLoading(false);
   const handleImageError = () => {
     setImageLoading(false);
-    setImageError(true);
+    // Fall back to SVG placeholder if the external image fails
+    const fallback = resolveImageUrl(undefined);
+    if (imageSrc !== fallback) {
+      setImageSrc(fallback);
+    } else {
+      setImageError(true);
+    }
   };
 
   return (
@@ -63,14 +71,14 @@ function GroupImage({ imageUrl, title }: { imageUrl: string; title?: string }) {
       {imageUrl ? (
         <>
           <Image
-            src={resolveImageUrl(imageUrl) || ""}
+            src={imageSrc}
             alt={title || "Group"}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
             className="object-cover rounded-lg"
             onLoad={handleImageLoad}
             onError={handleImageError}
-            unoptimized={imageUrl.startsWith('http://') || imageUrl.startsWith('https://')}
+            unoptimized={shouldBeUnoptimized(imageSrc)}
           />
           {imageLoading && (
             <div className="absolute inset-0 bg-gray-200 rounded-lg flex items-center justify-center">

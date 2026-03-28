@@ -101,18 +101,19 @@ export default function EventCard({
   children,
 }: EventCardProps) {
   const [imageLoading, setImageLoading] = useState(true);
-  const [imageError, setImageError] = useState(false);
   const { isDark } = useThemeSafe();
 
   const accent = getCategoryAccent(category);
   const accentText = getAccentTextColor(accent, isDark);
   const primaryCategory = Array.isArray(category) ? category[0] : category;
-  const resolvedUrl = resolveImageUrl(
+  const fallbackUrl = resolveImageUrl(undefined, primaryCategory, title, venue);
+  const initialUrl = resolveImageUrl(
     imageUrl || "",
     primaryCategory,
     title,
     venue
   );
+  const [imageSrc, setImageSrc] = useState(initialUrl);
 
   return (
     <Link href={href} className="group block h-full">
@@ -126,37 +127,19 @@ export default function EventCard({
       >
         {/* Image */}
         <div className="relative h-28 sm:h-44 flex-shrink-0 overflow-hidden">
-          {!imageError ? (
-            <Image
-              src={resolvedUrl}
-              alt={title}
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
-              onLoad={() => setImageLoading(false)}
-              onError={() => {
-                setImageLoading(false);
-                setImageError(true);
-              }}
-              unoptimized={shouldBeUnoptimized(resolvedUrl)}
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-              <svg
-                className="w-8 h-8 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-            </div>
-          )}
+          <Image
+            src={imageSrc}
+            alt={title}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            onLoad={() => setImageLoading(false)}
+            onError={() => {
+              setImageLoading(false);
+              if (imageSrc !== fallbackUrl) setImageSrc(fallbackUrl);
+            }}
+            unoptimized={shouldBeUnoptimized(imageSrc)}
+          />
 
           {/* Loading shimmer */}
           {imageLoading && imageUrl && (

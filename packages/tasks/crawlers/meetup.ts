@@ -227,6 +227,14 @@ class MeetupCrawler {
                 eventUrl = `https://www.meetup.com${eventUrl}`;
               }
 
+              let imageUrl = evt.image_url;
+              // Filter out Meetup placeholder/fallback images
+              if (imageUrl && /fallback|placeholder|group-cover/i.test(imageUrl)) {
+                imageUrl = undefined;
+              } else if (imageUrl && !imageUrl.startsWith("http") && !imageUrl.startsWith("data:")) {
+                imageUrl = `https://www.meetup.com${imageUrl}`;
+              }
+
               this.events.push({
                 title: evt.title,
                 date,
@@ -236,7 +244,7 @@ class MeetupCrawler {
                 category: undefined, // Let normalizeCategory handle it
                 description: evt.description || undefined,
                 url: eventUrl || request.url,
-                image_url: evt.image_url || undefined,
+                image_url: imageUrl || undefined,
                 price: evt.price || undefined,
               });
             }
@@ -369,7 +377,10 @@ class MeetupCrawler {
               }
 
               let imageUrl = evt.image_url;
-              if (imageUrl && !imageUrl.startsWith("http") && !imageUrl.startsWith("data:")) {
+              // Filter out Meetup placeholder/fallback images
+              if (imageUrl && /fallback|placeholder|group-cover/i.test(imageUrl)) {
+                imageUrl = undefined;
+              } else if (imageUrl && !imageUrl.startsWith("http") && !imageUrl.startsWith("data:")) {
                 imageUrl = `https://www.meetup.com${imageUrl}`;
               }
 

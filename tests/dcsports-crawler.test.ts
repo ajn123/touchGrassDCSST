@@ -66,14 +66,14 @@ describe("DC Sports crawler", () => {
       const competitors = [
         {
           homeAway: "home",
-          team: { displayName: "Washington Wizards", shortDisplayName: "Wizards" },
+          team: { displayName: "Washington Wizards", shortDisplayName: "Wizards", abbreviation: "WSH" },
         },
         {
           homeAway: "away",
-          team: { displayName: "Los Angeles Lakers", shortDisplayName: "Lakers" },
+          team: { displayName: "Los Angeles Lakers", shortDisplayName: "Lakers", abbreviation: "LAL" },
         },
       ];
-      const result = buildGameTitle("Washington Wizards", competitors);
+      const result = buildGameTitle("WSH", competitors);
       expect(result.title).toBe("Wizards vs. Lakers");
       expect(result.isHome).toBe(true);
     });
@@ -82,14 +82,14 @@ describe("DC Sports crawler", () => {
       const competitors = [
         {
           homeAway: "home",
-          team: { displayName: "Boston Celtics", shortDisplayName: "Celtics" },
+          team: { displayName: "Boston Celtics", shortDisplayName: "Celtics", abbreviation: "BOS" },
         },
         {
           homeAway: "away",
-          team: { displayName: "Washington Wizards", shortDisplayName: "Wizards" },
+          team: { displayName: "Washington Wizards", shortDisplayName: "Wizards", abbreviation: "WSH" },
         },
       ];
-      const result = buildGameTitle("Washington Wizards", competitors);
+      const result = buildGameTitle("WSH", competitors);
       expect(result.title).toBe("Wizards at Celtics");
       expect(result.isHome).toBe(false);
     });
@@ -98,49 +98,49 @@ describe("DC Sports crawler", () => {
       const competitors = [
         {
           homeAway: "home",
-          team: { displayName: "Washington Nationals" },
+          team: { displayName: "Washington Nationals", abbreviation: "WSH" },
         },
         {
           homeAway: "away",
-          team: { displayName: "New York Mets" },
+          team: { displayName: "New York Mets", abbreviation: "NYM" },
         },
       ];
-      const result = buildGameTitle("Washington Nationals", competitors);
+      const result = buildGameTitle("WSH", competitors);
       expect(result.title).toBe("Washington Nationals vs. New York Mets");
       expect(result.isHome).toBe(true);
     });
 
-    it("returns team name when competitors array is empty", () => {
-      const result = buildGameTitle("Washington Capitals", []);
-      expect(result.title).toBe("Washington Capitals");
+    it("returns team abbrev when competitors array is empty", () => {
+      const result = buildGameTitle("WSH", []);
+      expect(result.title).toBe("WSH");
       expect(result.isHome).toBe(true);
     });
 
-    it("returns team name when competitors is undefined", () => {
-      const result = buildGameTitle("D.C. United", undefined as any);
-      expect(result.title).toBe("D.C. United");
+    it("returns team abbrev when competitors is undefined", () => {
+      const result = buildGameTitle("DC", undefined as any);
+      expect(result.title).toBe("DC");
       expect(result.isHome).toBe(true);
     });
 
-    it("returns team name when only one competitor", () => {
+    it("returns team abbrev when only one competitor", () => {
       const competitors = [
         {
           homeAway: "home",
-          team: { displayName: "Washington Commanders", shortDisplayName: "Commanders" },
+          team: { displayName: "Washington Commanders", shortDisplayName: "Commanders", abbreviation: "WSH" },
         },
       ];
-      const result = buildGameTitle("Washington Commanders", competitors);
-      expect(result.title).toBe("Washington Commanders");
+      const result = buildGameTitle("WSH", competitors);
+      expect(result.title).toBe("WSH");
       expect(result.isHome).toBe(true);
     });
 
     it("handles missing homeAway fields gracefully", () => {
       const competitors = [
-        { team: { displayName: "Team A", shortDisplayName: "A" } },
-        { team: { displayName: "Team B", shortDisplayName: "B" } },
+        { team: { displayName: "Team A", shortDisplayName: "A", abbreviation: "TA" } },
+        { team: { displayName: "Team B", shortDisplayName: "B", abbreviation: "TB" } },
       ];
-      const result = buildGameTitle("Team A", competitors);
-      expect(result.title).toBe("Team A");
+      const result = buildGameTitle("TA", competitors);
+      expect(result.title).toBe("TA");
       expect(result.isHome).toBe(true);
     });
 
@@ -148,14 +148,14 @@ describe("DC Sports crawler", () => {
       const competitors = [
         {
           homeAway: "home",
-          team: { displayName: "D.C. United", shortDisplayName: "D.C. United" },
+          team: { displayName: "D.C. United", shortDisplayName: "D.C. United", abbreviation: "DC" },
         },
         {
           homeAway: "away",
-          team: { displayName: "Atlanta United FC", shortDisplayName: "Atlanta United" },
+          team: { displayName: "Atlanta United FC", shortDisplayName: "Atlanta United", abbreviation: "ATL" },
         },
       ];
-      const result = buildGameTitle("D.C. United", competitors);
+      const result = buildGameTitle("DC", competitors);
       expect(result.title).toBe("D.C. United vs. Atlanta United");
       expect(result.isHome).toBe(true);
     });
@@ -164,6 +164,7 @@ describe("DC Sports crawler", () => {
   describe("parseESPNSchedule", () => {
     const mockTeam = {
       name: "Washington Wizards",
+      espnAbbrev: "WSH",
       sport: "Basketball",
       venue: "Capital One Arena",
       venueAddress: "601 F St NW, Washington, DC 20004",
@@ -181,11 +182,11 @@ describe("DC Sports crawler", () => {
                 competitors: [
                   {
                     homeAway: "home",
-                    team: { displayName: "Washington Wizards", shortDisplayName: "Wizards" },
+                    team: { displayName: "Washington Wizards", shortDisplayName: "Wizards", abbreviation: "WSH" },
                   },
                   {
                     homeAway: "away",
-                    team: { displayName: "Los Angeles Lakers", shortDisplayName: "Lakers" },
+                    team: { displayName: "Los Angeles Lakers", shortDisplayName: "Lakers", abbreviation: "LAL" },
                   },
                 ],
                 venue: { fullName: "Capital One Arena" },
@@ -219,8 +220,8 @@ describe("DC Sports crawler", () => {
               {
                 status: { type: { completed: true } },
                 competitors: [
-                  { homeAway: "home", team: { displayName: "Washington Wizards", shortDisplayName: "Wizards" } },
-                  { homeAway: "away", team: { displayName: "Boston Celtics", shortDisplayName: "Celtics" } },
+                  { homeAway: "home", team: { displayName: "Washington Wizards", shortDisplayName: "Wizards", abbreviation: "WSH" } },
+                  { homeAway: "away", team: { displayName: "Boston Celtics", shortDisplayName: "Celtics", abbreviation: "BOS" } },
                 ],
               },
             ],
@@ -240,8 +241,8 @@ describe("DC Sports crawler", () => {
               {
                 status: { type: { completed: false } },
                 competitors: [
-                  { homeAway: "home", team: { displayName: "Washington Wizards" } },
-                  { homeAway: "away", team: { displayName: "Celtics" } },
+                  { homeAway: "home", team: { displayName: "Washington Wizards", abbreviation: "WSH" } },
+                  { homeAway: "away", team: { displayName: "Celtics", abbreviation: "BOS" } },
                 ],
               },
             ],
@@ -273,8 +274,8 @@ describe("DC Sports crawler", () => {
               {
                 status: { type: { completed: false } },
                 competitors: [
-                  { homeAway: "home", team: { displayName: "Washington Wizards", shortDisplayName: "Wizards" } },
-                  { homeAway: "away", team: { displayName: "Miami Heat", shortDisplayName: "Heat" } },
+                  { homeAway: "home", team: { displayName: "Washington Wizards", shortDisplayName: "Wizards", abbreviation: "WSH" } },
+                  { homeAway: "away", team: { displayName: "Miami Heat", shortDisplayName: "Heat", abbreviation: "MIA" } },
                 ],
               },
             ],
@@ -297,8 +298,8 @@ describe("DC Sports crawler", () => {
               {
                 status: { type: { completed: false } },
                 competitors: [
-                  { homeAway: "home", team: { displayName: "Washington Wizards", shortDisplayName: "Wizards" } },
-                  { homeAway: "away", team: { displayName: "Chicago Bulls", shortDisplayName: "Bulls" } },
+                  { homeAway: "home", team: { displayName: "Washington Wizards", shortDisplayName: "Wizards", abbreviation: "WSH" } },
+                  { homeAway: "away", team: { displayName: "Chicago Bulls", shortDisplayName: "Bulls", abbreviation: "CHI" } },
                 ],
                 venue: {
                   fullName: "United Center",
@@ -325,8 +326,8 @@ describe("DC Sports crawler", () => {
               {
                 status: { type: { completed: false } },
                 competitors: [
-                  { homeAway: "home", team: { displayName: "Washington Wizards", shortDisplayName: "Wizards" } },
-                  { homeAway: "away", team: { displayName: "Nets", shortDisplayName: "Nets" } },
+                  { homeAway: "home", team: { displayName: "Washington Wizards", shortDisplayName: "Wizards", abbreviation: "WSH" } },
+                  { homeAway: "away", team: { displayName: "Nets", shortDisplayName: "Nets", abbreviation: "BKN" } },
                 ],
               },
             ],
@@ -350,8 +351,8 @@ describe("DC Sports crawler", () => {
               {
                 status: { type: { completed: false } },
                 competitors: [
-                  { homeAway: "home", team: { displayName: "Washington Wizards", shortDisplayName: "Wizards" } },
-                  { homeAway: "away", team: { displayName: "Hawks", shortDisplayName: "Hawks" } },
+                  { homeAway: "home", team: { displayName: "Washington Wizards", shortDisplayName: "Wizards", abbreviation: "WSH" } },
+                  { homeAway: "away", team: { displayName: "Hawks", shortDisplayName: "Hawks", abbreviation: "ATL" } },
                 ],
               },
             ],
@@ -372,8 +373,8 @@ describe("DC Sports crawler", () => {
             competitions: [{
               status: { type: { completed: false } },
               competitors: [
-                { homeAway: "home", team: { displayName: "Washington Wizards", shortDisplayName: "Wizards" } },
-                { homeAway: "away", team: { displayName: "Lakers", shortDisplayName: "Lakers" } },
+                { homeAway: "home", team: { displayName: "Washington Wizards", shortDisplayName: "Wizards", abbreviation: "WSH" } },
+                { homeAway: "away", team: { displayName: "Lakers", shortDisplayName: "Lakers", abbreviation: "LAL" } },
               ],
             }],
           },
@@ -382,8 +383,8 @@ describe("DC Sports crawler", () => {
             competitions: [{
               status: { type: { completed: false } },
               competitors: [
-                { homeAway: "home", team: { displayName: "Washington Wizards", shortDisplayName: "Wizards" } },
-                { homeAway: "away", team: { displayName: "Celtics", shortDisplayName: "Celtics" } },
+                { homeAway: "home", team: { displayName: "Washington Wizards", shortDisplayName: "Wizards", abbreviation: "WSH" } },
+                { homeAway: "away", team: { displayName: "Celtics", shortDisplayName: "Celtics", abbreviation: "BOS" } },
               ],
             }],
           },
@@ -392,8 +393,8 @@ describe("DC Sports crawler", () => {
             competitions: [{
               status: { type: { completed: false } },
               competitors: [
-                { homeAway: "home", team: { displayName: "Knicks", shortDisplayName: "Knicks" } },
-                { homeAway: "away", team: { displayName: "Washington Wizards", shortDisplayName: "Wizards" } },
+                { homeAway: "home", team: { displayName: "Knicks", shortDisplayName: "Knicks", abbreviation: "NYK" } },
+                { homeAway: "away", team: { displayName: "Washington Wizards", shortDisplayName: "Wizards", abbreviation: "WSH" } },
               ],
             }],
           },
@@ -401,10 +402,10 @@ describe("DC Sports crawler", () => {
       };
 
       const events = parseESPNSchedule(data, mockTeam);
-      expect(events).toHaveLength(3);
+      // Only home games are included (away games are filtered out)
+      expect(events).toHaveLength(2);
       expect(events[0].title).toBe("Wizards vs. Lakers");
       expect(events[1].title).toBe("Wizards vs. Celtics");
-      expect(events[2].title).toBe("Wizards at Knicks");
     });
 
     it("sets image_url to undefined", () => {
@@ -415,8 +416,8 @@ describe("DC Sports crawler", () => {
             competitions: [{
               status: { type: { completed: false } },
               competitors: [
-                { homeAway: "home", team: { displayName: "Washington Wizards", shortDisplayName: "Wizards" } },
-                { homeAway: "away", team: { displayName: "Pacers", shortDisplayName: "Pacers" } },
+                { homeAway: "home", team: { displayName: "Washington Wizards", shortDisplayName: "Wizards", abbreviation: "WSH" } },
+                { homeAway: "away", team: { displayName: "Pacers", shortDisplayName: "Pacers", abbreviation: "IND" } },
               ],
             }],
           },
@@ -439,7 +440,7 @@ describe("DC Sports crawler", () => {
       const events = parseESPNSchedule(data, mockTeam);
       // Should still parse with defaults since date exists and status check is on competition
       expect(events).toHaveLength(1);
-      expect(events[0].title).toBe("Washington Wizards");
+      expect(events[0].title).toBe("WSH");
     });
   });
 });

@@ -256,8 +256,8 @@ describe("normalizeCategory", () => {
       expect(normalizeCategory("theatre")).toBe("Theater");
     });
 
-    it("maps 'volunteer' to Community", () => {
-      expect(normalizeCategory("volunteer")).toBe("Community");
+    it("maps 'volunteer' to Volunteer", () => {
+      expect(normalizeCategory("volunteer")).toBe("Volunteer");
     });
 
     it("maps 'happy hour' to Food & Drink", () => {
@@ -375,8 +375,8 @@ describe("normalizeCategory", () => {
   });
 
   describe("VALID_CATEGORIES", () => {
-    it("contains exactly 13 categories", () => {
-      expect(VALID_CATEGORIES).toHaveLength(13);
+    it("contains exactly 14 categories", () => {
+      expect(VALID_CATEGORIES).toHaveLength(14);
     });
 
     it("includes General", () => {

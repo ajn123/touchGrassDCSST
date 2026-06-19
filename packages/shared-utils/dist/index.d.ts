@@ -105,6 +105,7 @@ export declare function validateEvent(event: any): {
     isValid: boolean;
     errors: string[];
 };
+export declare function decodeHtmlEntities(input?: string): string;
 /**
  * Sanitize event data for safe storage
  */

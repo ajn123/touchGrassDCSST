@@ -1,5 +1,4 @@
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 3600;
 
 import { auth } from "@/app/actions";
 import { AdminEntityPanel } from "@/components/AdminEntityPanel";

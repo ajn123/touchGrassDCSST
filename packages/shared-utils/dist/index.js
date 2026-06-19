@@ -20,6 +20,7 @@ exports.parseCategories = parseCategories;
 exports.transformEventForOpenSearch = transformEventForOpenSearch;
 exports.transformOpenWebNinjaEvent = transformOpenWebNinjaEvent;
 exports.validateEvent = validateEvent;
+exports.decodeHtmlEntities = decodeHtmlEntities;
 exports.sanitizeEvent = sanitizeEvent;
 exports.generateStyledEventSvgBuffer = generateStyledEventSvgBuffer;
 exports.generateStyledArticleSvgBuffer = generateStyledArticleSvgBuffer;
@@ -627,18 +628,60 @@ function validateEvent(event) {
     };
 }
 /**
+ * Decode HTML entities (named + numeric) into their literal characters.
+ *
+ * Crawlers that scrape titles/venues from HTML or JSON-LD often leave entities
+ * like `&amp;`, `&#39;`, `&quot;` in the text (e.g. "Glow &amp; Create"). This
+ * normalizes them to the real characters ("Glow & Create"). Handles the common
+ * double-encoded case (`&amp;amp;`) by decoding `&amp;` last.
+ */
+const NAMED_ENTITIES = {
+    "&lt;": "<",
+    "&gt;": ">",
+    "&quot;": '"',
+    "&apos;": "'",
+    "&nbsp;": " ",
+    "&ndash;": "–",
+    "&mdash;": "—",
+    "&hellip;": "…",
+    "&lsquo;": "‘",
+    "&rsquo;": "’",
+    "&ldquo;": "“",
+    "&rdquo;": "”",
+};
+function decodeHtmlEntities(input) {
+    if (!input)
+        return input ?? "";
+    let out = input;
+    // Numeric entities: decimal (&#39;) and hex (&#x27;)
+    out = out.replace(/&#(\d+);/g, (_m, n) => String.fromCodePoint(parseInt(n, 10)));
+    out = out.replace(/&#[xX]([0-9a-fA-F]+);/g, (_m, n) => String.fromCodePoint(parseInt(n, 16)));
+    // Named entities (everything except &amp;)
+    for (const [entity, char] of Object.entries(NAMED_ENTITIES)) {
+        out = out.split(entity).join(char);
+    }
+    // Decode &amp; last so double-encoded values (&amp;amp;) collapse correctly
+    while (/&amp;/i.test(out)) {
+        const next = out.replace(/&amp;/gi, "&");
+        if (next === out)
+            break;
+        out = next;
+    }
+    return out;
+}
+/**
  * Sanitize event data for safe storage
  */
 function sanitizeEvent(event) {
     return {
         ...event,
-        title: event.title?.trim() || "",
+        title: decodeHtmlEntities(event.title?.trim()) || "",
         description: event.description
             ?.trim()
             ?.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "") ||
             "",
-        location: event.location?.trim() || "",
-        venue: event.venue?.trim() || "",
+        location: decodeHtmlEntities(event.location?.trim()) || "",
+        venue: decodeHtmlEntities(event.venue?.trim()) || "",
     };
 }
 // ============================================================================
@@ -705,12 +748,13 @@ function generateStyledEventSvgBuffer({ title, category, venue, }) {
     const lineHeight = 68;
     const titleStartY = 200;
     const titleSvg = titleLines
-        .map((line, i) => `<text x="64" y="${titleStartY + i * lineHeight}" fill="#f8fafc" font-family="system-ui,-apple-system,sans-serif" font-size="52" font-weight="700" letter-spacing="-0.5">${line}</text>`)
+        .map((line, i) => `<text x="600" y="${titleStartY + i * lineHeight}" fill="#f8fafc" font-family="system-ui,-apple-system,sans-serif" font-size="52" font-weight="700" letter-spacing="-0.5" text-anchor="middle">${line}</text>`)
         .join("\n  ");
     const venueY = titleStartY + titleLines.length * lineHeight + 28;
     const venueSvg = safeVenue
-        ? `<text x="64" y="${venueY}" fill="#94a3b8" font-family="system-ui,-apple-system,sans-serif" font-size="26">${safeVenue}</text>`
+        ? `<text x="600" y="${venueY}" fill="#94a3b8" font-family="system-ui,-apple-system,sans-serif" font-size="26" text-anchor="middle">${safeVenue}</text>`
         : "";
+    const badgeW = safeCategory.length * 12 + 48;
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
@@ -719,13 +763,12 @@ function generateStyledEventSvgBuffer({ title, category, venue, }) {
     </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
-  <rect x="0" y="0" width="8" height="630" fill="${color}"/>
   <rect x="0" y="0" width="1200" height="6" fill="${color}"/>
-  <rect x="64" y="68" rx="16" width="${safeCategory.length * 12 + 48}" height="36" fill="${color}" fill-opacity="0.2"/>
-  <text x="88" y="92" fill="${color}" font-family="system-ui,-apple-system,sans-serif" font-size="16" font-weight="600" letter-spacing="0.5">${safeCategory}</text>
+  <rect x="${600 - badgeW / 2}" y="68" rx="16" width="${badgeW}" height="36" fill="${color}" fill-opacity="0.2"/>
+  <text x="600" y="92" fill="${color}" font-family="system-ui,-apple-system,sans-serif" font-size="16" font-weight="600" letter-spacing="0.5" text-anchor="middle">${safeCategory}</text>
   ${titleSvg}
   ${venueSvg}
-  <text x="64" y="596" fill="#334155" font-family="system-ui,-apple-system,sans-serif" font-size="18">touchgrassdc.com</text>
+  <text x="600" y="596" fill="#334155" font-family="system-ui,-apple-system,sans-serif" font-size="18" text-anchor="middle">touchgrassdc.com</text>
 </svg>`;
     return Buffer.from(svg, "utf-8");
 }

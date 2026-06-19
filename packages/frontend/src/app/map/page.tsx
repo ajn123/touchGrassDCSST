@@ -3,8 +3,7 @@ import { TouchGrassDynamoDB } from "@/lib/dynamodb/TouchGrassDynamoDB";
 import type { Metadata } from "next";
 import { Resource } from "sst";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Event Map | DC Events on a Map",

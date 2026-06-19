@@ -62,6 +62,15 @@ declare module "sst" {
       "taskDefinition": string
       "type": "sst.aws.Task"
     }
+    "districtcleanupsTask": {
+      "assignPublicIp": boolean
+      "cluster": string
+      "containers": any
+      "securityGroups": any
+      "subnets": any
+      "taskDefinition": string
+      "type": "sst.aws.Task"
+    }
     "eventbriteTask": {
       "assignPublicIp": boolean
       "cluster": string

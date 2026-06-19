@@ -14,7 +14,7 @@ const client = new DynamoDBClient({
 // In-memory cache to avoid repeated queries within the same Lambda instance
 let guidesCache: { data: Guide[]; expiresAt: number } | null = null;
 const guideBySlugCache = new Map<string, { data: Guide | null; expiresAt: number }>();
-const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 export interface Guide {
   pk: string;

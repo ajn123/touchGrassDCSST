@@ -19,7 +19,7 @@ const client = new DynamoDBClient({
 
 // In-memory cache to avoid repeated queries on every request
 let publicGroupsCache: { data: Group[]; expiresAt: number } | null = null;
-const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 // Interface for Group items
 export interface Group {

@@ -25,11 +25,15 @@ function sanitizeString(value: string | null | undefined): string | undefined {
 }
 
 const BOT_PATTERN =
-  /bot|crawl|spider|slurp|wget|curl|python|scrapy|headless|phantom|lighthouse|pagespeed|gtmetrix|pingdom|uptime|monitor|fetch|archive|semrush|ahrefs|mj12|dotbot|yandex|baidu|petalbot|bytespider|amazonbot|claudebot|gptbot|chatgpt|anthropic|perplexity|cohere|ai2bot|ccbot|commoncrawl|applebot|duckduck|facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegram|discord|slack|preview|embed|og-|opengraph/i;
+  /bot|crawl|spider|slurp|wget|curl|python|scrapy|headless|phantom|lighthouse|pagespeed|gtmetrix|pingdom|uptime|monitor|fetch|archive|semrush|ahrefs|mj12|dotbot|yandex|baidu|petalbot|bytespider|amazonbot|claudebot|gptbot|chatgpt|anthropic|perplexity|cohere|ai2bot|ccbot|commoncrawl|applebot|duckduck|facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegram|discord|slack|preview|embed|og-|opengraph|l9scan|leakix/i;
+
+/** Stale user-agents used by bots pretending to be real browsers */
+const STALE_UA_PATTERN =
+  /iPhone OS 13_2_3|Chrome\/78\.0|iPod; U; CPU iPhone OS 3_2|ZTE BA520/i;
 
 function isBot(userAgent: string | null): boolean {
   if (!userAgent) return false;
-  return BOT_PATTERN.test(userAgent);
+  return BOT_PATTERN.test(userAgent) || STALE_UA_PATTERN.test(userAgent);
 }
 
 export function middleware(request: NextRequest) {

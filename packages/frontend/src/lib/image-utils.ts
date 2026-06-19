@@ -75,24 +75,24 @@ function generateEventPlaceholderDataUri(
   const venueY = titleStartY + (titleLines.length - 1) * lineHeight + 32;
 
   const badgeW = safeCategory.length * 16 + 48;
-  const badgeSvg = `<rect x="50" y="${badgeY}" rx="20" width="${badgeW}" height="44" fill="${color}" fill-opacity="0.85"/><text x="${50 + badgeW / 2}" y="${badgeY + 30}" fill="%23ffffff" font-family="system-ui,-apple-system,sans-serif" font-size="24" font-weight="700" letter-spacing="1" text-anchor="middle" text-transform="uppercase">${safeCategory}</text>`;
+  const badgeSvg = `<rect x="${400 - badgeW / 2}" y="${badgeY}" rx="20" width="${badgeW}" height="44" fill="${color}" fill-opacity="0.85"/><text x="400" y="${badgeY + 30}" fill="%23ffffff" font-family="system-ui,-apple-system,sans-serif" font-size="24" font-weight="700" letter-spacing="1" text-anchor="middle" text-transform="uppercase">${safeCategory}</text>`;
 
   const titleSvg = titleLines
     .map(
       (line, i) =>
-        `<text x="50" y="${titleStartY + i * lineHeight}" fill="%23f8fafc" font-family="system-ui,-apple-system,sans-serif" font-size="64" font-weight="800" letter-spacing="-1">${line}</text>`,
+        `<text x="400" y="${titleStartY + i * lineHeight}" fill="%23f8fafc" font-family="system-ui,-apple-system,sans-serif" font-size="64" font-weight="800" letter-spacing="-1" text-anchor="middle">${line}</text>`,
     )
     .join("");
 
   const venueSvg = safeVenue
-    ? `<text x="50" y="${venueY}" fill="%2394a3b8" font-family="system-ui,-apple-system,sans-serif" font-size="26">${escapeXml(wrapText(safeVenue, 30, 1)[0])}</text>`
+    ? `<text x="400" y="${venueY}" fill="%2394a3b8" font-family="system-ui,-apple-system,sans-serif" font-size="26" text-anchor="middle">${escapeXml(wrapText(safeVenue, 30, 1)[0])}</text>`
     : "";
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%25" stop-color="${bgFrom}"/><stop offset="50%25" stop-color="${bgTo}"/><stop offset="100%25" stop-color="${bgFrom}"/></linearGradient></defs><rect width="800" height="500" fill="url(%23bg)"/><rect x="0" y="0" width="800" height="6" fill="${color}"/><rect x="0" y="494" width="800" height="6" fill="${color}"/>` +
-    `<circle cx="700" cy="100" r="180" fill="${color}" fill-opacity="0.08"/>` +
-    `<circle cx="650" cy="400" r="120" fill="${color}" fill-opacity="0.05"/>` +
+    `<circle cx="600" cy="100" r="180" fill="${color}" fill-opacity="0.08"/>` +
+    `<circle cx="200" cy="400" r="120" fill="${color}" fill-opacity="0.05"/>` +
     `${badgeSvg}${titleSvg}${venueSvg}` +
-    `<text x="50" y="470" fill="%23334155" font-family="system-ui,-apple-system,sans-serif" font-size="16" font-weight="500">touchgrassdc.com</text></svg>`;
+    `<text x="400" y="470" fill="%23334155" font-family="system-ui,-apple-system,sans-serif" font-size="16" font-weight="500" text-anchor="middle">touchgrassdc.com</text></svg>`;
 
   return `data:image/svg+xml,${svg}`;
 }

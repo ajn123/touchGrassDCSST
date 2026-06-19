@@ -1,5 +1,6 @@
 import {
   NormalizedEvent,
+  decodeHtmlEntities,
   generateEventId,
   normalizeCategory,
   normalizeCoordinates,
@@ -838,6 +839,18 @@ export const handler: Handler = async (event, context, callback) => {
                 rawEventAny.is_public === "true";
             }
           }
+        }
+
+        // Decode HTML entities left over from scraping (e.g. "Glow &amp; Create")
+        // for every source, regardless of which transform produced the event.
+        if (normalizedEvent.title) {
+          normalizedEvent.title = decodeHtmlEntities(normalizedEvent.title).trim();
+        }
+        if (normalizedEvent.venue) {
+          normalizedEvent.venue = decodeHtmlEntities(normalizedEvent.venue).trim();
+        }
+        if (normalizedEvent.location) {
+          normalizedEvent.location = decodeHtmlEntities(normalizedEvent.location).trim();
         }
 
         // Backfill coordinates from known venue map if missing

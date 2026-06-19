@@ -7,18 +7,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
-function GroupCardImage({ group }: { group: { image_url?: string; title: string } }) {
-  const resolved = resolveImageUrl(group.image_url);
-  const fallback = resolveImageUrl(undefined);
+function GroupCardImage({
+  group,
+}: {
+  group: { image_url?: string; title: string; category?: string };
+}) {
+  const primaryCategory = group.category?.split(",")[0]?.trim();
+  const resolved = resolveImageUrl(group.image_url, primaryCategory, group.title);
+  const fallback = resolveImageUrl(undefined, primaryCategory, group.title);
   const [src, setSrc] = useState(resolved);
-
-  if (!group.image_url) {
-    return (
-      <div className="w-full h-48 bg-gray-200 flex items-center justify-center theme-hover-medium transition-colors">
-        <span>No image</span>
-      </div>
-    );
-  }
 
   return (
     <Image

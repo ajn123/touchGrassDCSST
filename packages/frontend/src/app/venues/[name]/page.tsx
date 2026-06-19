@@ -1,5 +1,4 @@
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 1800; // 30 min — matches venues list page
 
 import EventCard from "@/components/EventCard";
 import { Cost } from "@/components/Cost";

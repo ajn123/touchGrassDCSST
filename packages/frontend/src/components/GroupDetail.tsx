@@ -48,82 +48,47 @@ interface GroupDetailProps {
   group: Group;
 }
 
-function GroupImage({ imageUrl, title }: { imageUrl: string; title?: string }) {
-  const resolvedUrl = resolveImageUrl(imageUrl || undefined);
+function GroupImage({
+  imageUrl,
+  title,
+  category,
+}: {
+  imageUrl: string;
+  title?: string;
+  category?: string | string[];
+}) {
+  const primaryCategory = Array.isArray(category)
+    ? category[0]
+    : category?.split(",")[0]?.trim();
+  // When there's no image, this returns a titled SVG placeholder (same as events).
+  const resolvedUrl = resolveImageUrl(imageUrl || undefined, primaryCategory, title);
+  const fallback = resolveImageUrl(undefined, primaryCategory, title);
   const [imageSrc, setImageSrc] = useState(resolvedUrl);
   const [imageLoading, setImageLoading] = useState(true);
-  const [imageError, setImageError] = useState(false);
 
   const handleImageLoad = () => setImageLoading(false);
   const handleImageError = () => {
     setImageLoading(false);
-    // Fall back to SVG placeholder if the external image fails
-    const fallback = resolveImageUrl(undefined);
-    if (imageSrc !== fallback) {
-      setImageSrc(fallback);
-    } else {
-      setImageError(true);
-    }
+    // Fall back to the titled SVG placeholder if the external image fails
+    if (imageSrc !== fallback) setImageSrc(fallback);
   };
 
   return (
     <div className="relative w-full h-64 md:h-80 lg:h-96">
-      {imageUrl ? (
-        <>
-          <Image
-            src={imageSrc}
-            alt={title || "Group"}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
-            className="object-cover rounded-lg"
-            onLoad={handleImageLoad}
-            onError={handleImageError}
-            unoptimized={shouldBeUnoptimized(imageSrc)}
-          />
-          {imageLoading && (
-            <div className="absolute inset-0 bg-gray-200 rounded-lg flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-green-600"></div>
-            </div>
-          )}
-          {imageError && (
-            <div className="absolute inset-0 bg-gray-200 rounded-lg flex items-center justify-center">
-              <div className="text-center">
-                <svg
-                  className="w-12 h-12 text-gray-400 mx-auto mb-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2z"
-                  />
-                </svg>
-                <span className="text-gray-500">Image unavailable</span>
-              </div>
-            </div>
-          )}
-        </>
-      ) : (
-        <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
-          <div className="text-center">
-            <svg
-              className="w-16 h-16 text-gray-400 mx-auto mb-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
-              />
-            </svg>
-            <span className="text-gray-500">No image</span>
-          </div>
+      <Image
+        src={imageSrc}
+        alt={title || "Group"}
+        fill
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
+        className="object-cover rounded-lg"
+        onLoad={handleImageLoad}
+        onError={handleImageError}
+        unoptimized={shouldBeUnoptimized(imageSrc)}
+      />
+      {/* Loading shimmer only while a real (external) image is loading */}
+      {imageLoading && imageUrl && (
+        <div className="absolute inset-0 bg-gray-200 rounded-lg flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-green-600"></div>
         </div>
       )}
     </div>
@@ -252,7 +217,11 @@ export default function GroupDetail({ group }: GroupDetailProps) {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Image Section */}
           <div className="lg:w-1/2">
-            <GroupImage imageUrl={group.image_url || ""} title={group.title} />
+            <GroupImage
+              imageUrl={group.image_url || ""}
+              title={group.title}
+              category={group.category}
+            />
           </div>
 
           {/* Group Info Section */}

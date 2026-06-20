@@ -104,7 +104,7 @@ class SmithsonianCrawler {
 
         try {
           await page.goto(request.url, {
-            waitUntil: "networkidle",
+            waitUntil: "domcontentloaded",
             timeout: 60000,
           });
           await page.waitForTimeout(3000);
@@ -309,7 +309,7 @@ class SmithsonianCrawler {
                 ? nextPageUrl
                 : `https://www.si.edu${nextPageUrl}`;
               console.log(`Found next page: ${fullNextUrl}`);
-              await page.goto(fullNextUrl, { waitUntil: "networkidle", timeout: 60000 });
+              await page.goto(fullNextUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
               // Re-run DOM scraping on next page (simplified — real pagination handled by crawlee requests)
             }
           }

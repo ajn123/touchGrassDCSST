@@ -186,7 +186,7 @@ class KennedyCenterCrawler {
 
         try {
           await page.goto(request.url, {
-            waitUntil: "networkidle",
+            waitUntil: "domcontentloaded",
             timeout: 60000,
           });
           // Wait for page to hydrate

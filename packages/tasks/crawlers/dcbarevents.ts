@@ -125,7 +125,7 @@ class DCBarEventsCrawler {
 
         try {
           await page.goto(request.url, {
-            waitUntil: "networkidle",
+            waitUntil: "domcontentloaded",
             timeout: 60000,
           });
           await page.waitForTimeout(3000);

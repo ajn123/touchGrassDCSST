@@ -95,7 +95,7 @@ class DistrictCleanupsCrawler {
 
         try {
           await page.goto(request.url, {
-            waitUntil: "networkidle",
+            waitUntil: "domcontentloaded",
             timeout: 60000,
           });
 
@@ -324,7 +324,7 @@ class DistrictCleanupsCrawler {
               }
             });
 
-            await page.goto(request.url, { waitUntil: "networkidle", timeout: 60000 });
+            await page.goto(request.url, { waitUntil: "domcontentloaded", timeout: 60000 });
             await page.waitForTimeout(5000);
 
             if (apiEvents.length > 0) {

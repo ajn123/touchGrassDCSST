@@ -2,9 +2,12 @@ import { SFNClient, StartExecutionCommand } from "@aws-sdk/client-sfn";
 import { Handler } from "aws-lambda";
 import { Resource } from "sst";
 
-const RSS_URL =
-  "https://www.anacostiaws.org/events-and-recreation/events-calendar.html?format=feed&type=rss";
+// The site migrated from a Joomla RSS feed to WordPress + The Events Calendar,
+// which exposes a clean REST API. We page through it starting from today.
+const API_BASE = "https://www.anacostiaws.org/wp-json/tribe/events/v1/events";
+const FALLBACK_URL = "https://www.anacostiaws.org/events/";
 const MAX_EVENTS = 50;
+const PER_PAGE = 50;
 
 function stripHtml(html: string): string {
   return html
@@ -20,114 +23,86 @@ function stripHtml(html: string): string {
 }
 
 /**
- * Parse RFC 2822 date (e.g. "Sat, 14 Mar 2026 10:30:00 -0400")
- * into { date: "YYYY-MM-DD", time: "h:mm AM/PM" }
+ * Convert The Events Calendar date details (already in the site's local
+ * Eastern time) into { date: "YYYY-MM-DD", time: "h:mm AM/PM" }.
  */
-function parseRssDate(dateStr: string): { date: string; time: string } | null {
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return null;
+function formatEventTime(
+  details: any
+): { date: string; time: string } | null {
+  if (!details || !details.year || !details.month || !details.day) return null;
 
-  const dateFormatter = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/New_York",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
+  const date = `${details.year}-${details.month}-${details.day}`;
 
-  const timeFormatter = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/New_York",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
+  let time = "";
+  const hour = parseInt(details.hour ?? "", 10);
+  const minutes = details.minutes ?? "00";
+  if (!isNaN(hour)) {
+    const period = hour >= 12 ? "PM" : "AM";
+    const hour12 = hour % 12 === 0 ? 12 : hour % 12;
+    time = `${hour12}:${minutes} ${period}`;
+  }
 
-  return {
-    date: dateFormatter.format(d),
-    time: timeFormatter.format(d),
-  };
-}
-
-/**
- * Simple XML tag extractor — no XML parser dependency needed.
- * Gets content between <tag> and </tag>.
- */
-function extractTag(xml: string, tag: string): string {
-  // Handle CDATA
-  const cdataRegex = new RegExp(
-    `<${tag}[^>]*>\\s*<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>\\s*</${tag}>`,
-    "i"
-  );
-  const cdataMatch = xml.match(cdataRegex);
-  if (cdataMatch) return cdataMatch[1].trim();
-
-  const regex = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`, "i");
-  const match = xml.match(regex);
-  return match ? match[1].trim() : "";
+  return { date, time };
 }
 
 export const handler: Handler = async () => {
   console.log("Anacostia Watershed Society handler started");
 
   try {
-    const response = await fetch(RSS_URL);
-    if (!response.ok) {
-      throw new Error(`RSS fetch error: ${response.status}`);
+    // Start from today (site-local date) so we only pull upcoming events.
+    const todayStr = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/New_York",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+
+    const rawEvents: any[] = [];
+    let pageUrl: string | null = `${API_BASE}?per_page=${PER_PAGE}&start_date=${todayStr}`;
+    let pageCount = 0;
+
+    // Page through the REST API (next_rest_url) until exhausted or capped.
+    while (pageUrl && rawEvents.length < MAX_EVENTS && pageCount < 10) {
+      const response = await fetch(pageUrl);
+      if (!response.ok) {
+        throw new Error(`Events REST API error: ${response.status}`);
+      }
+      const data: any = await response.json();
+      const pageEvents: any[] = Array.isArray(data.events) ? data.events : [];
+      rawEvents.push(...pageEvents);
+      pageUrl = data.next_rest_url || null;
+      pageCount++;
     }
 
-    const xml = await response.text();
-
-    // Split RSS into items
-    const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
-    const items: string[] = [];
-    let match;
-    while ((match = itemRegex.exec(xml)) !== null) {
-      items.push(match[1]);
-    }
-
-    console.log(`Found ${items.length} RSS items`);
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    console.log(`Fetched ${rawEvents.length} events from REST API`);
 
     const events: any[] = [];
 
-    for (const item of items) {
-      const title = extractTag(item, "title");
-      const pubDateStr = extractTag(item, "pubDate");
-      const description = extractTag(item, "description");
-      const link = extractTag(item, "link");
+    for (const ev of rawEvents) {
+      const title = ev.title ? stripHtml(ev.title) : "";
+      const start = formatEventTime(ev.start_date_details);
+      if (!title || !start) continue;
 
-      if (!title || !pubDateStr) continue;
+      const end = formatEventTime(ev.end_date_details);
+      const endTime = end && end.time ? end.time : undefined;
 
-      const parsed = parseRssDate(pubDateStr);
-      if (!parsed) continue;
+      const descText = stripHtml(ev.description || ev.excerpt || "");
 
-      // Skip past events
-      const eventDate = new Date(pubDateStr);
-      if (eventDate < today) continue;
-
-      // Extract location from description HTML if present
-      const descText = stripHtml(description);
-
-      // Try to extract end time from description (format: "MM/DD/YY HH:MM am - MM/DD/YY HH:MM pm")
-      let endTime: string | undefined;
-      const timeRangeMatch = descText.match(
-        /\d{1,2}\/\d{1,2}\/\d{2}\s+\d{1,2}:\d{2}\s*[ap]m\s*-\s*\d{1,2}\/\d{1,2}\/\d{2}\s+(\d{1,2}:\d{2}\s*[ap]m)/i
-      );
-      if (timeRangeMatch) {
-        endTime = timeRangeMatch[1].trim();
-      }
+      const venueName = ev.venue?.venue;
+      const locationParts = [ev.venue?.address, ev.venue?.city].filter(Boolean);
 
       events.push({
         title,
-        date: parsed.date,
-        time: parsed.time,
+        date: start.date,
+        time: start.time,
         end_time: endTime,
         description: descText.substring(0, 500),
-        url: link || "https://www.anacostiaws.org/events-and-recreation/events-calendar.html",
+        url: ev.url || FALLBACK_URL,
         category: "Volunteer",
-        venue: "Anacostia Watershed Society",
-        location: "Washington, DC area",
+        venue: venueName || "Anacostia Watershed Society",
+        location: locationParts.length
+          ? locationParts.join(", ")
+          : "Washington, DC area",
       });
     }
 
